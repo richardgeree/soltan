@@ -1964,6 +1964,25 @@ try{
     if (saved.resources) Object.assign(state.resources, saved.resources);
     if (saved.buildings) Object.assign(state.buildings, saved.buildings);
     if (saved.streak) Object.assign(state.streak, saved.streak);
+        // ✅ inventory restore + migration hardening
+    if (saved.inventory && typeof saved.inventory === "object") {
+      if (!state.inventory || typeof state.inventory !== "object") {
+        state.inventory = { crates: 0, nftCommons: {}, nftUniques: {} };
+      }
+
+      if (typeof saved.inventory.crates === "number") {
+        state.inventory.crates = saved.inventory.crates;
+      }
+
+      if (saved.inventory.nftCommons && typeof saved.inventory.nftCommons === "object") {
+        state.inventory.nftCommons = { ...saved.inventory.nftCommons };
+      }
+
+      if (saved.inventory.nftUniques && typeof saved.inventory.nftUniques === "object") {
+        state.inventory.nftUniques = { ...saved.inventory.nftUniques };
+      }
+    }
+
 
     if (saved.powerGrid && Array.isArray(saved.powerGrid.nodes)) {
       state.powerGrid.selectedSeed = saved.powerGrid.selectedSeed || state.powerGrid.selectedSeed;
