@@ -1,0 +1,4414 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <title>SOLTAN — mock v0.29</title>
+  <style>
+html, body { height: 100%; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  background: var(--bg);
+  color: var(--text-main);
+  font-family: var(--font-main);
+  font-size: 15px;
+  overflow: hidden;
+}
+
+:root{
+  --content-top: 40px; 
+  --frame-w: min(430px, 96vw); 
+  --frame-h: calc(var(--frame-w) * 2.165); 
+  --frame-y: 5px; 
+  --status-gap: 8px; 
+}
+
+.device-frame{
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: var(--frame-w);
+  height: min(var(--frame-h), 100dvh);
+  transform: translate(-50%, -50%) translateY(var(--frame-y));
+  pointer-events: none;
+  z-index: 9999;
+  border-radius: 34px;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,0.10),
+    0 0 0 10px rgba(0,0,0,0.55),
+    0 18px 60px rgba(0,0,0,0.75);
+}
+
+.device-frame::before{
+  content:"";
+  position:absolute;
+  top: 10px;
+  left: 50%;
+  width: 140px;
+  height: 30px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: rgba(0,0,0,0.75);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+.safe-guides{
+  position: absolute;
+  inset: 0;
+  border-radius: 34px;
+}
+
+@media (max-width: 520px){
+  .device-frame{ display:none; }
+}
+
+.map-wrap{
+  width: 100%;
+  aspect-ratio: 1 / 1;   
+  border: 1px solid rgba(74,222,128,.25);
+  border-radius: 12px;
+  background: #000;
+  overflow: hidden;
+  display:flex;              
+  align-items:center;        
+  justify-content:center;    
+}
+
+.map-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.map-status{
+  margin: 0;                 
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.map-toolbar{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-top: 8px;
+}
+
+.map-hint{
+  font-size:12px;
+  color: var(--text-soft);
+  margin-top: 6px;
+  margin-bottom: var(--status-gap); 
+}
+
+.map-canvas{
+  display: block;
+  touch-action: none;
+}
+
+.plot-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(74,222,128,.35);
+  color: var(--text-muted);
+  font-size: 12px;
+  background: rgba(2,6,18,.35);
+}
+.plot-badge strong{ color: var(--text-main); }
+
+.burn-btn {
+  margin-top: 62px;
+}
+
+.btn.selected{
+  border-color: rgba(74,222,128,.9);
+  box-shadow: 0 0 0 2px rgba(74,222,128,.15) inset;
+}
+
+.btn:disabled{
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+  pointer-events: none;
+}
+
+.bicon{
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+
+  
+  background: #000;
+
+  
+  padding: 10px;
+
+  
+  border-radius: 14px;
+  margin-right: 16px;
+
+  box-shadow:
+    inset 0 0 0 1px #1a2333,
+    0 8px 24px rgba(0,0,0,.45);
+}
+
+.shell::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.app { width: 100%; }
+
+img, svg, canvas { max-width: 100%; height: auto; }
+
+.top-row,
+.bottom-row {
+  grid-template-columns: 1fr !important;
+}
+
+    :root {
+      --bg: #05070d;
+      --card-bg: #070b12;
+      --card-border: #162033;
+
+      --accent: #4ade80;        
+      --danger: #f97373;
+      --success: #34d399;
+
+      --text-main: #e6edf7;
+      --text-muted: #a7b6cf;
+      --text-soft: #7b8aa6;
+      --log-text: #c7d2fe;
+
+      --btn-bg: #070b12;
+      --btn-bg-hover: #0b1320;
+      --btn-border: #22304a;
+
+      --font-main: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
+      --accent-soft: #4ade80;   
+      --accent-warm: #facc6b;   
+    }
+
+    * { box-sizing: border-box; }
+
+    h1,h2,h3,h4 {
+      margin: 0;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      text-transform: none;
+    }
+
+    .emoji {
+      font-size: 1.8em;
+      vertical-align: -0.16em;
+      margin-right: 4px;
+    }
+
+    .requirement-text {
+      color: #ff6b81; 
+    }
+
+    .requirement-met {
+      color: var(--text-soft); 
+    }
+
+    .requirement-text.requirement-met { color: var(--text-soft); }
+
+    .top-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .bottom-row {
+      display: grid;
+      grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.4fr);
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    
+    
+    .app > .card {
+      margin-bottom: 10px;
+    }
+
+    
+    .app > .bottom-row {
+      margin-bottom: 10px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      padding: 10px 13px;
+      box-shadow: none;              
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 12px;
+      color: var(--text-soft);
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+    }
+
+    .badge {
+      font-size: 13px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.13);
+      color: var(--text-muted);
+    }
+
+    .toggle-header {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .chevron {
+      font-size: 12px;
+      color: var(--text-soft);
+      margin-left: 6px;
+    }
+    .collapsed-icon::before { content: "▸"; }
+    .expanded-icon::before { content: "▾"; }
+
+    .card-body.collapsed { display: none; }
+
+    
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .top-bar-title {
+      flex: 1;
+      text-align: center;
+      font-size: 18px;        
+      color: var(--text-main);
+      letter-spacing: 0.01em;
+      font-weight: 600;
+    }
+
+    .top-bar-spacer {
+      width: 120px;
+    }
+
+    .top-bar-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      width: 120px;
+    }
+
+    
+    .btn {
+      padding: 7px 11px;
+      border-radius: 7px;
+      border: 1px solid var(--btn-border);
+      background: var(--btn-bg);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.13s ease, transform 0.06s ease, box-shadow 0.13s ease;
+    }
+    .btn:hover {
+      background: var(--btn-bg-hover);
+      transform: translateY(-1px);
+      box-shadow: none;
+    }
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+    .btn-primary {
+      border-color: #22c55e;
+      background: radial-gradient(circle at top, rgba(45,212,191,0.28), #02060f);
+    }
+    .btn-danger {
+      border-color: rgba(255,115,140,0.9);
+      background: radial-gradient(circle at top, rgba(255,120,160,0.25), rgba(20,6,12,0.96));
+    }
+    .btn-ghost { background: transparent; border-style: dashed; }
+    .btn-sm { padding: 5px 9px; font-size: 13px; }
+    .btn-block { width: 100%; justify-content: center; }
+
+    .btn-group { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+
+    
+
+    .resources-title {
+      font-size: 15px;
+      color: var(--accent);
+    }
+
+    .resources-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 6px;
+      margin-bottom: 8px;
+    }
+
+    .resource-pill {
+      padding: 6px 7px;
+      border-radius: 8px;
+      background: #040812;
+      border: 1px solid #1f3b36;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .resource-label {
+      font-size: 11px;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.10em;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .emoji {
+      font-size: 1.4em;
+    }
+
+    .sol-icon {
+      width: 20px;
+      height: 20px;
+      display: inline-block;
+      margin-right: 4px;
+      vertical-align: middle;
+
+      background-image: url("https://solana.com/src/img/branding/solanaLogoMark.png");
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .resource-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .resource-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .streak-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .streak-info {
+      font-size: 13px;
+      color: var(--accent-warm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    
+    .item-list { display:flex; flex-direction:column; gap:10px; }
+
+    .game-item {
+      padding:7px 8px;
+      border-radius:8px;
+      background:#020612;
+      border:1px solid #273549;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .level-pill {
+      font-size:12px;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid #4ade80;
+      color:#bbf7d0;
+      background:#022c22;
+    }
+
+    .detail-group { margin-top:2px; font-size:12px; color:var(--text-soft); }
+    .detail-line { margin-bottom:4px; }
+    .detail-line strong { color:var(--text-muted); }
+
+#powerGrid{
+  display:grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap:10px;
+}
+
+.node-cell{
+  border:1px solid #273549;
+  border-radius:12px;
+  padding:10px;
+  position: relative;          
+  padding-bottom: 26px;        
+
+  height: 110px;          
+  min-height: 110px;      
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  gap:8px;
+
+  cursor:pointer;
+  user-select:none;
+}
+
+.node-bar{
+  height: 8px;          
+  width: 100%;
+  flex: 0 0 auto;        
+  border-radius: 999px;
+  background: #0b1020;
+  border: 1px solid #1f2a44;
+  overflow: hidden;
+}
+
+.node-bar-fill{
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: #4ade80;
+  transition: width 0.35s linear; 
+  will-change: width;
+}
+
+.node-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-start;
+  gap:8px;
+}
+
+.node-icon{
+  font-size:34px;            
+  line-height:1;
+  text-align:center;
+}
+
+.node-status{
+  height: 14px;           
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align:center;
+  line-height: 14px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 5px;               
+}
+
+.node-ready{
+  border-color: rgba(74,222,128,.9);
+  box-shadow: 0 0 0 2px rgba(74,222,128,.15) inset;
+}
+
+.nft-wrap{
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(2,6,18,0.35);
+  overflow: hidden;
+}
+
+.nft-library{
+  transition: filter 0.25s ease, opacity 0.25s ease;
+}
+
+.nft-library.locked{
+  filter: blur(10px) saturate(0.8);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.nft-shelf-title{
+  font-size: 12px;
+  color: var(--text-soft);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.nft-grid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.nft-card{
+  position: relative;
+  border-radius: 12px;
+  border: 1px solid rgba(74,222,128,0.18);
+  background: #020612;
+  padding: 10px;
+  min-height: 120px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+.nft-thumb{
+  height: 68px;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(74,222,128,0.18), transparent 55%),
+    radial-gradient(circle at 70% 60%, rgba(80,160,255,0.12), transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0));
+  border: 1px dashed rgba(255,255,255,0.10);
+}
+
+.nft-name{
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--text-main);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nft-badge{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text-muted);
+  background: rgba(5,9,21,0.7);
+}
+
+.nft-lock{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 14px;
+  pointer-events: none; 
+}
+
+.nft-lock.show{
+  pointer-events: auto;
+}
+
+.nft-lock-card{
+  width: 100%;
+  max-width: 320px;
+  border-radius: 14px;
+  border: 1px solid rgba(74,222,128,0.25);
+  background: rgba(5,9,21,0.92);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.75);
+  padding: 14px;
+  text-align: center;
+}
+
+.nft-lock-title{
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
+.nft-lock-sub{
+  font-size: 13px;
+  color: var(--text-soft);
+  line-height: 1.35;
+  margin-bottom: 10px;
+}
+
+    
+.dev-note {
+font-size:12px;
+color:var(--text-soft);
+margin-top:4px;
+}
+
+    .dev-buttons {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:8px;
+    }
+
+    
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 12px;
+    }
+    .modal-backdrop.open { display:flex; }
+
+    .modal {
+      background: #050915;
+      border-radius: 10px;
+      border: 1px solid #2b3a55;
+      padding: 20px;
+      width: min(calc(var(--phone-w) - 24px), 92vw);
+      max-width: min(calc(var(--phone-w) - 24px), 520px);
+      max-height: calc(100dvh - 40px);
+      overflow-y: auto;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.8);
+      font-size: 14px;
+    }
+    .modal-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:12px;
+    }
+    .modal-title {
+      font-size:18px;
+      color:var(--accent-soft);
+    }
+    .modal-close {
+      cursor:pointer;
+      font-size:22px;
+      color:var(--text-soft);
+    }
+
+.wallet-address-row {
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(15,23,42,0.9);
+  font-family: var(--font-main);
+  font-size: 11px;
+  word-break: break-all;
+  margin-bottom: 10px;
+}
+.wallet-address-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.howto-body ul {
+  padding-left: 18px;
+  margin: 8px 0;
+  font-size: 13px;
+}
+.howto-body li + li {
+  margin-top: 4px;
+}
+
+    
+.build-progress {
+  margin-top: 6px;
+  height: 7px;
+  border-radius: 999px;
+  background: #020617;
+  overflow: hidden;
+  position: relative;
+  display: none;
+}
+
+.build-progress-fill {
+  position: absolute;
+  inset: 0;
+  width: 0%;
+  background: linear-gradient(90deg, #22c55e, #4ade80, #a5f3fc);
+  box-shadow: 0 0 14px rgba(74,222,128,0.8);
+  transition: width linear;
+}
+
+.build-progress-label {
+  font-size: 11px;
+  color: var(--text-soft);
+  margin-top: 4px;
+}
+
+html, body {
+  overscroll-behavior: none;
+}
+
+.header-cta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-inline {
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 8px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.game-item-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  flex-wrap: wrap;
+}
+
+.game-item-title{
+  display:flex;
+  align-items:center;
+  gap:6px;
+
+  flex: 1 1 260px;
+  min-width: 240px;
+
+  font-size:15px;
+  color: var(--text-main);
+}
+
+.game-item-header > div[style*="margin-top:10px"]{
+  flex: 1 1 100%;
+}
+
+.level-pill {
+  flex: 0 0 auto;
+}
+
+.title-text{
+  display:flex;
+  flex-direction:column;
+}
+
+.title-name{
+  font-size:18px;
+  font-weight:700;
+  color:var(--text-main);
+}
+
+.title-desc{
+  font-size:13px;
+  color:var(--text-soft);
+}
+
+.buildbar{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:10px;
+  margin-top: 10px;
+}
+
+.bcard{
+  height: 200px;
+  position:relative;
+  background:#020612;
+  border:2px solid #273549;
+  border-radius:12px;
+  padding:10px;
+  cursor:pointer;
+  user-select:none;
+}
+
+.bcard.active{
+  border-color: rgba(74,222,128,.9);
+  box-shadow: 0 0 0 2px rgba(74,222,128,.15) inset;
+}
+
+.bname{
+  position:absolute;
+  top:8px;
+  left:10px;
+  right:10px;
+  font-size:13px;
+  font-weight:600;
+  color:var(--text-main);
+  text-align:center;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.bdesc{
+  position:absolute;
+  top:32px;
+  left:5px;
+  right:5px;
+  font-size:12px;
+  color:var(--text-soft);
+  text-align:center;
+  line-height:1.2;
+}
+
+.breq{
+  position:absolute;
+  left:10px;
+  right:10px;
+  top:80px;
+  font-size:11px;
+  text-align:center;
+  color:#ff6b81;
+}
+
+.breq.ok{ color: var(--text-soft); }
+
+.bcostbar{
+  position:absolute;
+  left:10px;
+  right:10px;
+  bottom:10px;
+  height: 34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  border-radius:10px;
+  background:#0b1020;
+  border:1px solid #1f2a44;
+  font-weight:700;
+  font-size:16px;
+  color:var(--text-main);
+}
+
+.blocked{
+  opacity: 0.4;
+  pointer-events:none;
+}
+
+.seedbar-wrap{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:10px;
+}
+
+.seed-arrow{
+  width:52px;
+  height:52px;
+  border-radius:999px;
+  border:1px solid #273549;
+  background:#0b1020;
+  color:var(--text-main);
+  font-size:18px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  user-select:none;
+}
+.seed-arrow:active{ transform: scale(0.98); }
+
+.seedbar{
+  flex:1;
+  display:grid;
+  gap:10px;
+  grid-template-columns: repeat(3, 1fr); 
+}
+
+.seedbar.cols-3{ grid-template-columns: repeat(3, 1fr); }
+.seedbar.cols-2{ grid-template-columns: repeat(3, 1fr); }
+
+.seed-card.placeholder{
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.seed-card{
+  width: 100%;
+  height: 120px;            
+  min-height: 120px;        
+  position:relative;
+  background:#020612;
+  border:2px solid #273549;
+  border-radius:12px;
+  padding:8px;
+  cursor:pointer;
+  user-select:none;
+}
+
+.seed-card.active{
+  border-color: rgba(74,222,128,.9);
+  box-shadow: 0 0 0 2px rgba(74,222,128,.15) inset;
+}
+
+.seed-name{
+  position:absolute;
+  top:6px;
+  left:8px;
+  right:8px;
+  font-size:11px;          
+  color:var(--text-muted);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  text-align:center;
+}
+
+.seed-icon{
+  width:58px;              
+  height:58px;
+  display:block;
+  margin:14px auto 6px;
+  object-fit:contain;
+}
+
+.seed-costbar{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  margin-top:6px;
+  border-radius:10px;
+  background:#0b1020;
+  border:1px solid #1f2a44;
+  font-weight:600;
+  font-size:14px;
+}
+
+.seed-btn{
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--btn-border);
+  background: #020617;
+  color: var(--text-main);
+  font-family: var(--font-main);
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.seed-btn:hover{ background: rgba(255,255,255,0.06); }
+.seed-btn.selected{
+  border-color: rgba(74,222,128,0.9);
+  box-shadow: 0 0 0 2px rgba(74,222,128,0.15) inset;
+}
+.seed-cost{ font-size:12px; color: var(--text-soft); }
+
+.node-icon { display:flex; align-items:center; justify-content:center; }
+.node-icon-img{
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  display:block;
+}
+
+.node-empty-img{
+  opacity: 0.55;   
+  filter: saturate(0.9);
+}
+
+.node-stage-badge{
+  position:absolute;
+  top:-1px;
+  right:-1px;
+
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+
+  border: 1px solid rgba(74,222,128,.85);
+  border-top-right-radius: 12px;   
+  border-bottom-left-radius: 14px; 
+  border-top-left-radius: 6px;
+  border-bottom-right-radius: 0;
+
+  background: rgba(2,6,18,.75);
+  backdrop-filter: blur(2px);
+}
+
+.node-cell img { pointer-events: none; }
+
+:root{
+  --phone-w: min(430px, 96vw);
+  --hud-pad: 6px;
+
+    
+  --safe-top: max(env(safe-area-inset-top), 14px);
+  --safe-bottom: max(env(safe-area-inset-bottom), 14px);
+}
+
+.shell{
+  display:flex;
+  flex-direction:column;
+  width: var(--phone-w);
+  height: min(calc(var(--phone-w) * 2.165), 100dvh);
+  overflow:hidden;
+  position: relative;
+
+  
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+
+.hud{
+  position: relative;
+  flex: 0 0 auto;
+
+  
+  padding: var(--content-top) var(--hud-pad) 0;  
+}
+
+.hud-top{
+  display:flex;
+  flex-direction: column;
+  align-items:start;
+}
+
+.hud-spacer{
+  width: 1px;
+  height: 1px;
+}
+
+.hud-actions-row{
+  display:flex;
+  justify-content:flex-end;
+  gap: 8px;
+}
+
+.hud-lucky{
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: left;
+  padding: 0 2px;
+}
+.hud-lucky strong{
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.resources-title{
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--text-soft);
+  text-transform: uppercase;
+}
+
+.resources-grid{
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 8px 0 0 0;
+    
+  justify-items: center;
+  text-align: center;
+}
+
+.resource-pill{
+  padding: 6px 7px;
+  border-radius: 10px;
+  background: #020617;
+  border: 1px solid rgba(255,255,255,0.08);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+}
+
+.resource-label{
+  font-size: 12px;
+  color: var(--text-soft);
+  text-transform: none;   
+  letter-spacing: 0;
+}
+
+.hud-actions{
+  display:flex;
+  gap: 8px;
+  align-items:flex-start;
+  justify-content:flex-end;
+}
+
+.hud-actions .btn{
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 10px;
+}
+
+.hud-streak{
+  margin-bottom: 8px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+}
+
+.hud-streak .streak-mini{
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud-streak .btn{
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.hud-tabs{
+  margin-top: 10px;
+  display:flex;
+  gap: 8px;
+}
+
+.tab-btn{
+  flex:1;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--btn-border);
+  background: #020617;
+  color: var(--text-muted);
+  font-family: var(--font-main);
+  font-size: 12px;
+  cursor: pointer;
+  user-select:none;
+}
+
+.tab-btn.active{
+  border-color: rgba(74,222,128,.9);
+  color: var(--text-main);
+  box-shadow: 0 0 0 2px rgba(74,222,128,.12) inset;
+}
+
+.pages{
+  height: calc(100% - 0px);
+}
+
+.pages-inner{
+  height: 100%;
+}
+
+.main-panel{
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0 var(--hud-pad) var(--hud-pad);
+  padding: 0;                 
+  overflow:hidden;
+}
+
+.panel-tabs{
+  display:flex;
+  gap:8px;
+  padding: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: rgba(2,6,18,0.35);
+}
+
+.panel-body{
+  height: 100%;
+  min-height: 0;
+}
+
+.pager{
+  height: 100%;
+  overflow-x:auto;
+  overflow-y:hidden;
+  display:flex;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.page{
+  flex:0 0 100%;
+  width:100%;
+  height: 100%;
+  overflow-y:auto;
+  padding: 12px;
+  padding-bottom: calc(12px + var(--safe-bottom));
+}
+
+.page .card{ margin-bottom: 10px; }
+
+#powerGridCard{ margin: 0; }
+
+.node-cell.lucky{
+  position: relative;
+  box-shadow:
+    0 0 13px rgba(74,222,128,0.75),
+    0 0 32px rgba(74,222,128,0.55),
+    inset 0 0 8px rgba(74,222,128,0.35);
+  animation: luckyPulseStrong 1.4s ease-in-out infinite;
+}
+
+@keyframes luckyPulseStrong{
+  0%   { filter: brightness(1); }
+  50%  { filter: brightness(1.3); }
+  100% { filter: brightness(1); }
+}
+
+.node-popup{
+  position: absolute;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+  white-space: nowrap;
+
+  opacity: 0;
+  transform: translate(-50%, 6px); 
+  filter: drop-shadow(0 2px 10px rgba(0,0,0,0.55));
+  will-change: transform, opacity;
+}
+
+.node-popup.power{ left: 30%; animation: floatUpLeft 2000ms cubic-bezier(.22,.61,.36,1) forwards; }
+.node-popup.rank { left: 70%; animation: floatUpRight 3200ms cubic-bezier(.22,.61,.36,1) forwards; }
+
+.node-popup.power.pos{ color: #4ade80; } 
+.node-popup.power.neg{ color: #f97373; } 
+.node-popup.rank{ color: #facc6b; }      
+
+@keyframes floatUpLeft{
+  0%   { opacity: 0; transform: translate(-50%, 10px) translateX(-6px); }
+  12%  { opacity: 1; transform: translate(-50%, 2px)  translateX(-10px); }
+  100% { opacity: 0; transform: translate(-50%, -28px) translateX(-16px); }
+}
+
+@keyframes floatUpRight{
+  0%   { opacity: 0; transform: translate(-50%, 10px) translateX(6px); }
+  12%  { opacity: 1; transform: translate(-50%, 2px)  translateX(10px); }
+  100% { opacity: 0; transform: translate(-50%, -28px) translateX(16px); }
+}
+
+.seed-pop{
+  position: fixed;
+  z-index: 99999;
+  min-width: 220px;
+  max-width: 260px;
+  background: rgba(5,9,21,0.96);
+  border: 1px solid rgba(74,222,128,0.35);
+  border-radius: 12px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.75);
+  padding: 10px 10px;
+  backdrop-filter: blur(6px);
+  color: var(--text-main);
+  font-size: 12px;
+}
+
+.seed-pop .seed-pop-title{
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-soft);
+  margin-bottom: 8px;
+}
+
+.seed-pop .seed-pop-line{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding: 4px 0;
+  border-bottom: 1px dashed rgba(255,255,255,0.08);
+}
+.seed-pop .seed-pop-line:last-child{ border-bottom: none; }
+
+.seed-pop .seed-pop-k{ color: var(--text-soft); }
+.seed-pop .seed-pop-v{ color: var(--text-main); font-weight: 700; }
+
+.top-bar, .bottom-row { display:none !important; }
+
+.resource-inline{
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.1;
+}
+
+.resource-value{
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-main);
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.resource-rate-inline{
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.resources-grid.hud-resources{
+  width: 100%;
+  margin: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  justify-items: stretch;
+  text-align: center;
+  margin-bottom: 8px; 
+}
+
+.hud-subhead{
+  margin-top: 10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+#hudSectionTitle{
+  font-size:12px;
+  color:var(--text-soft);
+  letter-spacing:0.10em;
+  text-transform:uppercase;
+}
+
+.top-actions {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 2px);
+  right: 10px;
+  display: flex;
+  gap: 4px;
+  z-index: 20;
+}
+
+  </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="app">
+
+    
+        <div class="hud">
+          <div class="hud-top">
+
+  
+            <div class="top-actions">
+    <button class="btn btn-sm" id="walletButton">Wallet</button>
+    <button class="btn btn-sm" id="howtoButton">How-to</button>
+            </div>
+
+  
+            <div class="resources-grid hud-resources">
+              <div class="resource-pill">
+                <div class="resource-label">
+        <span class="emoji">⚡</span> Power
+                </div>
+                <div class="resource-value">
+        <span id="powerValue">0.00</span>
+        <span class="resource-rate-inline" id="powerRate">(0.00/hr)</span>
+                </div>
+              </div>
+
+              <div class="resource-pill">
+                <div class="resource-label">
+        <span class="emoji">🔥</span> Rank
+                </div>
+      <div class="resource-value" id="rankValue">0</div>
+              </div>
+
+              <div class="resource-pill">
+                <div class="resource-label">
+        <span class="sol-icon"></span> SOL
+                </div>
+      <div class="resource-value" id="solValue">0.00000</div>
+              </div>
+            </div>
+
+   
+            <div class="hud-streak">
+              <div class="streak-mini" id="streakMiniText">
+      🔥 Streak: <strong id="streakValue">0</strong>d — Week 1
+              </div>
+
+              <button class="btn btn-primary btn-sm" id="claimStreakButton">
+      Claim
+              </button>
+            </div>
+
+  
+            <div class="hud-lucky" id="luckyMiniRow">
+    ✨ Lucky: <strong id="luckyChanceValue">0%</strong>
+            </div>
+
+          </div>
+
+          <div class="card main-panel" id="mainPanel">
+
+            <div class="panel-tabs">
+    <button class="tab-btn active" id="tabNode">Power Grid</button>
+    <button class="tab-btn" id="tabBuildings">Buildings</button>
+    <button class="tab-btn" id="tabNFTs">NFTs</button>
+    <button class="tab-btn" id="tabDev">Dev Tools</button>
+            </div>
+
+            <div class="panel-body">
+              <div class="pager" id="pager">
+      
+                <section class="page" id="pageNode">
+
+                  <div class="seedbar-wrap">
+            <button class="seed-arrow" id="seedPrev" aria-label="Previous">◀</button>
+                    <div class="seedbar" id="nodeSeedBar"></div>
+            <button class="seed-arrow" id="seedNext" aria-label="Next">▶</button>
+                  </div>
+
+                  <div id="powerGrid" style="margin-top:10px;"></div>
+
+                </section>
+
+                <section class="page" id="pageBuildings">
+
+  
+                  <div class="map-header">
+    <div class="map-hint map-status" id="placeStatus">Idle</div>
+    <button class="btn btn-sm regen-mini" id="regenMapBtn">New Map</button>
+                  </div>
+
+  
+                  <div class="map-wrap">
+                    <canvas id="buildMap" class="map-canvas"></canvas>
+                  </div>
+
+  
+                  <div class="map-toolbar" id="confirmBar" style="display:none;">
+    <button class="btn btn-primary btn-sm" id="confirmYesBtn">Build</button>
+    <button class="btn btn-danger btn-sm" id="confirmNoBtn">Cancel</button>
+                  </div>
+
+  
+                  <div class="buildbar" id="buildBar"></div>
+
+                </section>
+
+                <section class="page" id="pageNFTs">
+
+                  <div class="card-header">
+    <div class="card-title">NFTs</div>
+                  </div>
+
+                  <div class="nft-wrap" id="nftWrap">
+    
+                    <div class="nft-library" id="nftLibrary">
+      <div class="nft-shelf-title">SOLTAN Collections</div>
+
+                      <div class="nft-grid">
+        <div class="nft-card"><div class="nft-badge">COMMON</div><div class="nft-thumb"></div><div class="nft-name">Terminal Relics</div></div>
+        <div class="nft-card"><div class="nft-badge">COMMON</div><div class="nft-thumb"></div><div class="nft-name">Grid Sprites</div></div>
+        <div class="nft-card"><div class="nft-badge">ADV</div><div class="nft-thumb"></div><div class="nft-name">Solana Nodes</div></div>
+        <div class="nft-card"><div class="nft-badge">ADV</div><div class="nft-thumb"></div><div class="nft-name">Quantum Parts</div></div>
+        <div class="nft-card"><div class="nft-badge">LEG</div><div class="nft-thumb"></div><div class="nft-name">Mythic ASIC</div></div>
+        <div class="nft-card"><div class="nft-badge">LEG</div><div class="nft-thumb"></div><div class="nft-name">Genesis Core</div></div>
+                      </div>
+                    </div>
+
+                    <div id="nftLibrary" class="nft-lib locked">
+  <div class="nft-actions">
+    <button id="buyCrateBtn" class="btn">Buy Crate (Rank)</button>
+    <button id="openCrateBtn" class="btn">Open Crate</button>
+    <div id="crateCount" class="mini">Crates: 0</div>
+  </div>
+
+  <div class="nft-section">
+    <div class="nft-h">Uniques</div>
+    <div id="nftUniquesGrid" class="nft-grid"></div>
+  </div>
+
+  <div class="nft-section">
+    <div class="nft-h">Commons</div>
+    <div id="nftCommonsGrid" class="nft-grid"></div>
+  </div>
+</div>
+
+    
+                    <div class="nft-lock" id="nftLock">
+                      <div class="nft-lock-card">
+        <div class="nft-lock-title">NFT Library Locked</div>
+        <div class="nft-lock-sub">Build <strong>dApp Store</strong> to unlock Lucky Grids and NFTs.</div>
+        <button class="btn btn-primary btn-sm" id="nftGoBuildBtn">Go to Buildings</button>
+                      </div>
+                    </div>
+                  </div>
+
+                </section>
+
+                <section class="page" id="pageDev">
+                  <div class="card-header">
+    <div class="card-title">DEV TOOLS</div>
+                  </div>
+
+                  <div class="btn-group">
+    <button class="btn btn-sm" id="pass5sButton">+5s Tick</button>
+    <button class="btn btn-sm" id="addSolButton">+1 SOL</button>
+    <button class="btn btn-sm" id="buyPackButton">Buy Pack (0.5 SOL)</button>
+    <button class="btn btn-sm" id="devStreakButton">Streak +1 (DEV)</button>
+    <button class="btn btn-sm" id="maxAllButton">MAX ALL</button>
+    <button class="btn btn-sm" onclick="resetGame()">RESET GAME</button>
+                  </div>
+                </section>
+
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="modal-backdrop" id="burnModal">
+        <div class="modal">
+          <div class="modal-header">
+      <div class="modal-title">Burn Tokens</div>
+      <div class="modal-close" data-close="burnModal">✕</div>
+          </div>
+
+    
+          <div id="burnStep1Inline">
+            <div style="font-size:12px; color:var(--text-soft); margin-bottom:10px;">
+        Spend SOL (mock) to simulate buying & burning tokens. Furnace tier increases Rank yield.
+            </div>
+
+            <label style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+              <input type="radio" name="burnModeInline" id="burnModePopularInline" checked>
+        Popular meme tokens
+            </label>
+
+            <div style="margin: 0 0 10px 22px;">
+              <select id="burnTokenSelectInline" class="btn btn-sm" style="width:100%;">
+          <option value="" selected disabled>Select token…</option>
+          <option value="POPCAT">😺 Popcat (POPCAT)</option>
+          <option value="WIF">🐶 WIF (WIF)</option>
+          <option value="BONK">🦴 BONK (BONK)</option>
+          <option value="PEPE">🐸 PEPE (PEPE)</option>
+          <option value="MEW">🐱 MEW (MEW)</option>
+              </select>
+            </div>
+
+            <label style="display:flex; gap:8px; align-items:center; margin: 10px 0 8px;">
+              <input type="radio" name="burnModeInline" id="burnModeContractInline">
+        Custom contract (mint)
+            </label>
+
+            <div style="margin-left:22px; display:none;" id="burnContractWrapInline">
+              <input id="burnContractInputInline" class="btn btn-sm" style="width:100%;" placeholder="Paste mint address…">
+            </div>
+
+            <div class="btn-group" style="margin-top:12px;">
+        <button class="btn btn-primary" id="burnNextBtnInline">Next</button>
+        <button class="btn" id="burnCancelBtnInline">Close</button>
+            </div>
+          </div>
+
+    
+          <div id="burnStep2Inline" style="display:none;">
+            <div id="burnTokenSummaryInline" style="font-size:12px; color:var(--text-muted); margin-bottom:10px;"></div>
+
+            <div style="font-size:12px; color:var(--text-soft); margin-bottom:6px;">
+        SOL to burn (mock)
+            </div>
+            <input id="burnSolAmountInline" class="btn btn-sm" style="width:100%;" placeholder="e.g. 0.25" inputmode="decimal">
+
+            <div class="btn-group" style="margin-top:12px;">
+        <button class="btn btn-primary" id="burnExecuteBtnInline">Burn</button>
+        <button class="btn" id="burnBackBtnInline">Back</button>
+            </div>
+          </div>
+
+    
+          <div id="burnResultInline" style="display:none;">
+            <div id="burnResultTextInline" style="margin-bottom:10px;"></div>
+            <div id="burnResultLinkInline" style="font-size:12px; color:var(--text-muted); margin-bottom:12px;"></div>
+
+            <div class="btn-group">
+        <button class="btn btn-primary" id="burnAgainBtnInline">Burn Again</button>
+        <button class="btn" id="burnCloseBtnInline">Close</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    
+      <div class="modal-backdrop" id="walletModal">
+        <div class="modal">
+          <div class="modal-header">
+        <div class="modal-title">Wallet</div>
+        <div class="modal-close" data-close="walletModal">✕</div>
+          </div>
+
+      <p class="wallet-address-label">Connected wallet (mock):</p>
+          <div class="wallet-address-row">
+        <span id="walletAddress">9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM</span>
+          </div>
+
+          <div class="btn-group">
+        <button class="btn" id="openSolscanBtn">Open in Solscan</button>
+        <button class="btn btn-primary" id="disconnectWalletBtn">Disconnect</button>
+          </div>
+
+          <p class="dev-note" id="walletStatusNote" style="margin-top:10px;">
+        Current status: connected (mock).
+          </p>
+        </div>
+      </div>
+
+      
+      <div class="modal-backdrop" id="howtoModal">
+        <div class="modal">
+          <div class="modal-header">
+        <div class="modal-title">How-to Play</div>
+        <div class="modal-close" data-close="howtoModal">✕</div>
+          </div>
+          <div class="howto-body">
+        <p><strong>Goal:</strong> Expand your Power Grid, grow Power, and turn risky tokens into Rank.</p>
+            <ul>
+          <li><strong>Resources:</strong> ⚡ Power powers everything. Ⓢ SOL is premium currency for packs & future on-chain actions. 🔥 Rank is your long-term multiplier.</li>
+          <li><strong>Power Grid:</strong> Deploy components onto empty nodes (costs ⚡). Each node “cooks” over time—harvest when ready for ⚡ rewards. Higher-tier components cost more but scale better.</li>
+          <li><strong>Power Plant:</strong> Generates passive ⚡ over time. Upgrading it increases your baseline income.</li>
+          <li><strong>dApp Store:</strong> Unlocks Lucky Grids and the NFTs library. Higher tiers slightly increase Lucky odds.</li>
+          <li><strong>Furnace:</strong> Unlocks <em>Burn Tokens</em>. Spend SOL (mock) to simulate buying & burning tokens to earn 🔥 Rank.</li>
+          <li><strong>Streak:</strong> Claim once per day. Small daily ⚡ boosts that compound and keep momentum.</li>
+          <li><strong>Rank:</strong> Earned only via Burn Tokens. Used as a multiplier for end-of-day/community reward logic (later: real distribution rules).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+<script>
+    function log(){ /* no-op */ }
+
+/* =========================================================
+   SAVE v1 — single localStorage key + legacy migration
+   Drop-in module. Put this under `function log(){}`.
+   ========================================================= */
+
+const SAVE_KEY = "soltan_save_v1";
+const SAVE_VERSION = 1;
+
+// ---- helpers
+function safeParse(json){
+  try { return JSON.parse(json); } catch(e){ return null; }
+}
+
+function defaultSave(){
+  return {
+    version: SAVE_VERSION,
+    ts: Date.now(),
+
+    resources: { power: 0, sol: 0.0, rank: 0 },
+
+    buildings: { powerPlant: 0, dappStore: 0, furnace: 0 },
+
+    inventory: {
+  components: {
+    electron: Infinity,
+    transistor: Infinity,
+    microchip: Infinity,
+    ram: Infinity,
+    cpu: Infinity,
+    gpu: Infinity,
+    ai: Infinity,
+    quantum: Infinity
+  },
+  crates: {
+    basic: 0,
+    advanced: 0,
+    legendary: 0
+  },
+  nftCommons: {},
+  nftUniques: {}
+},
+
+
+    streak: { current: 0, lastClaimDate: null },
+
+    progression: {
+  chapter: 1,
+  unlocks: {
+    shop: true,
+    nftCollection: false,
+    overclock: false
+  }
+},
+
+rng: {
+  seed: Math.floor(Math.random() * 1e9),
+  rolls: 0
+},
+
+    powerGrid: {
+      selectedSeed: "electron",
+      nodes: Array.from({length: 16}, () => ({
+        seed: null,
+        stage: 0,
+        readyIn: 0,
+        total: 0,
+        luckyTier: null
+      }))
+    },
+
+    // Buildings map persistence (ONLY what must persist)
+    buildMap: {
+      seed: 0,
+      // 3 plots => store builtKey per plot index
+      built: [null, null, null]
+    }
+  };
+}
+
+function resetGame(){
+  // ⚠️ Buradaki key, Save v1’in kullandığı key ile birebir aynı olmalı.
+  // Eğer sende farklıysa, Save v1’de geçen key’i buraya yaz.
+  localStorage.removeItem("soltan_save_v1");
+  location.reload();
+}
+
+// ---- legacy migration (your current scattered keys)
+function migrateLegacyToV1(){
+  const s = defaultSave();
+
+  // Legacy streak
+  try{
+    const legacyCurrent = localStorage.getItem("soltan_streak_current");
+    const legacyLast    = localStorage.getItem("soltan_streak_last");
+    if (legacyCurrent != null){
+      const n = parseInt(legacyCurrent, 10);
+      if (!isNaN(n) && n >= 0) s.streak.current = n;
+    }
+    if (legacyLast) s.streak.lastClaimDate = legacyLast || null;
+  }catch(e){}
+
+  // Legacy build map
+  try{
+    const legacySeed = parseInt(localStorage.getItem("soltan_buildmap_seed") || "", 10);
+    if (!isNaN(legacySeed)) s.buildMap.seed = legacySeed;
+
+    const legacyBuilt = safeParse(localStorage.getItem("soltan_buildmap_built") || "");
+    if (Array.isArray(legacyBuilt)){
+      // keep only 3 plots
+      s.buildMap.built = legacyBuilt.slice(0, 3).map(v => v || null);
+      while (s.buildMap.built.length < 3) s.buildMap.built.push(null);
+    }
+  }catch(e){}
+
+  // Legacy resources/buildings were not stored consistently in your current code,
+  // so we leave them at defaults.
+
+  return s;
+}
+
+// ---- load/save
+function loadSaveV1(){
+  const raw = localStorage.getItem(SAVE_KEY);
+  const parsed = safeParse(raw);
+
+  // If valid v1, return it
+  if (parsed && parsed.version === SAVE_VERSION) {
+    // minimal shape hardening (in case of partial corruption)
+    const base = defaultSave();
+    // shallow merge
+    return {
+      ...base,
+      ...parsed,
+      resources: { ...base.resources, ...(parsed.resources||{}) },
+      buildings: { ...base.buildings, ...(parsed.buildings||{}) },
+      streak: { ...base.streak, ...(parsed.streak||{}) },
+      powerGrid: {
+        ...base.powerGrid,
+        ...(parsed.powerGrid||{}),
+        nodes: Array.isArray(parsed.powerGrid?.nodes) ? parsed.powerGrid.nodes : base.powerGrid.nodes
+      },
+      buildMap: {
+        ...base.buildMap,
+        ...(parsed.buildMap||{}),
+        built: Array.isArray(parsed.buildMap?.built) ? parsed.buildMap.built.slice(0,3) : base.buildMap.built.slice()
+      }
+    };
+  }
+
+  // Otherwise migrate legacy -> v1
+  const migrated = migrateLegacyToV1();
+  saveNowV1(migrated);
+  return migrated;
+}
+
+function saveNowV1(saveObj){
+  try{
+    saveObj.version = SAVE_VERSION;
+    saveObj.ts = Date.now();
+    localStorage.setItem(SAVE_KEY, JSON.stringify(saveObj));
+  }catch(e){
+    // storage can fail (private mode/quota). ignore.
+  }
+}
+
+// ---- throttled save (call this instead of writing localStorage everywhere)
+let __saveScheduled = false;
+function scheduleSaveV1(){
+  if (__saveScheduled) return;
+  __saveScheduled = true;
+  setTimeout(() => {
+    __saveScheduled = false;
+    saveNowV1(state); // IMPORTANT: in your current code `state` is the save object (we'll set it that way)
+  }, 250);
+}
+
+// ---- optional: one-time cleanup of legacy keys (safe to keep; you decide)
+// call cleanupLegacyKeysOnce() after you confirm v1 works for you.
+function cleanupLegacyKeysOnce(){
+  try{
+    localStorage.removeItem("soltan_streak_current");
+    localStorage.removeItem("soltan_streak_last");
+    localStorage.removeItem("soltan_buildmap_seed");
+    localStorage.removeItem("soltan_buildmap_built");
+  }catch(e){}
+}
+
+const PASSIVE_TICK_SECONDS = 5;
+// =======================
+// STATE BOOTSTRAP (FIX v0.29)
+// =======================
+
+function createDefaultState(){
+  return {
+    resources: { power: 0, sol: 0.0, rank: 0 },
+
+    buildings: { powerPlant: 0, dappStore: 0, furnace: 0 },
+
+    // ✅ bunlar STATE içinde olmalı (asla state oluşmadan dışarıda değil)
+    buildBusy: { powerPlant: false, dappStore: false, furnace: false },
+    buildBusyUntil: { powerPlant: 0, dappStore: 0, furnace: 0 },
+    buildPendingTier: { powerPlant: 0, dappStore: 0, furnace: 0 },
+
+    streak: { current: 0, lastClaimDate: null },
+
+    powerGrid: {
+      selectedSeed: "electron",
+      nodes: Array.from({length: 16}, () => ({
+        seed: null,
+        stage: 0,
+        readyIn: 0,
+        total: 0,
+        luckyTier: null,
+      }))
+    },
+
+    // ✅ render/cache flags
+    render: {
+      mapDirty: true,
+      rafOn: false,
+      mapCacheCanvas: null,
+      mapCacheValid: false,
+      mapCacheKey: "",
+      _started: false
+    },
+
+    // ✅ ui selections
+    ui: {
+      selectedBuildKey: null,
+      selectedPlotIndex: null,
+      confirmMode: null,
+      confirmKey: null,
+      confirmPlotIndex: null
+    },
+
+    // ✅ buildings map
+    buildMap: {
+      w: 128,
+      h: 128,
+      tiles: null,
+      plots: [],
+      selectedPlaceKey: null,
+      tileSize: 4,
+      seed: 0,
+      view: { x:0, y:0, w:64, h:64 },
+      viewRect: null
+    }
+  };
+}
+
+// 1) önce default state
+const state = createDefaultState();
+
+// 2) sonra save’den yükle (SAVE v1 modülün bunu sağlamalı)
+try{
+  const saved = loadSaveV1(); // SAVE v1 module fonksiyonu
+  if (saved && typeof saved === "object") {
+    // sadece bilinen alanları merge et (render/ui gibi runtime şeyleri ezme)
+    if (saved.resources) Object.assign(state.resources, saved.resources);
+    if (saved.buildings) Object.assign(state.buildings, saved.buildings);
+    if (saved.streak) Object.assign(state.streak, saved.streak);
+
+    if (saved.powerGrid && Array.isArray(saved.powerGrid.nodes)) {
+      state.powerGrid.selectedSeed = saved.powerGrid.selectedSeed || state.powerGrid.selectedSeed;
+      // node sayısı uyuşmuyorsa default’a düş
+      if (saved.powerGrid.nodes.length === state.powerGrid.nodes.length) {
+        state.powerGrid.nodes = saved.powerGrid.nodes;
+      }
+    }
+
+    // buildMap: tiles/plots restore edilecekse burada kontrollü al
+    if (saved.buildMap) {
+      if (typeof saved.buildMap.seed === "number") state.buildMap.seed = saved.buildMap.seed;
+      if (Array.isArray(saved.buildMap.plots)) state.buildMap.plots = saved.buildMap.plots;
+      if (saved.buildMap.tiles && saved.buildMap.tiles.length) state.buildMap.tiles = saved.buildMap.tiles;
+    }
+  }
+}catch(e){
+  console.warn("Save load failed, using defaults.", e);
+}
+
+let explorationBusy = false;
+
+state.render = {
+  mapDirty: true,
+  rafOn: false,
+  mapCacheCanvas: null,
+  mapCacheValid: false,
+  mapCacheKey: ""
+};
+
+state.ui = {
+  selectedBuildKey: null,
+  selectedPlotIndex: null,
+  confirmMode: null,
+  confirmKey: null,
+  confirmPlotIndex: null
+};
+
+// buildMap runtime fields (tiles/plots/view/tileSize) - keep your existing init
+state.buildMap = state.buildMap || { seed: 0, built: [null,null,null] };
+
+function markMapDirty(full = false){
+  state.render.mapDirty = true;
+  if (full) state.render.mapCacheValid = false; // ✅ terrain/plots değişti -> cache invalid
+}
+
+// ✅ Plot/building sprite atlas (tek yerde)
+const PLOT_SPRITES = {
+  empty:      { src: "assets/buildings/bul_empty.png" },
+  powerPlant: { src: "assets/buildings/bul_powerplant.png" },
+  dappStore:  { src: "assets/buildings/bul_dappstore.png" },
+  furnace:    { src: "assets/buildings/bul_furnace.png" },
+};
+
+const plotImgs = {}; // { key: HTMLImageElement }
+
+function loadPlotSprites(){
+  Object.entries(PLOT_SPRITES).forEach(([key, meta]) => {
+    const img = new Image();
+    img.onload = () => markMapDirty(true);
+    img.onerror = () => console.warn(`${meta.src} yüklenemedi`);
+    img.src = meta.src;
+    plotImgs[key] = img;
+  });
+}
+
+function getPlotImg(key){
+  const img = plotImgs[key];
+  return (img && img.complete && img.naturalWidth > 0) ? img : null;
+}
+
+// ===== BUILDINGS MAP STATE =====
+state.buildMap = {
+  w: 128,
+  h: 128,
+  tiles: null,            // Uint8Array
+  plots: [],              // {x,y, builtKey:null|key}
+  selectedPlaceKey: null, // "powerPlant" | "dappStore" | "furnace"
+  tileSize: 4             // render scale (auto ayarlayacağız)
+};
+
+state.buildMap.view = { x:0, y:0, w:64, h:64 };
+
+// ===== BUILDINGS MAP GENERATION + RENDER =====
+const TILE = { VOID:0, LAND:1, FOREST:2, WATER:3, ROAD:4, PLOT:5 };
+
+function rng(seed){
+  // minik deterministik RNG (seed -> repeatable)
+  let t = seed >>> 0;
+  return () => (t = (t * 1664525 + 1013904223) >>> 0) / 4294967296;
+}
+
+function hash01(x, y, seed){
+  // 0..1 deterministic noise
+  let n = (x * 374761393 + y * 668265263 + (seed|0) * 69069) | 0;
+  n = (n ^ (n >>> 13)) | 0;
+  n = (n * 1274126177) | 0;
+  n = (n ^ (n >>> 16)) | 0;
+  return (n >>> 0) / 4294967296;
+}
+
+function mapIndex(x,y){ return y * state.buildMap.w + x; }
+
+function generateBuildMap(seed = Date.now()){
+  const { w,h } = state.buildMap;
+  const R = rng(seed);
+  const tiles = new Uint8Array(w*h);
+
+  // base land
+  for (let i=0;i<tiles.length;i++) tiles[i] = TILE.LAND;
+
+  // terrain patches
+  function stamp(tileType, count, stepsMin, stepsMax){
+  for(let i=0;i<count;i++){
+    let x = Math.floor(R()*w);
+    let y = Math.floor(R()*h);
+    const steps = stepsMin + Math.floor(R()*(stepsMax-stepsMin+1));
+
+    for (let s=0; s<steps; s++){
+      // bounds
+      if (x<0) x=0; if (y<0) y=0; if (x>=w) x=w-1; if (y>=h) y=h-1;
+
+      tiles[mapIndex(x,y)] = tileType;
+
+      // “kalınlık” için bazen komşuları da boya
+      if (R() < 0.7){
+        const nx = x + (R()<0.5 ? -1 : 1);
+        const ny = y + (R()<0.5 ? -1 : 1);
+        if (nx>=0 && ny>=0 && nx<w && ny<h) tiles[mapIndex(nx,ny)] = tileType;
+      }
+
+      // random walk
+      const r = R();
+      if (r < 0.25) x++;
+      else if (r < 0.50) x--;
+      else if (r < 0.75) y++;
+      else y--;
+
+      // bazen “branch” etkisi: küçük sıçrama
+      if (R() < 0.02){
+        x += Math.floor((R()*7)-3);
+        y += Math.floor((R()*7)-3);
+      }
+    }
+  }
+}
+
+  stamp(TILE.WATER,    14,  400, 700);   // göl/kıyı parçaları
+  stamp(TILE.FOREST,   12, 180, 260);   // orman kümeleri
+
+  // =========================
+  // PLOTS (safe region)
+  // =========================
+  const v = state.buildMap.view; // {w:80,h:80}
+  const VIEW_MARGIN = 2;
+  const PLOT_SIZE = 16;
+  const PLOT_GAP = 4;
+  const MAX_TRIES = 30000;
+
+  const safeW = v.w - (VIEW_MARGIN*2);
+  const safeH = v.h - (VIEW_MARGIN*2);
+
+  // map ortasına sabitle
+  const safeX = Math.floor((w - v.w) * 0.5);
+  const safeY = Math.floor((h - v.h) * 0.5);
+  // ✅ view'u safe region'a kilitle (BFS burayı baz alacak)
+state.buildMap.view.x = safeX;
+state.buildMap.view.y = safeY;
+
+  const areaX0 = safeX + VIEW_MARGIN;
+  const areaY0 = safeY + VIEW_MARGIN;
+  const areaX1 = areaX0 + safeW - PLOT_SIZE;
+  const areaY1 = areaY0 + safeH - PLOT_SIZE;
+
+  const plots = [];
+
+  function okTile(xx, yy){
+  const t = tiles[mapIndex(xx,yy)];
+  return t === TILE.LAND; // ✅ sadece kahverengi zemin
+}
+
+  function rectOK(x,y){
+    for (let yy=y; yy<y+PLOT_SIZE; yy++){
+      for (let xx=x; xx<x+PLOT_SIZE; xx++){
+        if (!okTile(xx,yy)) return false;
+      }
+    }
+    return true;
+  }
+
+  function overlaps(x,y){
+    for (const p of plots){
+      const pad = PLOT_GAP;
+      const overlap =
+        x < p.x + p.w + pad &&
+        x + PLOT_SIZE + pad > p.x &&
+        y < p.y + p.h + pad &&
+        y + PLOT_SIZE + pad > p.y;
+      if (overlap) return true;
+    }
+    return false;
+  }
+
+  for (let want=0; want<3; want++){
+    let placed = false;
+    for (let tries=0; tries<MAX_TRIES; tries++){
+      const x = areaX0 + Math.floor(R() * Math.max(1, (areaX1 - areaX0 + 1)));
+      const y = areaY0 + Math.floor(R() * Math.max(1, (areaY1 - areaY0 + 1)));
+      if (!rectOK(x,y)) continue;
+      if (overlaps(x,y)) continue;
+      plots.push({x,y,w:PLOT_SIZE,h:PLOT_SIZE,builtKey:null});
+      placed = true;
+      break;
+    }
+    if (!placed){
+      // bu seed ile olmadı → yeni seed ile tekrar dene
+      return generateBuildMap(seed + 1);
+    }
+  }
+
+// view dışına çıkmayı tamamen yasakla
+const INSET = 2; // kenarlara yaklaşmasın (thickness taşmasın diye)
+const viewRect = {
+  x: v.x + INSET,
+  y: v.y + INSET,
+  w: v.w - INSET * 2,
+  h: v.h - INSET * 2
+};
+
+state.buildMap.viewRect = viewRect;
+
+const passable = (x, y) => {
+  if (!inRect(x, y, viewRect)) return false; // ⛔ view dışı YASAK
+  const t = tiles[mapIndex(x, y)];
+   return (t === TILE.LAND || t === TILE.ROAD);
+};
+
+  function plotCenter(p){
+    return { x: Math.floor(p.x + p.w/2), y: Math.floor(p.y + p.h/2) };
+  }
+
+  // --- ROAD PLAN: connect closest pair, then connect the remaining plot to nearest of that pair ---
+function dist2(a,b){
+  const dx = a.x - b.x, dy = a.y - b.y;
+  return dx*dx + dy*dy;
+}
+
+const centers = plots.map(p => plotCenter(p));
+
+// find closest pair (0..2)
+let best = { i:0, j:1, d: dist2(centers[0], centers[1]) };
+for (let i=0;i<centers.length;i++){
+  for (let j=i+1;j<centers.length;j++){
+    const d = dist2(centers[i], centers[j]);
+    if (d < best.d) best = { i, j, d };
+  }
+}
+
+let path1 = null;
+let path2 = null;
+
+function clampToRect(pt, r){
+  return {
+    x: Math.min(r.x + r.w - 1, Math.max(r.x, pt.x)),
+    y: Math.min(r.y + r.h - 1, Math.max(r.y, pt.y))
+  };
+}
+
+function connectPlots(i, j){
+  const pi = plots[i], pj = plots[j];
+  const ci = centers[i], cj = centers[j];
+
+  const ei = pickExit(pi, cj.x, cj.y); // plot i -> j yönüne kapı
+  const ej = pickExit(pj, ci.x, ci.y); // plot j -> i yönüne kapı
+
+  // BFS plot DIŞINDAN plot DIŞINA
+  let start = { x: ei.outX, y: ei.outY };
+  let goal  = { x: ej.outX, y: ej.outY };
+
+  // view rect dışına taşmasın
+  start = clampToRect(start, viewRect);
+  goal  = clampToRect(goal, viewRect);
+
+  // start/goal geçilemezse map’i çöpe at (yenisini üret)
+  if (!passable(start.x, start.y) || !passable(goal.x, goal.y)) return null;
+
+  const path = bfsPath(start, goal, passable);
+  if (!path) return null;
+
+  // kapı tile’larını da road yap ki yol plot’a “dokunsun”
+  paintRoadTile(tiles, w, h, ei.x, ei.y);
+  paintRoadTile(tiles, w, h, ei.outX, ei.outY);
+  paintRoadTile(tiles, w, h, ej.x, ej.y);
+  paintRoadTile(tiles, w, h, ej.outX, ej.outY);
+
+  return path;
+}
+
+// connect closest pair
+path1 = connectPlots(best.i, best.j);
+
+// connect remaining
+{
+  const k = [0,1,2].find(x => x !== best.i && x !== best.j);
+  const targetIdx = (dist2(centers[k], centers[best.i]) <= dist2(centers[k], centers[best.j])) ? best.i : best.j;
+  path2 = connectPlots(k, targetIdx);
+}
+
+// ✅ Eğer iki yoldan biri yoksa bu map’i çöpe at
+if (!path1 || !path2) {
+  return generateBuildMap(seed + 1);
+}
+
+// boya
+for (const step of path1) paintRoadTile(tiles, w, h, step.x, step.y, seed);
+for (const step of path2) paintRoadTile(tiles, w, h, step.x, step.y, seed);
+
+  // =========================
+  // PLOTS paint (tek kez) ✅
+  // =========================
+  for (const p of plots){
+    for (let yy=p.y; yy<p.y+p.h; yy++){
+      for (let xx=p.x; xx<p.x+p.w; xx++){
+        tiles[mapIndex(xx,yy)] = TILE.PLOT;
+      }
+    }
+  }
+
+  // =========================
+  // commit to state + persist
+  // =========================
+  state.buildMap.tiles = tiles;
+  state.buildMap.seed = seed;
+  state.buildMap.plots = plots; // ✅ BUNU EKLE (en kritik)
+
+  state.buildMap.seed = seed;
+scheduleSaveV1();
+}
+
+function paintRoadTile(tiles, w, h, x, y, seed){
+  if (x<0||y<0||x>=w||y>=h) return;
+
+  const t = tiles[mapIndex(x,y)];
+  if (t !== TILE.LAND && t !== TILE.FOREST) return;
+  tiles[mapIndex(x,y)] = TILE.ROAD;
+
+  const neigh = [
+    [ 1,0, 0.70],
+    [-1,0, 0.70],
+    [ 0,1, 0.70],
+    [ 0,-1,0.70],
+  ];
+
+  for (const [dx,dy,p] of neigh){
+    const xx = x+dx, yy = y+dy;
+    if (xx<0||yy<0||xx>=w||yy>=h) continue;
+
+    // ✅ viewRect dışına taşma engeli
+  const vr = state.buildMap.viewRect;
+  if (vr && !inRect(xx, yy, vr)) continue;
+
+    const tt = tiles[mapIndex(xx,yy)];
+    if (tt !== TILE.LAND && tt !== TILE.FOREST) continue;
+
+    if (hash01(xx,yy,seed) < p) tiles[mapIndex(xx,yy)] = TILE.ROAD;
+  }
+}
+
+function inRect(x,y, r){ return x>=r.x && x<r.x+r.w && y>=r.y && y<r.y+r.h; }
+
+function pickExit(plot, targetX, targetY){
+  // hedefe göre hangi kenardan çıkayım?
+  const cx = plot.x + plot.w/2;
+  const cy = plot.y + plot.h/2;
+  const dx = targetX - cx;
+  const dy = targetY - cy;
+
+  // kenarın ortası
+  if (Math.abs(dx) > Math.abs(dy)){
+    // sağ/sol
+    if (dx > 0){
+      return { x: plot.x + plot.w, y: Math.floor(plot.y + plot.h/2), outX: plot.x + plot.w + 1, outY: Math.floor(plot.y + plot.h/2) };
+    } else {
+      return { x: plot.x - 1, y: Math.floor(plot.y + plot.h/2), outX: plot.x - 2, outY: Math.floor(plot.y + plot.h/2) };
+    }
+  } else {
+    // alt/üst
+    if (dy > 0){
+      return { x: Math.floor(plot.x + plot.w/2), y: plot.y + plot.h, outX: Math.floor(plot.x + plot.w/2), outY: plot.y + plot.h + 1 };
+    } else {
+      return { x: Math.floor(plot.x + plot.w/2), y: plot.y - 1, outX: Math.floor(plot.x + plot.w/2), outY: plot.y - 2 };
+    }
+  }
+}
+
+function bfsPath(start, goal, passable){
+  // 4-neighbor BFS (map küçük, yeter)
+  const W = state.buildMap.w, H = state.buildMap.h;
+  const q = [];
+  const prev = new Int32Array(W*H);
+  prev.fill(-1);
+
+  const si = start.y*W + start.x;
+  const gi = goal.y*W + goal.x;
+
+  q.push(si);
+  prev[si] = si;
+
+  const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+
+  while (q.length){
+    const cur = q.shift();
+    if (cur === gi) break;
+    const cx = cur % W;
+    const cy = (cur / W) | 0;
+
+    for (const [dx,dy] of dirs){
+      const nx = cx + dx, ny = cy + dy;
+      if (nx<0||ny<0||nx>=W||ny>=H) continue;
+      const ni = ny*W + nx;
+      if (prev[ni] !== -1) continue;
+      if (!passable(nx,ny)) continue;
+      prev[ni] = cur;
+      q.push(ni);
+    }
+  }
+
+  if (prev[gi] === -1) return null;
+
+  // reconstruct
+  const path = [];
+  let cur = gi;
+  while (cur !== prev[cur]){
+    path.push({ x: cur % W, y: (cur / W) | 0 });
+    cur = prev[cur];
+  }
+  path.push({ x: start.x, y: start.y });
+  path.reverse();
+  return path;
+}
+
+function loadBuildMap(){
+  const seed = (state.buildMap && state.buildMap.seed) ? state.buildMap.seed : 0;
+
+  generateBuildMap(seed && !isNaN(seed) ? seed : Date.now());
+
+  // builtKey'leri geri bas
+  const built = Array.isArray(state.buildMap?.built) ? state.buildMap.built : null;
+  if (Array.isArray(built) && built.length === state.buildMap.plots.length){
+    for (let i=0;i<built.length;i++){
+      state.buildMap.plots[i].builtKey = built[i];
+    }
+  }
+
+  updateRegenMapLock();
+}
+
+function fitMapCanvas(){
+  const canvas = document.getElementById("buildMap");
+  if (!canvas) return;
+
+  const wrap = canvas.parentElement; // .map-wrap
+  const v = state.buildMap.view;
+
+  const wrapSize = Math.floor(wrap.clientWidth); // kare
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+
+  // ✅ FULL-FILL: tile artık float (wrap'ı tam doldurur)
+  const tile = wrapSize / v.w;
+  state.buildMap.tileSize = tile;
+
+  // ✅ canvas CSS boyu = wrapSize (tam doldur)
+  canvas.style.width  = wrapSize + "px";
+  canvas.style.height = wrapSize + "px";
+
+  // ✅ retina buffer
+  canvas.width  = Math.floor(wrapSize * dpr);
+  canvas.height = Math.floor(wrapSize * dpr);
+
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.imageSmoothingEnabled = false;
+}
+
+function renderBuildBar() {
+  const bar = document.getElementById("buildBar");
+  if (!bar) return;
+  bar.innerHTML = "";
+  ["powerPlant", "dappStore", "furnace"].forEach(key => {
+    const b = BUILDINGS[key];
+    const card = document.createElement("div");
+    card.className = "bcard";
+    if (state.ui.selectedBuildKey === key) card.classList.add("active");
+    const ok = b.req();
+    if (!ok) card.classList.add("blocked");
+
+    const name = document.createElement("div");
+    name.className = "bname";
+    name.textContent = b.name;
+    const desc = document.createElement("div");
+    desc.className = "bdesc";
+    desc.textContent = b.desc;
+        const req = document.createElement("div");
+    req.className = "breq";
+
+    if (!ok) {
+      // Gereklilik YOKSA → kırmızı yazı göster
+      req.textContent = b.reqText();
+      req.style.color = "#ff6b81"; // kırmızı
+    } else {
+      // Gereklilik VARSA → yazıyı tamamen gizle (en temiz görünüm)
+      req.textContent = "";
+      // Alternatif: sadece gri yapıp bırakmak istersen:
+      // req.textContent = b.reqText();
+      // req.style.color = "var(--text-soft)";
+    }
+
+    const nextTier = (state.buildings[key] || 0) + 1;
+    const cost = buildingCost(key, nextTier).power;
+    const costbar = document.createElement("div");
+    costbar.className = "bcostbar";
+    costbar.innerHTML = `⚡ <span>${cost}</span>`;
+
+    card.appendChild(name);
+    card.appendChild(desc);
+    card.appendChild(req);
+    // ✅ Furnace built ise "Burn Tokens" butonu
+if (key === "furnace" && (state.buildings.furnace || 0) >= 1) {
+  const burnBtn = document.createElement("button");
+  burnBtn.className = "btn btn-sm btn-danger burn-btn";
+  burnBtn.textContent = "Burn Tokens";
+
+  burnBtn.addEventListener("click", (ev) => {
+    ev.stopPropagation(); // kart tıklaması (build/upgrade) tetiklenmesin
+    resetBurnInline();    // modal her açılışta temiz başlasın
+    openModal("burnModal");
+  });
+
+  card.appendChild(burnBtn);
+}
+
+    card.appendChild(costbar);
+
+    card.addEventListener("click", () => {
+      if (anyBuildBusy()) { setPlaceStatus("Building in progress… wait."); return; }
+  // kartı seç (highlight)
+  state.ui.selectedBuildKey = key;
+  renderBuildBar();
+
+   const plotIdx = state.ui.selectedPlotIndex;
+    if (plotIdx == null) {  // ✅ null veya undefined
+    clearConfirm();
+    setPlaceStatus(`Building selected: ${b.name}. Tap a plot.`);
+    return;
+  }
+
+  const plot = state.buildMap.plots[plotIdx];
+
+  // plot boşsa: kart tıklayınca build başlatma (senin istediğin akış)
+  if (!plot.builtKey) {
+  openConfirm("build", key, plotIdx);
+  setPlaceStatus(`Confirm build: ${b.name}`);
+  renderBuildMap();
+  return;
+}
+
+  // plot doluysa: sadece o binanın kartı upgrade açabilir
+  if (plot.builtKey !== key) {
+    clearConfirm();
+    setPlaceStatus(`This plot has ${BUILDINGS[plot.builtKey].name}. Select that card to upgrade.`);
+    return;
+  }
+
+  // ✅ doğru kart + dolu plot => upgrade confirm aç
+  openConfirm("upgrade", key, plotIdx);
+  setPlaceStatus(`Confirm upgrade: ${b.name}`);
+});
+
+    bar.appendChild(card);
+  });
+}
+
+function ensureMapCacheCanvas(){
+  if (!state.render.mapCacheCanvas){
+    state.render.mapCacheCanvas = document.createElement("canvas");
+  }
+  return state.render.mapCacheCanvas;
+}
+
+function getMapCacheKey(){
+  const v = state.buildMap.view;
+  const seed = state.buildMap.seed || 0;
+  // static layer: terrain+roads+plot borders → builtKey dahil ETME (iconlar overlay’de)
+  return `${seed}|${v.x},${v.y},${v.w},${v.h}|${Math.round(state.buildMap.tileSize*1000)}`;
+}
+
+function drawMapStatic(ctx){
+  const v = state.buildMap.view;
+  const { w, tiles, tileSize, plots } = state.buildMap;
+  const seed = state.buildMap.seed || 1;
+
+  const col = {
+    bg: "#000",
+    land:   "rgba(150, 105, 65, 0.18)",
+    forest: "rgba(74,222,128,0.22)",
+    water:  "rgba(80,160,255,0.22)",
+    road:   "rgba(255,210,120,0.24)",
+  };
+
+  // bg
+  const size = Math.floor(document.getElementById("buildMap").clientWidth);
+  ctx.fillStyle = col.bg;
+  ctx.fillRect(0,0,size,size);
+
+  // tiles
+  for (let y=v.y; y<v.y+v.h; y++){
+    for (let x=v.x; x<v.x+v.w; x++){
+      const t = tiles[mapIndex(x,y)];
+      if (t === TILE.FOREST) ctx.fillStyle = col.forest;
+      else if (t === TILE.WATER) ctx.fillStyle = col.water;
+      else if (t === TILE.ROAD) ctx.fillStyle = col.road;
+      else ctx.fillStyle = col.land;
+
+      const px = (x - v.x) * tileSize;
+      const py = (y - v.y) * tileSize;
+      ctx.fillRect(px, py, tileSize, tileSize);
+
+      if (t === TILE.ROAD && hash01(x,y,seed) < 0.35){
+        ctx.fillStyle = "rgba(255,210,120,0.16)";
+        ctx.fillRect(px + tileSize*0.15, py + tileSize*0.15, tileSize*0.70, tileSize*0.70);
+      }
+    }
+  }
+
+  // plots + png icons
+  for (let idx=0; idx<plots.length; idx++){
+    const p = plots[idx];
+    const builtKey = p.builtKey;
+    const built = !!builtKey;
+
+    // view dışında ise skip
+    if (p.x+p.w<=v.x || p.x>=v.x+v.w || p.y+p.h<=v.y || p.y>=v.y+v.h) continue;
+
+    const ox = (p.x - v.x) * tileSize;
+    const oy = (p.y - v.y) * tileSize;
+    const pw = p.w * tileSize;
+    const ph = p.h * tileSize;
+
+    // border
+    ctx.strokeStyle = "rgba(74,222,128,0.30)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(ox+2, oy+2, pw-4, ph-4);
+
+    if (built){
+      ctx.save();
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4,4]);
+      ctx.strokeRect(ox+2, oy+2, pw-4, ph-4);
+      ctx.restore();
+    }
+
+  }
+}
+
+function drawMapOverlay(ctx){
+  const v = state.buildMap.view;
+  const { tileSize, plots } = state.buildMap;
+
+  // plot icons (dynamic)
+  for (let idx=0; idx<plots.length; idx++){
+    const p = plots[idx];
+
+    if (p.x+p.w<=v.x || p.x>=v.x+v.w || p.y+p.h<=v.y || p.y>=v.y+v.h) continue;
+
+    const ox = (p.x - v.x) * tileSize;
+    const oy = (p.y - v.y) * tileSize;
+    const pw = p.w * tileSize;
+    const ph = p.h * tileSize;
+
+    const key = p.builtKey ? p.builtKey : "empty";
+    const img = getPlotImg(key);
+    if (img){
+      const pad = Math.max(2, Math.floor(tileSize * 1.1));
+      if (key === "empty") ctx.drawImage(img, ox, oy, pw, ph);
+      else ctx.drawImage(img, ox+pad, oy+pad, pw-pad*2, ph-pad*2);
+    }
+  }
+
+  // progress bar (dynamic)
+  for (let idx=0; idx<plots.length; idx++){
+    const p = plots[idx];
+    const builtKey = p.builtKey;
+    if (!builtKey) continue;
+    if (!state.buildBusy[builtKey]) continue;
+
+    if (p.x+p.w<=v.x || p.x>=v.x+v.w || p.y+p.h<=v.y || p.y>=v.y+v.h) continue;
+
+    const ox = (p.x - v.x) * tileSize;
+    const oy = (p.y - v.y) * tileSize;
+    const pw = p.w * tileSize;
+    const ph = p.h * tileSize;
+
+    const until = state.buildBusyUntil[builtKey] || 0;
+    const now = Date.now();
+    const leftMs = Math.max(0, until - now);
+    const totalMs = BUILD_DURATION_MS || 5000;
+    const pct = Math.max(0, Math.min(1, 1 - (leftMs / totalMs)));
+
+    const pad = Math.max(2, Math.floor(tileSize * 0.35));
+    const barH = Math.max(6, Math.floor(tileSize * 1.15));
+    const barX = ox + pad;
+    const barW = pw - pad * 2;
+    const barY = oy + ph - barH - pad;
+
+    ctx.fillStyle = "rgba(11,16,32,0.95)";
+    ctx.fillRect(barX, barY, barW, barH);
+
+    ctx.strokeStyle = "rgba(31,42,68,0.9)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(barX + 0.5, barY + 0.5, barW - 1, barH - 1);
+
+    ctx.fillStyle = "rgba(74,222,128,0.95)";
+    ctx.fillRect(barX, barY, Math.floor(barW * pct), barH);
+  }
+
+  // selected plot corners (dynamic)
+  const idx = state.ui.selectedPlotIndex;
+  if (idx != null && plots[idx]){
+    const p = plots[idx];
+
+    const ox = (p.x - v.x) * tileSize;
+    const oy = (p.y - v.y) * tileSize;
+    const pw = p.w * tileSize;
+    const ph = p.h * tileSize;
+
+    ctx.strokeStyle = "rgba(74,222,128,0.95)";
+    ctx.lineWidth = 3;
+    const a = Math.max(10, tileSize * 3);
+    ctx.beginPath();
+    ctx.moveTo(ox+1, oy+a); ctx.lineTo(ox+1, oy+1); ctx.lineTo(ox+a, oy+1);
+    ctx.moveTo(ox+pw-a, oy+1); ctx.lineTo(ox+pw-1, oy+1); ctx.lineTo(ox+pw-1, oy+a);
+    ctx.moveTo(ox+1, oy+ph-a); ctx.lineTo(ox+1, oy+ph-1); ctx.lineTo(ox+a, oy+ph-1);
+    ctx.moveTo(ox+pw-a, oy+ph-1); ctx.lineTo(ox+pw-1, oy+ph-1); ctx.lineTo(ox+pw-1, oy+ph-a);
+    ctx.stroke();
+  }
+}
+
+function renderBuildMap(){
+  const canvas = document.getElementById("buildMap");
+  if (!canvas || !state.buildMap.tiles) return;
+
+  fitMapCanvas();
+
+  const ctx = canvas.getContext("2d");
+  const cache = ensureMapCacheCanvas();
+  const cacheKey = getMapCacheKey();
+
+  // 1) STATIC CACHE (terrain/roads/plot borders)
+  if (!state.render.mapCacheValid || state.render.mapCacheKey !== cacheKey){
+    cache.width = canvas.width;
+    cache.height = canvas.height;
+
+    const cctx = cache.getContext("2d");
+    cctx.setTransform(1,0,0,1,0,0);
+    cctx.clearRect(0,0,cache.width,cache.height);
+
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    cctx.setTransform(dpr,0,0,dpr,0,0);
+    cctx.imageSmoothingEnabled = false;
+
+    drawMapStatic(cctx);   // static layer
+
+    state.render.mapCacheValid = true;
+    state.render.mapCacheKey = cacheKey;
+  }
+
+  // 2) BLIT CACHE
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(cache, 0, 0);
+
+  // 3) OVERLAY (icons + selection + progress)
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.imageSmoothingEnabled = false;
+
+  drawMapOverlay(ctx);
+
+}
+
+function plotAtCanvasXY(cx, cy){
+  const { tileSize, plots, view } = state.buildMap;
+  const x = Math.floor(cx / tileSize) + view.x;
+  const y = Math.floor(cy / tileSize) + view.y;
+
+  for (let i=0;i<plots.length;i++){
+    const p = plots[i];
+    if (x>=p.x && x<p.x+p.w && y>=p.y && y<p.y+p.h) return {plot:p, index:i};
+  }
+  return null;
+}
+
+function recenterMapView(){
+  const v = state.buildMap.view;
+  const w = state.buildMap.w, h = state.buildMap.h;
+
+  // generateBuildMap'te safe region'ı map ortasına koyduk:
+  v.x = Math.floor((w - v.w) * 0.5);
+  v.y = Math.floor((h - v.h) * 0.5);
+}
+
+const nodeDom = []; // her hücrenin DOM referansları
+let lastRender = 0;
+let pendingNodeRender = false;
+
+    const MOCK_WALLET_ADDRESS = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM";
+    let walletConnected = true;
+
+    const el = {
+      powerValue: document.getElementById("powerValue"),
+      solValue: document.getElementById("solValue"),
+      rankValue: document.getElementById("rankValue"),
+      powerRate: document.getElementById("powerRate"),
+
+      luckyChanceValue: document.getElementById("luckyChanceValue"),
+
+      streakValue: document.getElementById("streakValue"),
+      claimStreakButton: document.getElementById("claimStreakButton"),
+      streakMiniText: document.getElementById("streakMiniText"),
+
+      pass5sButton: document.getElementById("pass5sButton"),
+      addSolButton: document.getElementById("addSolButton"),
+      buyPackButton: document.getElementById("buyPackButton"),
+      devStreakButton: document.getElementById("devStreakButton"),
+      maxAllButton: document.getElementById("maxAllButton"),
+
+      walletButton: document.getElementById("walletButton"),
+      howtoButton: document.getElementById("howtoButton"),
+      openSolscanBtn: document.getElementById("openSolscanBtn"),
+      disconnectWalletBtn: document.getElementById("disconnectWalletBtn"),
+      walletStatusNote: document.getElementById("walletStatusNote"),
+      walletAddress: document.getElementById("walletAddress")
+    };
+
+function setPlaceStatus(msg){
+  const ps = document.getElementById("placeStatus");
+  if (!ps) return;
+
+  const m = (msg ?? "").toString().trim();
+  ps.textContent = m ? ` ${m}` : "Idle";
+}
+
+function updateNFTsUI(){
+  const lib = document.getElementById("nftLibrary");
+  const lock = document.getElementById("nftLock");
+  if (!lib || !lock) return;
+
+  const unlocked = (state.buildings.dappStore || 0) >= 1;
+
+  lib.classList.toggle("locked", !unlocked);
+  lock.classList.toggle("show", !unlocked);
+  lock.style.display = unlocked ? "none" : "flex";
+
+  // unlocked değilse aşağıyı çizme
+  if (!unlocked) return;
+
+  // crates count
+  const crateCount = document.getElementById("crateCount");
+  if (crateCount) crateCount.textContent = `Crates: ${state.inventory?.crates || 0}`;
+
+  // uniques
+  const uGrid = document.getElementById("nftUniquesGrid");
+  if (uGrid){
+    uGrid.innerHTML = "";
+    const owned = state.inventory?.nftUniques || {};
+    const ids = Object.keys(owned).filter(k => owned[k]);
+
+    if (ids.length === 0) {
+      uGrid.innerHTML = `<div class="mini">No uniques yet.</div>`;
+    } else {
+      ids.sort().forEach(id=>{
+        const pill = document.createElement("div");
+        pill.className = "nft-pill unique";
+        pill.textContent = id;
+        uGrid.appendChild(pill);
+      });
+    }
+  }
+
+  // commons
+  const cGrid = document.getElementById("nftCommonsGrid");
+  if (cGrid){
+    cGrid.innerHTML = "";
+    const commons = state.inventory?.nftCommons || {};
+    const ids = Object.keys(commons).filter(k => (commons[k]||0) > 0);
+
+    if (ids.length === 0) {
+      cGrid.innerHTML = `<div class="mini">No commons yet.</div>`;
+    } else {
+      ids.sort().forEach(id=>{
+        const pill = document.createElement("div");
+        pill.className = "nft-pill common";
+        pill.textContent = `${id} ×${commons[id]}`;
+        cGrid.appendChild(pill);
+      });
+    }
+  }
+}
+
+
+function anyBuildBusy(){
+  return !!(state.buildBusy.powerPlant || state.buildBusy.dappStore || state.buildBusy.furnace);
+}
+
+    function formatRes(v){ return v.toFixed(1); }
+
+    function updateResourcesUI(){
+  el.powerValue.textContent = formatRes(state.resources.power);
+  el.solValue.textContent = state.resources.sol.toFixed(5);
+  if (el.rankValue) {
+    el.rankValue.textContent = Math.floor(state.resources.rank);
+  }
+  el.streakValue.textContent = state.streak.current;
+}
+
+function hasAnyPlacedBuilding(){
+  return Array.isArray(state.buildMap?.plots) && state.buildMap.plots.some(p => !!p.builtKey);
+}
+
+function updateRegenMapLock(){
+  const btn = document.getElementById("regenMapBtn");
+  if (!btn) return;
+
+  const lock = hasAnyPlacedBuilding();
+  btn.disabled = lock;
+
+  // istersen görsel olarak da "blocked" class'ı verelim (pointer-events zaten disabled’da yok)
+  btn.classList.toggle("blocked", lock);
+
+  if (lock) {
+    btn.title = "New Map is locked after you place your first building.";
+  } else {
+    btn.title = "Generate a new map.";
+  }
+}
+
+function clearConfirm(){
+  state.ui.confirmMode = null;
+  state.ui.confirmKey = null;
+  state.ui.confirmPlotIndex = null;
+
+  const bar = document.getElementById("confirmBar");
+  if (bar) bar.style.display = "none";
+}
+
+function openConfirm(mode, key, plotIndex){
+  state.ui.confirmMode = mode;          // "build" | "upgrade"
+  state.ui.confirmKey = key;
+  state.ui.confirmPlotIndex = plotIndex;
+
+  const bar = document.getElementById("confirmBar");
+  const yes = document.getElementById("confirmYesBtn");
+  const no  = document.getElementById("confirmNoBtn");
+  if (!bar || !yes || !no) return;
+
+  bar.style.display = "flex";
+  yes.textContent = (mode === "upgrade") ? "Upgrade" : "Build";
+  no.textContent  = "Cancel";
+}
+
+function cancelSelection(){
+  state.ui.selectedPlotIndex = null;
+  // state.ui.selectedBuildKey = null; // bunu istersen açık bırak, istersen sıfırla
+  clearConfirm();
+  setPlaceStatus("Idle");
+  renderBuildMap();
+  renderBuildBar(); // optional: highlight temizlensin istiyorsan
+}
+
+function getPowerPlantIconSrc(level){
+  if (level <= 0) return "assets/icons/powerplant_lv1.png"; // built değilken de lv1 göster
+  if (level === 1) return "assets/icons/powerplant_lv1.png";
+  if (level === 2) return "assets/icons/powerplant_lv2.png";
+  return "assets/icons/powerplant_lv3.png"; // level 3+ aynı görsel (yıldızları sonra overlay yapacağız)
+}
+
+function updateBuildingIconsUI(){
+  const pp = document.getElementById("iconPowerPlant");
+  if (pp) pp.src = getPowerPlantIconSrc(state.buildings.powerPlant);
+}
+
+        function updateWalletUI(){
+      if (walletConnected) {
+        el.walletAddress.textContent = MOCK_WALLET_ADDRESS;
+        el.walletStatusNote.textContent = "Current status: connected (mock).";
+        el.disconnectWalletBtn.textContent = "Disconnect";
+        el.openSolscanBtn.disabled = false;
+        el.openSolscanBtn.style.opacity = 1;
+      } else {
+        el.walletAddress.textContent = "Not connected";
+        el.walletStatusNote.textContent = "Current status: disconnected (mock).";
+        el.disconnectWalletBtn.textContent = "Connect Wallet";
+        el.openSolscanBtn.disabled = true;
+        el.openSolscanBtn.style.opacity = 0.5;
+      }
+    }
+
+    function buildingCost(key, levelForCost){
+      const l = Math.max(levelForCost, 1);
+
+      if (key === "powerPlant") {
+        const baseE = 120;
+        const growth = 1.6;
+        const power = Math.round(baseE * Math.pow(growth, l - 1));
+        return { power };
+      }
+
+      if (key === "dappStore") {
+        const baseE = 350;
+        const growth = 1.5;
+        const power = Math.round(baseE * Math.pow(growth, l - 1));
+        return { power };
+      }
+
+      if (key === "furnace") {
+        const baseE = 1800;
+        const growth = 1.45;
+        const power = Math.round(baseE * Math.pow(growth, l - 1));
+        return { power };
+      }
+
+      return { power: 0 };
+    }
+
+function updateBuildingCostsUI(){
+  // Eski UI kaldırıldı. Buildbar zaten renderBuildBar() ile cost gösteriyor.
+  // Burada hiçbir şeye dokunmuyoruz.
+}
+
+function updateBuildingLevelsUI(){
+  // Eski UI kaldırıldı. Buildbar + map üstünden gidiyoruz.
+  renderBuildBar();
+}
+
+   function canAfford(e, sol=0){
+      return state.resources.power >= e && state.resources.sol >= sol;
+    }
+
+    function spend(e, sol=0){
+      state.resources.power -= e;
+      state.resources.sol -= sol;
+      updateResourcesUI();
+    }
+
+    function computePassiveGains(){
+      const pp = state.buildings.powerPlant || 0;
+      // dApp Store artık sadece Lucky + NFTs unlock
+      const eGain = (pp * 2);
+      return { eGain };
+    }
+
+    function updateHourlyRates(){
+    const gains = computePassiveGains();
+    const factor = 3600 / PASSIVE_TICK_SECONDS;
+    el.powerRate.textContent =
+  "(" + (gains.eGain * factor).toFixed(1) + "/hr)";
+
+  }
+
+    function passiveTick(){
+      const gains = computePassiveGains();
+      if(gains.eGain === 0) return;
+      state.resources.power += gains.eGain;
+
+      updateResourcesUI();
+      updateHourlyRates();
+    }
+
+    function getTodayKey() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`; // "2025-12-11"
+}
+
+function hasClaimedToday() {
+  const today = getTodayKey();
+  return state.streak.lastClaimDate === today;
+}
+
+function saveStreakToStorage() {
+  scheduleSaveV1();
+}
+
+function loadStreakFromStorage() { /* v1: already loaded */ }
+
+function updateStreakUI() {
+  const s = state.streak.current;
+  el.streakValue.textContent = s;
+
+  const weekIndex = Math.min(3, Math.floor(Math.max(s, 1) - 1) / 7 | 0); // 0..3
+  const weekNum = weekIndex + 1;
+
+  if (el.streakMiniText) {
+    el.streakMiniText.innerHTML = `🔥 Streak: <strong>${s}</strong>d — Week ${weekNum}`;
+  }
+
+  if (hasClaimedToday()) {
+    el.claimStreakButton.disabled = true;
+    el.claimStreakButton.textContent = "Claimed";
+    el.claimStreakButton.style.opacity = 0.55;
+  } else {
+    el.claimStreakButton.disabled = false;
+    el.claimStreakButton.textContent = "Claim";
+    el.claimStreakButton.style.opacity = 1;
+  }
+}
+
+// Asıl ödülü dağıtan fonksiyon
+// fromDev=true → günlük limit kontrolü yok, sadece test.
+function applyStreakClaim(fromDev = false) {
+  state.streak.current += 1;
+  const s = state.streak.current;
+
+  const weekIndex = Math.min(3, Math.floor((s - 1) / 7)); // 0..3
+  const weekNum = weekIndex + 1;
+  const weekMultipliers = [1.0, 1.5, 2.0, 3.0];
+  const mult = weekMultipliers[weekIndex];
+
+  const baseE = 2;  // elektrik tabanı
+
+  const eGain = Math.round(baseE * mult);
+
+  state.resources.power += eGain;
+  updateResourcesUI();
+  updateHourlyRates();
+
+  if (!fromDev) {
+    state.streak.lastClaimDate = getTodayKey();
+    saveStreakToStorage();
+  }
+
+  updateStreakUI();
+  scheduleSaveV1();
+}
+
+// Oyuncunun gördüğü buton
+function claimStreak() {
+  if (hasClaimedToday()) {
+    log("Daily bonus already claimed today.", { negative: true, tag: "STREAK" });
+    updateStreakUI();
+    return;
+  }
+  applyStreakClaim(false);
+}
+
+const BUILD_DURATION_MS = 5000;
+
+function updateBuildProgressUI(){
+  const now = Date.now();
+
+  // ✅ status için: en az bir build varsa buradan güncelleyeceğiz
+  let showStatusKey = null;
+  let showStatusLeftSec = 0;
+
+  ["powerPlant","dappStore","furnace"].forEach(key=>{
+    if (!state.buildBusy[key]) return;
+
+    const until = state.buildBusyUntil[key] || 0;
+    let leftMs = Math.max(0, until - now);
+
+        // ✅ status: ilk busy building'i seç (istersen öncelik sırası böyle kalsın)
+    if (!showStatusKey) {
+      showStatusKey = key;
+      showStatusLeftSec = Math.ceil(leftMs / 1000);
+    }
+
+    // Süre bitti → finalize
+    if (leftMs <= 0){
+      state.buildBusy[key] = false;
+      state.buildBusyUntil[key] = 0;
+
+      const nextTier = state.buildPendingTier[key] || (state.buildings[key] + 1);
+      state.buildPendingTier[key] = 0;
+      state.buildings[key] = nextTier;
+
+      // status
+      if (nextTier === 1) setPlaceStatus(`${BUILDINGS[key].name} Tier ${nextTier} has been built.`);
+      else setPlaceStatus(`${BUILDINGS[key].name} upgraded → Tier ${nextTier} complete.`);
+
+      setTimeout(() => setPlaceStatus(""), 1000);
+
+      updateBuildingIconsUI();
+      updateHourlyRates();
+      checkBuildingRequirements();
+      renderBuildBar(); // UI'yı güncelle
+      markMapDirty(); // ✅ map'i RAF tekrar çizecek
+      updateNFTsUI(); // ✅ dApp Store bitince lock kalksın
+      updateLuckyUI();
+    }
+  });
+// status yazısını canlı güncelle
+if (showStatusKey) {
+  const name = BUILDINGS[showStatusKey].name;
+  const pending = state.buildPendingTier[showStatusKey] || ((state.buildings[showStatusKey] || 0) + 1);
+  const isBuild = (state.buildings[showStatusKey] || 0) === 0;
+
+  setPlaceStatus(
+    isBuild
+      ? `Building ${name} → Tier ${pending} ${showStatusLeftSec}s`
+      : `Upgrading ${name} → Tier ${pending} ${showStatusLeftSec}s`
+  );
+
+  markMapDirty(); // ✅ TEK YERDE
+}
+
+}
+
+function buildOrUpgrade(key, name){
+  const current = state.buildings[key] || 0;
+  const nextTier = current + 1;
+
+  // Busy kontrolü
+  if (state.buildBusy[key]) {
+    setPlaceStatus(`${name} is already in progress.`);
+    return false;
+  }
+
+  // Requirements (senin mevcut kuralların)
+  if (key === "dappStore" && state.buildings.powerPlant < 1) return false;
+  if (key === "furnace" && (state.buildings.powerPlant < 1 || state.buildings.dappStore < 1)) return false;
+
+  // Cost
+  const cost = buildingCost(key, nextTier);
+  if (!canAfford(cost.power)) return false;
+
+  // ✅ sadece 1 kere harca
+  spend(cost.power);
+  updateHourlyRates();
+
+  // ✅ ASIL EKSİK OLAN: build timer'ı başlat
+  const now = Date.now();
+  state.buildBusy[key] = true;
+  state.buildBusyUntil[key] = now + (BUILD_DURATION_MS || 5000);
+  state.buildPendingTier[key] = nextTier;
+
+  // ✅ UI refresh
+  renderBuildBar();
+  updateBuildProgressUI();   // anında status/progress görünsün
+  markMapDirty(true);        // map canvas progress bar çizilsin
+  scheduleSaveV1();
+
+  return true;
+}
+
+const BURN_KNOWN_TOKENS = {
+  POPCAT: { symbol: "POPCAT", name: "Popcat", emoji: "😺", mint: "POPCAT_MINT_MOCK" },
+  WIF:    { symbol: "WIF",    name: "WIF",    emoji: "🐶", mint: "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm" },
+  BONK:   { symbol: "BONK",   name: "BONK",   emoji: "🦴", mint: "BONK_MINT_MOCK" },
+  PEPE:   { symbol: "PEPE",   name: "PEPE",   emoji: "🐸", mint: "PEPE_MINT_MOCK" },
+  MEW:    { symbol: "MEW",    name: "MEW",    emoji: "🐱", mint: "MEW_MINT_MOCK" }
+};
+
+const BURN_KNOWN_MINTS = {
+  "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm": BURN_KNOWN_TOKENS.WIF,
+  "ukHH6c7mMyiWCf1b9pnWe25TSpkDDt3H5pQZgZ74J82": {
+    symbol: "BOME",
+    name: "BOOK OF MEME",
+    emoji: "📚",
+    mint: "ukHH6c7mMyiWCf1b9pnWe25TSpkDDt3H5pQZgZ74J82"
+  }
+};
+
+let currentBurnToken = null;
+
+function resolveBurnTokenFromStep1() {
+  const modePopular = document.getElementById("burnModePopularInline");
+  const modeContract = document.getElementById("burnModeContractInline");
+  const select = document.getElementById("burnTokenSelectInline");
+  const input = document.getElementById("burnContractInputInline");
+
+  if (modePopular && modePopular.checked) {
+    const val = select.value;
+    const meta = BURN_KNOWN_TOKENS[val];
+    if (!meta) {
+      log("Please select a token to burn.", { negative: true, tag: "BURN" });
+      return null;
+    }
+    return meta;
+  }
+
+  if (modeContract && modeContract.checked) {
+    const addr = (input.value || "").trim();
+    if (!addr) {
+      log("Please paste a contract (mint) address.", { negative: true, tag: "BURN" });
+      return null;
+    }
+    const known = BURN_KNOWN_MINTS[addr];
+    if (known) return known;
+
+    // Bilinmeyen token → generic meta
+    return {
+      symbol: addr.slice(0, 4) + "…",
+      name: "Custom Token",
+      emoji: "🧩",
+      mint: addr
+    };
+  }
+
+  return null;
+}
+
+function showBurnStep2(meta) {
+  currentBurnToken = meta;
+
+  const step1 = document.getElementById("burnStep1Inline");
+  const step2 = document.getElementById("burnStep2Inline");
+  const result = document.getElementById("burnResultInline");
+  const summary = document.getElementById("burnTokenSummaryInline");
+
+  step1.style.display = "none";
+  step2.style.display = "block";
+  result.style.display = "none";
+
+  if (summary) {
+    summary.innerHTML =
+      `<strong>Selected token:</strong> ${meta.emoji || ""} ${meta.name} ` +
+      `(<code style="font-size:11px;">${meta.mint}</code>)`;
+  }
+}
+
+function fakeTxSignature() {
+  const chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  let s = "";
+  for (let i = 0; i < 64; i++) {
+    s += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return s;
+}
+
+function burnerMultiplier(){
+  const lvl = state.buildings.furnace || 0;
+
+  // Tier 1 = x1.0
+  // Her tier +%25 Rank
+  return 1 + (lvl - 1) * 0.25;
+}
+
+function executeBurn() {
+  const step2 = document.getElementById("burnStep2Inline");
+  const result = document.getElementById("burnResultInline");
+
+  if (!currentBurnToken) {
+    log("No token selected for burn.", { negative: true, tag: "BURN" });
+    return;
+  }
+
+  const solInput = document.getElementById("burnSolAmountInline");
+  const val = parseFloat(solInput.value);
+  if (isNaN(val) || val <= 0) {
+    log("Enter a positive SOL amount.", { negative: true, tag: "BURN" });
+    return;
+  }
+
+  const solAmount = val;
+
+  if (state.resources.sol < solAmount) {
+    log("Not enough SOL (mock) to perform burn.", { negative: true, tag: "BURN" });
+    return;
+  }
+
+  // SOL düş
+  state.resources.sol -= solAmount;
+
+  // Rank kazanımı (örnek: 1 SOL = 100 Rank)
+  const baseRank = solAmount * 100;
+  const burnerMult = burnerMultiplier();
+  const rankGain = Math.max(1, Math.round(baseRank * burnerMult));
+
+  state.resources.rank += rankGain;
+
+  updateResourcesUI();
+
+  // Sahte tx, solscan linki
+  const tx = fakeTxSignature();
+  const solscanUrl = `https://solscan.io/tx/${tx}`;
+
+  const resultText = document.getElementById("burnResultTextInline");
+  const resultLink = document.getElementById("burnResultLinkInline");
+
+  if (step2 && result) {
+    step2.style.display = "none";
+    result.style.display = "block";
+  }
+
+  if (resultText) {
+    resultText.innerHTML =
+      `You used <strong>${solAmount.toFixed(4)} SOL</strong> to buy &amp; burn ` +
+      `${currentBurnToken.emoji || ""} <strong>${currentBurnToken.name}</strong>.<br>` +
+      `You gained <strong>${rankGain} Rank</strong>.`;
+  }
+
+  if (resultLink) {
+    resultLink.innerHTML =
+      `Mock transaction: <a href="${solscanUrl}" target="_blank" style="color:var(--accent-soft);">` +
+      `${tx.slice(0, 8)}…</a> (Solscan preview)`;
+  }
+
+  log(
+    `Burned ${solAmount.toFixed(4)} SOL to buy & burn ${currentBurnToken.symbol}. +${rankGain} Rank.`,
+    { positive: true, tag: "BURN" }
+  );
+
+  scheduleSaveV1();
+
+}
+
+function resetBurnInline(){
+  currentBurnToken = null;
+
+  const step1 = document.getElementById("burnStep1Inline");
+  const step2 = document.getElementById("burnStep2Inline");
+  const result = document.getElementById("burnResultInline");
+
+  if (step1) step1.style.display = "block";
+  if (step2) step2.style.display = "none";
+  if (result) result.style.display = "none";
+
+  // Mode reset
+  const modePopular = document.getElementById("burnModePopularInline");
+  const modeContract = document.getElementById("burnModeContractInline");
+  if (modePopular) modePopular.checked = true;
+  if (modeContract) modeContract.checked = false;
+
+  // Inputs reset
+  const select = document.getElementById("burnTokenSelectInline");
+  if (select) select.selectedIndex = 0;
+
+  const input = document.getElementById("burnContractInputInline");
+  if (input) input.value = "";
+
+  const solInput = document.getElementById("burnSolAmountInline");
+  if (solInput) solInput.value = "";
+}
+
+    function openModal(id){
+      document.getElementById(id).classList.add("open");
+    }
+    function closeModal(id){
+      document.getElementById(id).classList.remove("open");
+    }
+
+const BUILDINGS = {
+  powerPlant: {
+    name:"Power Plant",
+    desc:"Generates Power over time",
+    req: () => true,
+    reqText: () => "",
+  },
+  dappStore: {
+    name:"dApp Store",
+    desc:"Unlocks Lucky Grids and NFTs",
+    req: () => state.buildings.powerPlant >= 1,
+    reqText: () => "Requires: Power Plant Tier 1",
+  },
+  furnace: {
+    name:"Furnace",
+    desc:"Unlocks Burn Tokens",
+    req: () => (state.buildings.powerPlant >= 1 && state.buildings.dappStore >= 1),
+    reqText: () => "Requires: PP Tier 1 + dApp Tier 1",
+  }
+};
+
+const CRATE = {
+  priceRank: 120,          // 1 crate = 120 Rank (şimdilik)
+  drops: {
+    empty: 0.20,           // %20 boş
+    common: 0.75,          // %75 common
+    unique: 0.05           // %5 unique
+  },
+  // common havuzu (şimdilik 16 tane)
+  commonPool: [
+    "C01","C02","C03","C04","C05","C06","C07","C08",
+    "C09","C10","C11","C12","C13","C14","C15","C16"
+  ],
+  // unique havuzu (şimdilik 4 tane)
+  uniquePool: ["U01","U02","U03","U04"]
+};
+
+function randPick(arr){
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function rollCrateOutcome(){
+  const r = Math.random();
+  const p0 = CRATE.drops.empty;
+  const p1 = p0 + CRATE.drops.common;
+
+  if (r < p0) return { type: "empty" };
+  if (r < p1) return { type: "common", id: randPick(CRATE.commonPool) };
+  return { type: "unique", id: randPick(CRATE.uniquePool) };
+}
+
+function buyCrate(){
+  const cost = CRATE.priceRank;
+  if ((state.resources.rank || 0) < cost){
+    log(`Not enough Rank. Need ${cost}.`, { negative:true, tag:"CRATE" });
+    return false;
+  }
+
+  state.resources.rank -= cost;
+  state.inventory.crates = (state.inventory.crates || 0) + 1;
+
+  updateResourcesUI();
+  updateNFTsUI();      // crate sayısı UI’da görünecek
+  scheduleSaveV1();
+
+  log(`Bought 1 Crate → -${cost} Rank.`, { positive:true, tag:"CRATE" });
+  return true;
+}
+
+function openCrate(){
+  if ((state.inventory.crates || 0) <= 0){
+    log("No crates to open.", { negative:true, tag:"CRATE" });
+    return null;
+  }
+
+  state.inventory.crates -= 1;
+
+  const out = rollCrateOutcome();
+
+  if (out.type === "empty"){
+    log("Crate opened → empty.", { tag:"CRATE" });
+  }
+
+  if (out.type === "common"){
+    const id = out.id;
+    state.inventory.nftCommons[id] = (state.inventory.nftCommons[id] || 0) + 1;
+    log(`Crate opened → Common NFT ${id} (+1).`, { positive:true, tag:"CRATE" });
+  }
+
+  if (out.type === "unique"){
+    const id = out.id;
+
+    // 1/account rule: aynı unique varsa tekrar veremeyiz → fallback common
+    if (state.inventory.nftUniques[id]){
+      const fallback = randPick(CRATE.commonPool);
+      state.inventory.nftCommons[fallback] = (state.inventory.nftCommons[fallback] || 0) + 1;
+      log(`Unique ${id} already owned → fallback Common ${fallback} (+1).`, { tag:"CRATE" });
+    } else {
+      state.inventory.nftUniques[id] = true;
+      log(`Crate opened → UNIQUE NFT ${id} acquired!`, { positive:true, tag:"CRATE" });
+    }
+  }
+
+  updateNFTsUI();
+  scheduleSaveV1();
+  return out;
+}
+
+const NODE_SEEDS = {
+  electron:   { label:"Electron",   iconSrc:"assets/nodes/node_electron.png",   cost:1,   grow:2,  harvests:3 },
+  transistor: { label:"Transistor", iconSrc:"assets/nodes/node_transistor.png", cost:3,   grow:4,  harvests:3 },
+  microchip:  { label:"Microchip",  iconSrc:"assets/nodes/node_microchip.png",  cost:7,   grow:7,  harvests:3 },
+  ram:        { label:"RAM",        iconSrc:"assets/nodes/node_ram.png",        cost:15,  grow:12,  harvests:3 },
+  cpu:        { label:"CPU",        iconSrc:"assets/nodes/node_cpu.png",        cost:25,  grow:17,  harvests:3 },
+  gpu:        { label:"GPU",        iconSrc:"assets/nodes/node_gpu.png",        cost:60,  grow:40, harvests:3 },
+  ai:         { label:"AI",         iconSrc:"assets/nodes/node_ai.png",         cost:100, grow:60, harvests:3 },
+  quantum:    { label:"Quantum",    iconSrc:"assets/nodes/node_quantum.png",    cost:140, grow:90, harvests:3 },
+};
+
+const SEED_ORDER = ["electron","transistor","microchip","ram","cpu","gpu","ai","quantum"];
+let seedPage = 0;
+
+let seedPopEl = null;
+let seedPopOpenFor = null;
+
+function closeSeedPop(){
+  if (seedPopEl){
+    seedPopEl.remove();
+    seedPopEl = null;
+  }
+  seedPopOpenFor = null;
+}
+
+function openSeedPop(seedKey, anchorEl){
+  closeSeedPop();
+
+  const s = NODE_SEEDS[seedKey];
+  if (!s || !anchorEl) return;
+
+  const rr = seedRankRewards(seedKey);
+
+  const pop = document.createElement("div");
+  pop.className = "seed-pop";
+  pop.dataset.seed = seedKey;
+
+  pop.innerHTML = `
+    <div class="seed-pop-title">${s.label}</div>
+    <div class="seed-pop-line"><div class="seed-pop-k">Core ${s.label}</div><div class="seed-pop-v">+${rr.core} Rank</div></div>
+    <div class="seed-pop-line"><div class="seed-pop-k">Entangled ${s.label}</div><div class="seed-pop-v">+${rr.entangled} Rank</div></div>
+    <div class="seed-pop-line"><div class="seed-pop-k">Fusion ${s.label}</div><div class="seed-pop-v">+${rr.fusion} Rank</div></div>
+  `;
+
+  document.body.appendChild(pop);
+
+  // position near card (keep on-screen)
+  const r = anchorEl.getBoundingClientRect();
+  const pad = 10;
+
+  let x = Math.round(r.left);
+  let y = Math.round(r.bottom + 8);
+
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const pr = pop.getBoundingClientRect();
+
+  if (x + pr.width + pad > vw) x = vw - pr.width - pad;
+  if (x < pad) x = pad;
+
+  if (y + pr.height + pad > vh) y = Math.max(pad, r.top - pr.height - 8);
+
+  pop.style.left = x + "px";
+  pop.style.top  = y + "px";
+
+  seedPopEl = pop;
+  seedPopOpenFor = seedKey;
+}
+
+// ===== Rank rewards (Core / Entangled / Fusion) =====
+// Electron: 3 / 8 / 20 (senin verdiğin)
+// Sonraki seed’ler kademeli artar (24 değer = 8 seed x 3 tier)
+function seedRankRewards(seedKey){
+  const idx = Math.max(0, SEED_ORDER.indexOf(seedKey));
+  // basit ölçek: Electron->Quantum artar
+  const core = 3 + idx * 2;
+  const ent  = 8 + idx * 4;
+  const fus  = 20 + idx * 10;
+  return { core, entangled: ent, fusion: fus };
+}
+
+function luckyChance(){
+  const lvl = state.buildings.dappStore || 0;
+  if (lvl < 1) return 0;
+
+  // “yavaşça artan” curve:
+  // Tier1: 4%, Tier2: 5%, Tier3: 6% ... Tier11: 14% (cap)
+  const base = 0.04;
+  const perTier = 0.01;
+  const cap = 0.14;
+  return Math.min(cap, base + (lvl - 1) * perTier);
+}
+
+function updateLuckyUI(){
+  if (!el.luckyChanceValue) return;
+
+  const p = luckyChance(); // 0..1
+  el.luckyChanceValue.textContent = Math.round(p * 100) + "%";
+}
+
+// Lucky roll:
+// %10 lucky; lucky ise A/B/C = 75/20/5
+function rollLuckyTier(){
+  const chance = luckyChance(); // dApp Store yoksa 0
+  if (Math.random() >= chance) return null;
+
+  // lucky ise A/B/C = 75/20/5
+  const t = Math.random();
+  if (t < 0.75) return "A";
+  if (t < 0.95) return "B";
+  return "C";
+}
+
+function luckyTierToLabel(tier){
+  if (tier === "A") return "Core";
+  if (tier === "B") return "Entangled";
+  if (tier === "C") return "Fusion";
+  return "";
+}
+
+function luckyTierToRank(seedKey, tier){
+  const rr = seedRankRewards(seedKey);
+  if (tier === "A") return rr.core;
+  if (tier === "B") return rr.entangled;
+  if (tier === "C") return rr.fusion;
+  return 0;
+}
+
+// 3-3-2 sayfalar: [0..2], [3..5], [6..7]
+function seedPageSlice(page){
+  if (page === 0) return SEED_ORDER.slice(0, 3);
+  if (page === 1) return SEED_ORDER.slice(3, 6);
+  return SEED_ORDER.slice(6, 8);
+}
+
+function renderSeedBar(){
+  const bar = document.getElementById("nodeSeedBar");
+  if (!bar) return;
+
+  const keys = seedPageSlice(seedPage);
+
+  bar.classList.remove("cols-2","cols-3");
+  bar.classList.add(keys.length === 2 ? "cols-2" : "cols-3");
+
+  bar.innerHTML = "";
+
+  keys.forEach(seedKey=>{
+    const s = NODE_SEEDS[seedKey];
+    const card = document.createElement("div");
+    card.className = "seed-card";
+    if (state.powerGrid.selectedSeed === seedKey) card.classList.add("active");
+    card.dataset.seed = seedKey;
+
+    const name = document.createElement("div");
+    name.className = "seed-name";
+    name.textContent = s.label;
+
+    const icon = document.createElement("img");
+    icon.className = "seed-icon";
+    icon.src = s.iconSrc;
+    icon.alt = "";
+
+    const cost = document.createElement("div");
+    cost.className = "seed-costbar";
+    cost.innerHTML = `<span>⚡</span><span>${s.cost}</span>`;
+
+    card.appendChild(name);
+    card.appendChild(icon);
+    card.appendChild(cost);
+
+    card.addEventListener("click", (ev)=>{
+  const alreadySelected = (state.powerGrid.selectedSeed === seedKey);
+
+  if (alreadySelected){
+    // same seed clicked again -> toggle pop
+    if (seedPopOpenFor === seedKey) {
+      closeSeedPop();
+    } else {
+      openSeedPop(seedKey, card);
+    }
+    return;
+  }
+
+  // selecting a different seed closes previous pop
+  closeSeedPop();
+  setSelectedSeed(seedKey);
+  renderSeedBar();
+});
+
+    bar.appendChild(card);
+  })
+    // ✅ 3 kolonu sabitlemek için: 2 item varsa 1 tane placeholder koy
+  while (bar.children.length < 3) {
+    const ph = document.createElement("div");
+    ph.className = "seed-card placeholder";
+    bar.appendChild(ph);
+  }
+
+  ;
+}
+
+function nextSeedPage(){
+  seedPage = (seedPage + 1) % 3;
+  renderSeedBar();
+}
+function prevSeedPage(){
+  seedPage = (seedPage + 2) % 3;
+  renderSeedBar();
+}
+
+function nodeSeedProfit(seedKey){
+  // senin tarifin: her harvest = cost/2 (3 harvest => toplam 1.5x cost)
+  const s = NODE_SEEDS[seedKey];
+  return Math.max(1, Math.round(s.cost / 2));
+}
+
+function spawnNodePopup(cellEl, text, kind){
+  if (!cellEl) return;
+
+  const el = document.createElement("div");
+  el.className = "node-popup " + (kind || "");
+  el.textContent = text;
+  cellEl.appendChild(el);
+
+  // güvenli kaldırma (animationend gelmezse diye fallback var)
+  let removed = false;
+  const remove = () => {
+    if (removed) return;
+    removed = true;
+    if (el && el.parentNode) el.remove();
+  };
+
+  el.addEventListener("animationend", remove, { once:true });
+
+  // Rank popup daha uzun sürsün (senin isteğin)
+  const ttl = (kind && kind.includes("rank")) ? 3400 : 2200;
+  setTimeout(remove, ttl);
+}
+
+function getNodeCellEl(idx){
+  const dom = nodeDom[idx];
+  return dom ? dom.cell : null;
+}
+
+function renderPowerGrid(force = false){
+  const grid = document.getElementById("powerGrid");
+  if (!grid) return;
+
+  // İlk kez kurulum (DOM'u 1 kere oluştur)
+  if (force || nodeDom.length === 0) {
+    grid.innerHTML = "";
+    nodeDom.length = 0;
+
+    state.powerGrid.nodes.forEach((n, idx) => {
+      const cell = document.createElement("div");
+      cell.className = "node-cell";
+      cell.dataset.idx = String(idx);
+
+      const icon = document.createElement("img");
+      icon.className = "node-icon-img";
+      icon.alt = "";
+      icon.draggable = false;
+
+      const status = document.createElement("div");
+      status.className = "node-status";
+
+      const bar = document.createElement("div");
+      bar.className = "node-bar";
+
+      const fill = document.createElement("div");
+      fill.className = "node-bar-fill";
+      bar.appendChild(fill);
+
+      cell.appendChild(icon);
+      cell.appendChild(status);
+      cell.appendChild(bar);
+
+      grid.appendChild(cell);
+
+      nodeDom[idx] = { cell, icon, status, fill };
+    });
+  }
+
+  // Sadece içerikleri güncelle (DOM'u yıkma!)
+  state.powerGrid.nodes.forEach((n, idx) => {
+    const dom = nodeDom[idx];
+    if (!dom) return;
+
+    dom.cell.classList.remove("node-ready", "lucky", "luckyA", "luckyB", "luckyC");
+
+    if (!n.seed) {
+  dom.icon.src = "assets/nodes/node_empty.png";
+  dom.icon.classList.add("node-empty-img");
+  dom.status.textContent = "";            // ✅ boş
+  dom.status.style.visibility = "hidden"; // ✅ alanı koru
+  dom.fill.style.width = "0%";
+  return;
+}
+
+const s = NODE_SEEDS[n.seed];          // ✅ EKSİK OLAN BUYDU
+if (!s) return;                        // safety
+
+dom.icon.src = s.iconSrc;   // ✅ ekilen şeyin görselini göster
+dom.icon.classList.remove("node-empty-img");
+dom.status.style.visibility = "visible";
+dom.status.textContent = `${n.stage}/${s.harvests}`;
+
+if (n.readyIn <= 0) dom.cell.classList.add("node-ready");
+
+const total = Math.max(1, n.total || s.grow);
+const done = total - Math.max(0, n.readyIn);
+const pct = Math.max(0, Math.min(100, (done / total) * 100));
+dom.fill.style.width = pct + "%";
+
+// ✅ lucky visuals
+if (n.luckyTier){
+  dom.cell.classList.add("lucky");
+  dom.cell.classList.add("lucky" + n.luckyTier); // luckyA/luckyB/luckyC
+}
+
+  });
+}
+
+function setSelectedSeed(seedKey){
+  if (!NODE_SEEDS[seedKey]) return;
+  state.powerGrid.selectedSeed = seedKey;
+  renderPowerGrid();
+}
+
+function nodeTryDeploy(idx){
+  const n = state.powerGrid.nodes[idx];
+  if (n.seed) return;
+
+  const s = NODE_SEEDS[state.powerGrid.selectedSeed];
+  if (!canAfford(s.cost)){
+    log(`Not enough ⚡ to deploy ${s.label}.`, { negative:true, tag:"NODE" });
+    return;
+  }
+
+  spend(s.cost);
+  spawnNodePopup(getNodeCellEl(idx), `-${s.cost}⚡`, "power neg");
+
+n.seed = state.powerGrid.selectedSeed;
+n.stage = 1;
+n.readyIn = s.grow;
+n.total = s.grow;
+
+// ✅ lucky roll only once, on FIRST deploy
+n.luckyTier = rollLuckyTier();
+
+log(`Deployed ${s.label} → -${s.cost}⚡`, { negative:false, tag:"NODE" });
+renderPowerGrid();
+scheduleSaveV1();
+
+}
+
+function nodeTryHarvest(idx){
+  const n = state.powerGrid.nodes[idx];
+  if (!n.seed) return;
+  if (n.readyIn > 0) return;
+
+  const s = NODE_SEEDS[n.seed];
+  const gain = nodeSeedProfit(n.seed);
+
+  state.resources.power += gain;
+  spawnNodePopup(getNodeCellEl(idx), `+${gain}⚡`, "power pos");
+  updateResourcesUI();
+  updateHourlyRates();
+
+  log(`Harvested ${s.label} → +${gain}⚡`, { positive:true, tag:"NODE" });
+
+  if (n.stage >= s.harvests){
+  // ✅ cycle complete: apply lucky rank bonus (if any)
+  if (n.luckyTier){
+    const bonus = luckyTierToRank(n.seed, n.luckyTier);
+    if (bonus > 0){
+      state.resources.rank += bonus;
+      updateResourcesUI();
+
+      spawnNodePopup(getNodeCellEl(idx), `+${bonus}🔥`, "rank");
+
+      log(
+        `Lucky ${s.label} (${luckyTierToLabel(n.luckyTier)}) → +${bonus} Rank`,
+        { positive:true, tag:"LUCKY" }
+      );
+    }
+  }
+
+  // reset node
+  n.seed = null;
+  n.stage = 0;
+  n.readyIn = 0;
+  n.total = 0;
+  n.luckyTier = null;
+} else {
+  n.stage += 1;
+  n.readyIn = s.grow;
+  n.total = s.grow;
+}
+
+  renderPowerGrid();
+  scheduleSaveV1();
+}
+
+function nodeTick(){
+  let changed = false;
+
+  state.powerGrid.nodes.forEach(n=>{
+    if (n.seed && n.readyIn > 0){
+      n.readyIn -= 0.1;
+      if (n.readyIn < 0) n.readyIn = 0;
+      changed = true;
+    }
+  });
+
+  // değişiklik olduysa render'ı “beklemeye al”
+  if (changed) pendingNodeRender = true;
+
+  const now = performance.now();
+
+  // 150ms throttle, ama pending varsa mutlaka çiz
+  if (pendingNodeRender && (now - lastRender) > 150) {
+    lastRender = now;
+    pendingNodeRender = false;
+    renderPowerGrid();
+  }
+}
+
+    function wireEvents(){
+
+const yes = document.getElementById("confirmYesBtn");
+const no  = document.getElementById("confirmNoBtn");
+
+if (no) no.addEventListener("click", cancelSelection);
+
+if (yes) yes.addEventListener("click", () => {
+  if (anyBuildBusy()) { setPlaceStatus("Building in progress… wait."); return; }
+  const mode = state.ui.confirmMode;
+  const key  = state.ui.confirmKey;
+  const idx  = state.ui.confirmPlotIndex;
+
+  if (!mode || !key || idx === null) return;
+
+  const plot = state.buildMap.plots[idx];
+  if (!plot) return;
+
+  // ✅ BUILD
+  if (mode === "build") {
+    if (plot.builtKey) { setPlaceStatus("Plot already has a building."); return; }
+    if (state.buildings[key] > 0) { setPlaceStatus("This building is already built elsewhere."); return; }
+
+    const ok = buildOrUpgrade(key, BUILDINGS[key].name);
+    if (!ok) { setPlaceStatus("Can't build. Requirements or cost not met."); return; }
+
+    plot.builtKey = key;
+    updateRegenMapLock();
+
+    state.buildMap.built = state.buildMap.plots.map(p => p.builtKey || null).slice(0,3);
+scheduleSaveV1();
+
+    setPlaceStatus(`${BUILDINGS[key].name} build started.`);
+    cancelSelection();
+    return;
+  }
+
+  // ✅ UPGRADE
+  if (mode === "upgrade") {
+    if (!plot.builtKey) { setPlaceStatus("Empty plot."); return; }
+    if (plot.builtKey !== key) { setPlaceStatus("Select the building that exists on this plot."); return; }
+
+    const ok = buildOrUpgrade(key, BUILDINGS[key].name);
+    if (!ok) { setPlaceStatus("Can't upgrade. Requirements or cost not met."); return; }
+
+    setPlaceStatus(`${BUILDINGS[key].name} upgrade started.`);
+    cancelSelection();
+    return;
+  }
+});
+
+const regenMapBtn = document.getElementById("regenMapBtn");
+if (regenMapBtn){
+  regenMapBtn.addEventListener("click", ()=>{
+    state.buildMap.seed = 0;
+state.buildMap.built = [null, null, null];
+scheduleSaveV1();
+
+    generateBuildMap(Date.now());
+    recenterMapView();
+    markMapDirty(true);
+
+    setPlaceStatus("New map generated.");
+    updateRegenMapLock();
+  });
+}
+
+// ===== BUILD MAP UI EVENTS =====
+const placeStatus = document.getElementById("placeStatus");
+
+const buildMapCanvas = document.getElementById("buildMap");
+if (buildMapCanvas){
+  buildMapCanvas.addEventListener("pointerdown", (e) => {
+      if (anyBuildBusy()) { setPlaceStatus("Building in progress… wait."); return; }
+    const rect = buildMapCanvas.getBoundingClientRect();
+    const cx = (e.clientX - rect.left);
+    const cy = (e.clientY - rect.top);
+    const hit = plotAtCanvasXY(cx, cy);
+
+    if (!hit) {
+  cancelSelection();
+  return;
+}
+
+// ✅ plot seç (yeşil köşeler)
+state.ui.selectedPlotIndex = hit.index;
+
+// ✅ plot doluysa: o plot'taki building'i seçili yap (kart highlight)
+// ama upgrade BAŞLATMA
+if (hit.plot.builtKey) {
+  state.ui.selectedBuildKey = hit.plot.builtKey; // kart highlight
+  renderBuildBar();
+  clearConfirm();
+  setPlaceStatus(`${BUILDINGS[hit.plot.builtKey].name} selected.`);
+  renderBuildMap();
+  return;
+}
+
+// ✅ plot boşsa:
+renderBuildMap();
+
+// building seçili değilse sadece bilgi ver
+if (!state.ui.selectedBuildKey) {
+  clearConfirm();
+  setPlaceStatus("Plot selected. Now pick a building.");
+  return;
+}
+
+// building seçili + boş plot → build/confirm aç
+openConfirm("build", state.ui.selectedBuildKey, hit.index);
+setPlaceStatus(`Confirm build: ${BUILDINGS[state.ui.selectedBuildKey].name}`);
+
+  }, { passive: true });
+}
+
+// Tabs -> pager navigation
+const pager = document.getElementById("pager");
+const tabNode = document.getElementById("tabNode");
+const tabBuildings = document.getElementById("tabBuildings");
+const tabNFTs = document.getElementById("tabNFTs");
+const tabDev = document.getElementById("tabDev");
+
+function setActiveTab(which){
+  [tabNode, tabBuildings, tabNFTs, tabDev].forEach(b=> b && b.classList.remove("active"));
+  if (which === "node" && tabNode) tabNode.classList.add("active");
+  if (which === "buildings" && tabBuildings) tabBuildings.classList.add("active");
+  if (which === "nfts" && tabNFTs) tabNFTs.classList.add("active");
+  if (which === "dev" && tabDev) tabDev.classList.add("active");
+}
+
+function goPage(index){
+  if (!pager) return;
+  const w = pager.clientWidth;
+  pager.scrollTo({ left: index * w, behavior: "smooth" });
+}
+
+const nftGoBuildBtn = document.getElementById("nftGoBuildBtn");
+if (nftGoBuildBtn){
+  nftGoBuildBtn.addEventListener("click", ()=>{
+    setActiveTab("buildings");
+    goPage(1);
+    requestAnimationFrame(()=> renderBuildMap());
+  });
+}
+
+if (tabNode) tabNode.addEventListener("click", ()=> { setActiveTab("node"); goPage(0); });
+
+if (tabBuildings) tabBuildings.addEventListener("click", ()=> {
+  setActiveTab("buildings");
+  goPage(1);
+  requestAnimationFrame(()=> renderBuildMap());
+});
+
+if (tabNFTs) tabNFTs.addEventListener("click", ()=> {
+  setActiveTab("nfts");
+  goPage(2);
+  requestAnimationFrame(()=> updateNFTsUI());
+});
+
+if (tabDev) tabDev.addEventListener("click", ()=> { setActiveTab("dev"); goPage(3); });
+
+const buyCrateBtn = document.getElementById("buyCrateBtn");
+const openCrateBtn = document.getElementById("openCrateBtn");
+
+if (buyCrateBtn) buyCrateBtn.addEventListener("click", ()=>{
+  if ((state.buildings.dappStore || 0) < 1) { setPlaceStatus("dApp Store required."); return; }
+  buyCrate();
+});
+
+if (openCrateBtn) openCrateBtn.addEventListener("click", ()=>{
+  if ((state.buildings.dappStore || 0) < 1) { setPlaceStatus("dApp Store required."); return; }
+  openCrate();
+});
+
+
+  // Power Grid click - EKSİK OLAN BUYDU!
+  const gridEl = document.getElementById("powerGrid");
+  if (gridEl) {
+    gridEl.addEventListener("click", (e) => {
+      const cell = e.target.closest(".node-cell");
+      if (!cell) return;
+      const idx = parseInt(cell.dataset.idx, 10);
+      if (isNaN(idx)) return;
+      const n = state.powerGrid.nodes[idx];
+      if (!n.seed) {
+        nodeTryDeploy(idx);
+      } else {
+        nodeTryHarvest(idx);
+      }
+    });
+  }
+
+  // SEED NAVIGATION (oklar)
+  const prevBtn = document.getElementById("seedPrev");
+  const nextBtn = document.getElementById("seedNext");
+  if (prevBtn) prevBtn.addEventListener("click", prevSeedPage);
+  if (nextBtn) nextBtn.addEventListener("click", nextSeedPage);
+
+// Swipe/scroll ile geçince active tab güncelle
+if (pager){
+  pager.addEventListener("scroll", ()=>{
+    const idx = Math.round(pager.scrollLeft / Math.max(1, pager.clientWidth));
+    if (idx === 0) setActiveTab("node");
+    if (idx === 1) setActiveTab("buildings");
+    if (idx === 2) setActiveTab("nfts");
+    if (idx === 3) setActiveTab("dev");
+  }, { passive:true });
+}
+
+        el.claimStreakButton.addEventListener("click", claimStreak);
+
+            if (el.devStreakButton) el.devStreakButton.addEventListener("click", () => applyStreakClaim(true));
+
+        // 🔽 TOP BAR BUTONLARI
+      el.walletButton.addEventListener("click", () => openModal("walletModal"));
+      el.howtoButton.addEventListener("click", () => openModal("howtoModal"));
+
+           // 🔽 WALLET MODAL BUTTONS
+      el.openSolscanBtn.addEventListener("click", () => {
+        if (!walletConnected) return;
+        const addr = el.walletAddress.textContent.trim();
+        if (!addr || addr === "Not connected") return;
+        const url = `https://solscan.io/account/${addr}`;
+        window.open(url, "_blank");
+      });
+
+      el.disconnectWalletBtn.addEventListener("click", () => {
+        if (walletConnected) {
+          // Going from connected → disconnected
+          walletConnected = false;
+          log("Wallet disconnected (mock).", { tag:"WALLET" });
+        } else {
+          // Going from disconnected → connected
+          walletConnected = true;
+          log("Wallet connected (mock).", { tag:"WALLET" });
+        }
+        updateWalletUI();
+      });
+
+      el.pass5sButton.addEventListener("click", () => passiveTick());
+      if (el.addSolButton) el.addSolButton.addEventListener("click", () => {
+  state.resources.sol += 1;
+  updateResourcesUI();
+  scheduleSaveV1();
+});
+      if (el.buyPackButton) el.buyPackButton.addEventListener("click", () => {
+  const costSol = 0.5;
+  if (state.resources.sol < costSol) return;
+
+  state.resources.sol -= costSol;
+
+  const pp = state.buildings.powerPlant || 0;
+  const da = state.buildings.dappStore || 0;
+  const scale = 1 + (pp * 0.25) + (da * 0.35);
+
+  const baseE_min = 160, baseE_max = 240;
+  const PACK_MULT = 20;
+  const e = Math.round((baseE_min + Math.random() * (baseE_max - baseE_min)) * scale * PACK_MULT);
+
+  state.resources.power += e;
+  updateResourcesUI();
+  updateHourlyRates();
+  scheduleSaveV1();
+});
+
+      document.querySelectorAll(".modal-close").forEach(btn => {
+  btn.addEventListener("click", () => closeModal(btn.dataset.close));
+});
+
+// ✅ Close modal when clicking outside (backdrop)
+document.querySelectorAll(".modal-backdrop").forEach(backdrop => {
+  backdrop.addEventListener("click", (e) => {
+    // Sadece backdrop'un kendisine tıklandıysa kapat (modal içi tıklar kapatmasın)
+    if (e.target === backdrop) {
+      backdrop.classList.remove("open");
+    }
+  });
+});
+
+// ✅ close seed pop on outside click
+document.addEventListener("pointerdown", (e) => {
+  if (!seedPopEl) return;
+
+  const t = e.target;
+  const clickedInsidePop = seedPopEl.contains(t);
+
+  // seed-card üstüne tıkladıysa kapatma kararını seed-card click handler verecek
+  const clickedSeedCard = t && t.closest && t.closest(".seed-card");
+
+  if (!clickedInsidePop && !clickedSeedCard){
+    closeSeedPop();
+  }
+}, { passive:true });
+
+// =======================
+// ✅ PASTE HERE (BURN MODAL EVENTS)
+// =======================
+const burnNext = document.getElementById("burnNextBtnInline");
+const burnBack = document.getElementById("burnBackBtnInline");
+const burnExec = document.getElementById("burnExecuteBtnInline");
+const burnAgain = document.getElementById("burnAgainBtnInline");
+const burnCancel = document.getElementById("burnCancelBtnInline");
+const burnClose = document.getElementById("burnCloseBtnInline");
+
+const modePopular = document.getElementById("burnModePopularInline");
+const modeContract = document.getElementById("burnModeContractInline");
+const contractWrap = document.getElementById("burnContractWrapInline");
+
+function syncBurnModeUI(){
+  if (!contractWrap) return;
+  const show = !!(modeContract && modeContract.checked);
+  contractWrap.style.display = show ? "block" : "none";
+}
+
+if (modePopular) modePopular.addEventListener("change", syncBurnModeUI);
+if (modeContract) modeContract.addEventListener("change", syncBurnModeUI);
+syncBurnModeUI();
+
+if (burnNext) burnNext.addEventListener("click", () => {
+  if ((state.buildings.furnace || 0) < 1) {
+    setPlaceStatus("Furnace required.");
+    return;
+  }
+  const meta = resolveBurnTokenFromStep1();
+  if (!meta) return;
+  showBurnStep2(meta);
+});
+
+if (burnBack) burnBack.addEventListener("click", () => {
+  const step1 = document.getElementById("burnStep1Inline");
+  const step2 = document.getElementById("burnStep2Inline");
+  const result = document.getElementById("burnResultInline");
+  if (step1) step1.style.display = "block";
+  if (step2) step2.style.display = "none";
+  if (result) result.style.display = "none";
+});
+
+if (burnExec) burnExec.addEventListener("click", executeBurn);
+if (burnAgain) burnAgain.addEventListener("click", resetBurnInline);
+
+if (burnCancel) burnCancel.addEventListener("click", () => closeModal("burnModal"));
+if (burnClose) burnClose.addEventListener("click", () => closeModal("burnModal"));
+// =======================
+// ✅ END PASTE
+// =======================
+
+let maxAllUsed = false;
+
+if (el.maxAllButton) el.maxAllButton.addEventListener("click", () => {
+  state.buildings.powerPlant = 20;
+  state.buildings.dappStore  = 20;
+  state.buildings.furnace    = 20;
+
+  updateBuildingLevelsUI();
+  updateBuildingCostsUI();
+  updateHourlyRates();
+  checkBuildingRequirements();
+  updateBuildingIconsUI();
+  updateNFTsUI();
+  updateLuckyUI();
+  scheduleSaveV1();
+});
+
+window.addEventListener("resize", () => markMapDirty(true));
+
+    }
+
+    let lastFrameTs = 0;
+
+function isBuildingsPageActive(){
+  const btn = document.getElementById("tabBuildings");
+  return btn && btn.classList.contains("active");
+}
+
+function rafLoop(ts){
+  if (state.render.rafOn) {
+    if (isBuildingsPageActive() && anyBuildBusy()) {
+      state.render.mapDirty = true;
+    }
+
+    if (state.render.mapDirty) {
+      state.render.mapDirty = false;
+      renderBuildMap();
+    }
+  }
+
+  requestAnimationFrame(rafLoop);
+}
+
+function startRAF(){
+  if (state.render._started) return;
+  state.render._started = true;
+  state.render.rafOn = true;
+  requestAnimationFrame(rafLoop);
+}
+
+function stopRAF(){
+  state.render.rafOn = false;
+}
+
+   function init(){
+    // === 0.1 USER / IDENTITY (init-time guarantee) ===
+if (!state.user) {
+  state.user = {
+    id: "anon_" + Math.random().toString(36).slice(2),
+    createdAt: Date.now(),
+    wallet: null,
+    telegramId: null
+  };
+}
+// === 0.2 INVENTORY (init-time guarantee) ===
+if (!state.inventory) {
+  state.inventory = {
+    crates: 0,            // unopened crates
+    nftCommons: {},       // { "nft_id": count }
+    nftUniques: {},       // { "nft_id": true }
+  };
+}
+  loadPlotSprites();
+  loadStreakFromStorage();  // streak state'i geri yükle
+  updateResourcesUI();
+  updateBuildingLevelsUI();
+  updateBuildingCostsUI();
+  updateHourlyRates();
+  wireEvents();
+  setSelectedSeed("electron");
+  renderSeedBar();
+  renderPowerGrid(true);
+  loadBuildMap();
+  recenterMapView();
+  renderBuildMap();
+  renderBuildBar();
+  updateRegenMapLock();
+  markMapDirty(true)
+  startRAF();
+  updateNFTsUI();
+  updateLuckyUI();
+  setInterval(nodeTick, 100);
+  setInterval(updateBuildProgressUI, 120);
+  updateWalletUI();
+  updateStreakUI();         // streak buton + label durumu
+  setInterval(passiveTick, PASSIVE_TICK_SECONDS * 1000);
+  log("Game session started (v0.29).", { tag:"SYS" });
+
+}
+
+function checkBuildingRequirements(){
+  renderBuildBar();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  init();
+  checkBuildingRequirements();
+});
+
+  </script>
+      <div class="device-frame"><div class="safe-guides"></div></div>
+    </body>
+  </html>
