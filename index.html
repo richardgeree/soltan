@@ -1847,11 +1847,17 @@ rng: {
 }
 
 function resetGame(){
-  // ⚠️ Buradaki key, Save v1’in kullandığı key ile birebir aynı olmalı.
-  // Eğer sende farklıysa, Save v1’de geçen key’i buraya yaz.
-  localStorage.removeItem("soltan_save_v1");
+  // ✅ SOLTAN ile ilgili tüm localStorage key’lerini sil (v1 + legacy dahil)
+  try{
+    for (let i = localStorage.length - 1; i >= 0; i--){
+      const k = localStorage.key(i);
+      if (k && k.startsWith("soltan_")) localStorage.removeItem(k);
+    }
+  }catch(e){}
+
   location.reload();
 }
+
 
 // ---- legacy migration (your current scattered keys)
 function migrateLegacyToV1(){
