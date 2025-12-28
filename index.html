@@ -1397,9 +1397,10 @@ html, body {
   z-index: 20;
 }
 
-  </style>
-  </head>
-  <body>
+</style>
+</head>
+
+<body>
     <div class="shell">
       <div class="app">
 
@@ -1559,47 +1560,6 @@ html, body {
     <button id="openCrateBtn" class="btn">Open Selected</button>
   </div>
 </div>
-
-  <div class="nft-shop" style="display:grid; grid-template-columns:1fr; gap:10px;">
-    <div class="card" style="padding:12px;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div><strong>Basic Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
-        <div class="mini" id="basicMeta">—</div>
-      </div>
-      <div class="mini" id="basicRules">—</div>
-      <button id="buyCrateBasicBtn" class="btn btn-primary btn-sm">Buy Basic</button>
-    </div>
-
-    <div class="card" style="padding:12px;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div><strong>Advanced Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
-        <div class="mini" id="advMeta">—</div>
-      </div>
-      <div class="mini" id="advRules">—</div>
-      <button id="buyCrateAdvancedBtn" class="btn btn-primary btn-sm">Buy Advanced</button>
-    </div>
-
-    <div class="card" style="padding:12px;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div><strong>Legendary Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
-        <div class="mini" id="legMeta">—</div>
-      </div>
-      <div class="mini" id="legRules">—</div>
-      <button id="buyCrateLegendaryBtn" class="btn btn-primary btn-sm">Buy Legendary</button>
-    </div>
-  </div>
-
-  <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-    <div class="mini" id="crateCount">Crates: 0</div>
-
-    <select id="crateTypeSelect" class="select" style="min-width:170px;">
-      <option value="basic">Open: Basic</option>
-      <option value="advanced">Open: Advanced</option>
-      <option value="legendary">Open: Legendary</option>
-    </select>
-
-    <button id="openCrateBtn" class="btn">Open Selected</button>
-  </div>
 </div>
 
 
@@ -1773,21 +1733,24 @@ html, body {
         </div>
       </div>
 
-      <div class="modal" id="crateModal">
-  <div class="modal-card">
+      <div class="modal-backdrop" id="crateModal">
+  <div class="modal">
     <div class="modal-header">
       <div class="modal-title">CRATE RESULT</div>
-      <button class="modal-x" onclick="closeModal('crateModal')">✕</button>
+      <div class="modal-close" data-close="crateModal">✕</div>
     </div>
+
     <div class="modal-body">
       <div id="crateModalBody" class="mini" style="line-height:1.5;">—</div>
     </div>
-    <div class="modal-actions">
+
+    <div class="btn-group">
       <button class="btn btn-primary btn-sm" id="openAnotherBtn">Open another</button>
-      <button class="btn btn-sm" onclick="closeModal('crateModal')">Close</button>
+      <button class="btn btn-sm" data-close="crateModal">Close</button>
     </div>
   </div>
 </div>
+
 
 
 <script>
