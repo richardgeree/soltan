@@ -1457,7 +1457,8 @@ html, body {
               <button class="tab-btn active" id="tabNode">Power Grid</button>
               <button class="tab-btn" id="tabBuildings">Buildings</button>
               <button class="tab-btn" id="tabNFTs">NFTs</button>
-              <button class="tab-btn" id="tabDev">Dev Tools</button>
+              <button class="tab-btn" id="tabUpgrade">Upgrade</button>
+              <button class="tab-btn" id="tabDev">dev</button>
             </div>
 
             <div class="panel-body">
@@ -1574,17 +1575,26 @@ html, body {
 
 </section>
 
+<section id="pageUpgrade" class="page">
+  <div class="card">
+    <div class="card-title">Overclock</div>
+    <div class="mini">Spend ⚡ to boost profit, lucky chance, or speed.</div>
+
+    <div id="upgradeList" class="stack" style="margin-top:10px;"></div>
+  </div>
+</section>
+
 <section class="page" id="pageDev">
 <div class="card-header">
-  <div class="card-title">DEV TOOLS</div>
+  <div class="card-title">dev</div>
 </div>
 
 <div class="btn-group">
   <button class="btn btn-sm" id="pass5sButton">+5s Tick</button>
   <button class="btn btn-sm" id="addSolButton">+1 SOL</button>
   <button class="btn btn-sm" id="buyPackButton">Buy Pack (0.5 SOL)</button>
-  <button class="btn btn-sm" id="devStreakButton">Streak +1 (DEV)</button>
-  <button class="btn btn-sm" id="maxAllButton">MAX ALL</button>
+  <button class="btn btn-sm" id="devStreakButton">Streak +1</button>
+  <button class="btn btn-sm" id="maxAllButton">Max All</button>
   <button class="btn btn-sm" id="devRank1000Btn">+1000 Rank</button>
   <button class="btn btn-sm" id="devGiveCratesBtn">Give Crates (B/A/L)</button>
   <button class="btn btn-sm" id="devResetPityBtn">Reset Pity</button>
@@ -4435,7 +4445,9 @@ if (tabNFTs) tabNFTs.addEventListener("click", ()=> {
   requestAnimationFrame(()=> updateNFTsUI());
 });
 
-if (tabDev) tabDev.addEventListener("click", ()=> { setActiveTab("dev"); goPage(3); });
+if (tabUpgrade) tabUpgrade.addEventListener("click", ()=> { setActiveTab("upgrades"); goPage(3); });
+
+if (tabDev) tabDev.addEventListener("click", ()=> { setActiveTab("dev"); goPage(4); });
 
 const openCrateBtn = document.getElementById("openCrateBtn");
 const crateTypeSelect = document.getElementById("crateTypeSelect");
