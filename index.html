@@ -1507,91 +1507,94 @@ html, body {
 
                 </section>
 
-                <section class="page" id="pageNFTs">
+<section class="page" id="pageNFTs">
 
-                  <div class="card-header">
+  <div class="card-header">
     <div class="card-title">NFTs</div>
-                  </div>
+  </div>
 
-                  <div class="nft-wrap" id="nftWrap">
-    
-                    <div id="nftLibrary" class="nft-lib locked">
-<div class="nft-actions" style="gap:10px; flex-direction:column; align-items:stretch;">
-  <div class="mini" style="opacity:.9;">SHOP — buy crates with Rank (daily limits + cooldown)</div>
+  <div class="nft-wrap" id="nftWrap">
 
-  <div class="nft-shop" style="display:grid; grid-template-columns:1fr; gap:10px;">
-    <div class="card" style="padding:12px;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div><strong>Basic Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
-        <div class="mini" id="basicMeta">—</div>
+    <div id="nftLibrary" class="nft-lib locked">
+
+      <!-- SHOP / OPEN -->
+      <div class="nft-actions" style="gap:10px; flex-direction:column; align-items:stretch;">
+        <div class="mini" style="opacity:.9;">SHOP — buy crates with Rank (daily limits + cooldown)</div>
+
+        <div class="nft-shop" style="display:grid; grid-template-columns:1fr; gap:10px;">
+          <div class="card" style="padding:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div><strong>Basic Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
+              <div class="mini" id="basicMeta">—</div>
+            </div>
+            <div class="mini" id="basicRules">—</div>
+            <button id="buyCrateBasicBtn" class="btn btn-primary btn-sm">Buy Basic</button>
+          </div>
+
+          <div class="card" style="padding:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div><strong>Advanced Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
+              <div class="mini" id="advMeta">—</div>
+            </div>
+            <div class="mini" id="advRules">—</div>
+            <button id="buyCrateAdvancedBtn" class="btn btn-primary btn-sm">Buy Advanced</button>
+          </div>
+
+          <div class="card" style="padding:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div><strong>Legendary Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
+              <div class="mini" id="legMeta">—</div>
+            </div>
+            <div class="mini" id="legRules">—</div>
+            <button id="buyCrateLegendaryBtn" class="btn btn-primary btn-sm">Buy Legendary</button>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <div class="mini" id="crateCount">Crates: 0</div>
+
+          <select id="crateTypeSelect" class="select" style="min-width:170px;">
+            <option value="basic">Open: Basic</option>
+            <option value="advanced">Open: Advanced</option>
+            <option value="legendary">Open: Legendary</option>
+          </select>
+
+          <button id="openCrateBtn" class="btn">Open Selected</button>
+        </div>
       </div>
-      <div class="mini" id="basicRules">—</div>
-      <button id="buyCrateBasicBtn" class="btn btn-primary btn-sm">Buy Basic</button>
-    </div>
 
-    <div class="card" style="padding:12px;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div><strong>Advanced Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
-        <div class="mini" id="advMeta">—</div>
+      <!-- COLLECTIONS -->
+      <div class="nft-section">
+        <div class="nft-h">Uniques</div>
+        <div id="nftUniquesGrid" class="nft-grid"></div>
       </div>
-      <div class="mini" id="advRules">—</div>
-      <button id="buyCrateAdvancedBtn" class="btn btn-primary btn-sm">Buy Advanced</button>
-    </div>
 
-    <div class="card" style="padding:12px;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div><strong>Legendary Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
-        <div class="mini" id="legMeta">—</div>
+      <div class="nft-section">
+        <div class="nft-h">Commons</div>
+        <div id="nftCommonsGrid" class="nft-grid"></div>
       </div>
-      <div class="mini" id="legRules">—</div>
-      <button id="buyCrateLegendaryBtn" class="btn btn-primary btn-sm">Buy Legendary</button>
-    </div>
-  </div>
 
-  <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-    <div class="mini" id="crateCount">Crates: 0</div>
+    </div><!-- /nftLibrary -->
 
-    <select id="crateTypeSelect" class="select" style="min-width:170px;">
-      <option value="basic">Open: Basic</option>
-      <option value="advanced">Open: Advanced</option>
-      <option value="legendary">Open: Legendary</option>
-    </select>
-
-    <button id="openCrateBtn" class="btn">Open Selected</button>
-  </div>
-</div>
-</div>
-
-
-  <div class="nft-section">
-    <div class="nft-h">Uniques</div>
-    <div id="nftUniquesGrid" class="nft-grid"></div>
-  </div>
-
-  <div class="nft-section">
-    <div class="nft-h">Commons</div>
-    <div id="nftCommonsGrid" class="nft-grid"></div>
-  </div>
-</div>
-
-    
-                    <div class="nft-lock" id="nftLock">
-                      <div class="nft-lock-card">
+    <!-- LOCK OVERLAY (blur devam edecek) -->
+    <div class="nft-lock" id="nftLock">
+      <div class="nft-lock-card">
         <div class="nft-lock-title">NFT Library Locked</div>
         <div class="nft-lock-sub">Build <strong>dApp Store</strong> to unlock Lucky Grids and NFTs.</div>
         <button class="btn btn-primary btn-sm" id="nftGoBuildBtn">Go to Buildings</button>
-                      </div>
-                    </div>
-                  </div>
+      </div>
+    </div>
 
-                </section>
+  </div><!-- /nftWrap -->
 
-                <section class="page" id="pageDev">
-                  <div class="card-header">
+</section>
+
+<section class="page" id="pageDev">
+  <div class="card-header">
     <div class="card-title">DEV TOOLS</div>
-                  </div>
+  </div>
 
-                  <div class="btn-group">
+  <div class="btn-group">
     <button class="btn btn-sm" id="pass5sButton">+5s Tick</button>
     <button class="btn btn-sm" id="addSolButton">+1 SOL</button>
     <button class="btn btn-sm" id="buyPackButton">Buy Pack (0.5 SOL)</button>
@@ -1602,8 +1605,9 @@ html, body {
     <button class="btn btn-sm" id="devResetPityBtn">Reset Pity</button>
     <button class="btn btn-sm" id="devPrintShopBtn">Print Shop</button>
     <button class="btn btn-sm" onclick="resetGame()">RESET GAME</button>
-                  </div>
-                </section>
+  </div>
+</section>
+
 
               </div>
             </div>
