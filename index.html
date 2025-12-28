@@ -1514,25 +1514,94 @@ html, body {
 
                   <div class="nft-wrap" id="nftWrap">
     
-                    <div class="nft-library" id="nftLibrary">
-      <div class="nft-shelf-title">SOLTAN Collections</div>
-
-                      <div class="nft-grid">
-        <div class="nft-card"><div class="nft-badge">COMMON</div><div class="nft-thumb"></div><div class="nft-name">Terminal Relics</div></div>
-        <div class="nft-card"><div class="nft-badge">COMMON</div><div class="nft-thumb"></div><div class="nft-name">Grid Sprites</div></div>
-        <div class="nft-card"><div class="nft-badge">ADV</div><div class="nft-thumb"></div><div class="nft-name">Solana Nodes</div></div>
-        <div class="nft-card"><div class="nft-badge">ADV</div><div class="nft-thumb"></div><div class="nft-name">Quantum Parts</div></div>
-        <div class="nft-card"><div class="nft-badge">LEG</div><div class="nft-thumb"></div><div class="nft-name">Mythic ASIC</div></div>
-        <div class="nft-card"><div class="nft-badge">LEG</div><div class="nft-thumb"></div><div class="nft-name">Genesis Core</div></div>
-                      </div>
-                    </div>
-
                     <div id="nftLibrary" class="nft-lib locked">
-  <div class="nft-actions">
-    <button id="buyCrateBtn" class="btn">Buy Crate (Rank)</button>
-    <button id="openCrateBtn" class="btn">Open Crate</button>
-    <div id="crateCount" class="mini">Crates: 0</div>
+<div class="nft-actions" style="gap:10px; flex-direction:column; align-items:stretch;">
+  <div class="mini" style="opacity:.9;">SHOP — buy crates with Rank (daily limits + cooldown)</div>
+
+  <div class="nft-shop" style="display:grid; grid-template-columns:1fr; gap:10px;">
+    <div class="card" style="padding:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div><strong>Basic Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
+        <div class="mini" id="basicMeta">—</div>
+      </div>
+      <div class="mini" id="basicRules">—</div>
+      <button id="buyCrateBasicBtn" class="btn btn-primary btn-sm">Buy Basic</button>
+    </div>
+
+    <div class="card" style="padding:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div><strong>Advanced Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
+        <div class="mini" id="advMeta">—</div>
+      </div>
+      <div class="mini" id="advRules">—</div>
+      <button id="buyCrateAdvancedBtn" class="btn btn-primary btn-sm">Buy Advanced</button>
+    </div>
+
+    <div class="card" style="padding:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div><strong>Legendary Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
+        <div class="mini" id="legMeta">—</div>
+      </div>
+      <div class="mini" id="legRules">—</div>
+      <button id="buyCrateLegendaryBtn" class="btn btn-primary btn-sm">Buy Legendary</button>
+    </div>
   </div>
+
+  <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+    <div class="mini" id="crateCount">Crates: 0</div>
+
+    <select id="crateTypeSelect" class="select" style="min-width:170px;">
+      <option value="basic">Open: Basic</option>
+      <option value="advanced">Open: Advanced</option>
+      <option value="legendary">Open: Legendary</option>
+    </select>
+
+    <button id="openCrateBtn" class="btn">Open Selected</button>
+  </div>
+</div>
+
+  <div class="nft-shop" style="display:grid; grid-template-columns:1fr; gap:10px;">
+    <div class="card" style="padding:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div><strong>Basic Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
+        <div class="mini" id="basicMeta">—</div>
+      </div>
+      <div class="mini" id="basicRules">—</div>
+      <button id="buyCrateBasicBtn" class="btn btn-primary btn-sm">Buy Basic</button>
+    </div>
+
+    <div class="card" style="padding:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div><strong>Advanced Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
+        <div class="mini" id="advMeta">—</div>
+      </div>
+      <div class="mini" id="advRules">—</div>
+      <button id="buyCrateAdvancedBtn" class="btn btn-primary btn-sm">Buy Advanced</button>
+    </div>
+
+    <div class="card" style="padding:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div><strong>Legendary Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
+        <div class="mini" id="legMeta">—</div>
+      </div>
+      <div class="mini" id="legRules">—</div>
+      <button id="buyCrateLegendaryBtn" class="btn btn-primary btn-sm">Buy Legendary</button>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+    <div class="mini" id="crateCount">Crates: 0</div>
+
+    <select id="crateTypeSelect" class="select" style="min-width:170px;">
+      <option value="basic">Open: Basic</option>
+      <option value="advanced">Open: Advanced</option>
+      <option value="legendary">Open: Legendary</option>
+    </select>
+
+    <button id="openCrateBtn" class="btn">Open Selected</button>
+  </div>
+</div>
+
 
   <div class="nft-section">
     <div class="nft-h">Uniques</div>
@@ -1568,6 +1637,10 @@ html, body {
     <button class="btn btn-sm" id="buyPackButton">Buy Pack (0.5 SOL)</button>
     <button class="btn btn-sm" id="devStreakButton">Streak +1 (DEV)</button>
     <button class="btn btn-sm" id="maxAllButton">MAX ALL</button>
+    <button class="btn btn-sm" id="devRank1000Btn">+1000 Rank</button>
+    <button class="btn btn-sm" id="devGiveCratesBtn">Give Crates (B/A/L)</button>
+    <button class="btn btn-sm" id="devResetPityBtn">Reset Pity</button>
+    <button class="btn btn-sm" id="devPrintShopBtn">Print Shop</button>
     <button class="btn btn-sm" onclick="resetGame()">RESET GAME</button>
                   </div>
                 </section>
@@ -1700,6 +1773,23 @@ html, body {
         </div>
       </div>
 
+      <div class="modal" id="crateModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">CRATE RESULT</div>
+      <button class="modal-x" onclick="closeModal('crateModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="crateModalBody" class="mini" style="line-height:1.5;">—</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary btn-sm" id="openAnotherBtn">Open another</button>
+      <button class="btn btn-sm" onclick="closeModal('crateModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+
 <script>
     function log(){ /* no-op */ }
 
@@ -1744,6 +1834,13 @@ function defaultSave(){
   nftCommons: {},
   nftUniques: {}
 },
+
+    shop: {
+      daily: { dateKey: null, buys: { basic: 0, advanced: 0, legendary: 0 } },
+      cooldowns: { basic: 0, advanced: 0, legendary: 0 }, // next allowed purchase timestamp (ms)
+      pity: { basic: 0, advanced: 0, legendary: 0 },      // opens since last unique (per crate type)
+      lastOpenedType: "basic"
+    },
 
 
     streak: { current: 0, lastClaimDate: null },
@@ -2851,7 +2948,7 @@ function updateNFTsUI(){
 
   // crates count
   const crateCount = document.getElementById("crateCount");
-  if (crateCount) crateCount.textContent = `Crates: ${state.inventory?.crates || 0}`;
+  if (crateCount) crateCount.textContent = crateCountText();
 
   // uniques
   const uGrid = document.getElementById("nftUniquesGrid");
@@ -2890,6 +2987,56 @@ function updateNFTsUI(){
       });
     }
   }
+
+  // shop meta UI
+  try{
+    ensureShopState();
+    resetDailyIfNeeded();
+
+    const now = Date.now();
+    const c = state.inventory.crates || { basic:0, advanced:0, legendary:0 };
+
+    const basicMeta = document.getElementById("basicMeta");
+    const advMeta = document.getElementById("advMeta");
+    const legMeta = document.getElementById("legMeta");
+
+    const basicRules = document.getElementById("basicRules");
+    const advRules = document.getElementById("advRules");
+    const legRules = document.getElementById("legRules");
+
+    const setMeta = (key, metaEl, rulesEl)=>{
+      const cfg = CRATES[key];
+      const cd = Math.max(0, (state.shop.cooldowns[key] || 0) - now);
+      const cdS = Math.ceil(cd/1000);
+      const bought = state.shop.daily.buys[key] || 0;
+      const left = Math.max(0, cfg.limitPerDay - bought);
+      const pity = state.shop.pity[key] || 0;
+      const th = pityThreshold(key);
+
+      if (metaEl) metaEl.textContent = `Have: ${c[key]||0} | Price: ${cfg.priceRank} | Left today: ${left}`;
+      if (rulesEl) rulesEl.textContent = `Cooldown: ${cdS}s | Pity: ${pity+1}/${th} (unique guarantee at ${th})`;
+    };
+
+    setMeta("basic", basicMeta, basicRules);
+    setMeta("advanced", advMeta, advRules);
+    setMeta("legendary", legMeta, legRules);
+
+    // disable buy buttons if locked by rules
+    const disableBuy = (btnId, key)=>{
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      const check = canBuyCrate(key);
+      btn.disabled = !check.ok;
+      btn.title = check.ok ? "" : check.reason;
+    };
+
+    disableBuy("buyCrateBasicBtn","basic");
+    disableBuy("buyCrateAdvancedBtn","advanced");
+    disableBuy("buyCrateLegendaryBtn","legendary");
+
+  } catch(e) {}
+
+
 }
 
 
@@ -3457,90 +3604,288 @@ const BUILDINGS = {
   }
 };
 
-const CRATE = {
-  priceRank: 120,          // 1 crate = 120 Rank (şimdilik)
-  drops: {
-    empty: 0.20,           // %20 boş
-    common: 0.75,          // %75 common
-    unique: 0.05           // %5 unique
+// =========================
+// SHOP / CRATES (Rank → Crates)
+// =========================
+const CRATES = {
+  basic: {
+    key: "basic",
+    name: "Basic",
+    priceRank: 60,
+    cooldownMs: 60 * 1000,     // 1 dk
+    limitPerDay: 10,
+    commonQty: [1, 2],         // her açılışta en az 1 common
+    uniqueBaseChance: 0.10,    // %10
+    bonusRankChance: 0.20,     // %20 bonus rank
+    bonusRank: [5, 12],
+    // pity eşikleri: ilk unique hızlı, ikinci de kısa süre sonra, sonra normale döner
+    pityByUniquesOwned: [3, 5, 9] // 0 unique → 3; 1 unique → 5; 2+ → 9
   },
-  // common havuzu (şimdilik 16 tane)
+  advanced: {
+    key: "advanced",
+    name: "Advanced",
+    priceRank: 140,
+    cooldownMs: 2 * 60 * 1000, // 2 dk
+    limitPerDay: 6,
+    commonQty: [2, 3],
+    uniqueBaseChance: 0.16,
+    bonusRankChance: 0.28,
+    bonusRank: [10, 24],
+    pityByUniquesOwned: [2, 4, 7]
+  },
+  legendary: {
+    key: "legendary",
+    name: "Legendary",
+    priceRank: 320,
+    cooldownMs: 5 * 60 * 1000, // 5 dk
+    limitPerDay: 3,
+    commonQty: [3, 5],
+    uniqueBaseChance: 0.25,
+    bonusRankChance: 0.40,
+    bonusRank: [20, 50],
+    pityByUniquesOwned: [1, 2, 4]
+  }
+};
+
+// pools (senin mevcut setine uyumlu)
+const NFT_POOLS = {
   commonPool: [
     "C01","C02","C03","C04","C05","C06","C07","C08",
     "C09","C10","C11","C12","C13","C14","C15","C16"
   ],
-  // unique havuzu (şimdilik 4 tane)
   uniquePool: ["U01","U02","U03","U04"]
 };
 
+function ensureShopState(){
+  if (!state.shop || typeof state.shop !== "object") {
+    state.shop = {
+      daily: { dateKey: null, buys: { basic: 0, advanced: 0, legendary: 0 } },
+      cooldowns: { basic: 0, advanced: 0, legendary: 0 },
+      pity: { basic: 0, advanced: 0, legendary: 0 },
+      lastOpenedType: "basic"
+    };
+  }
+  // inventory crates migration: number → object
+  if (state.inventory && typeof state.inventory.crates === "number") {
+    const n = state.inventory.crates || 0;
+    state.inventory.crates = { basic: n, advanced: 0, legendary: 0 };
+  }
+  if (!state.inventory.crates || typeof state.inventory.crates !== "object") {
+    state.inventory.crates = { basic: 0, advanced: 0, legendary: 0 };
+  }
+  if (!state.shop.pity || typeof state.shop.pity !== "object") {
+    state.shop.pity = { basic: 0, advanced: 0, legendary: 0 };
+  }
+  if (!state.shop.cooldowns || typeof state.shop.cooldowns !== "object") {
+    state.shop.cooldowns = { basic: 0, advanced: 0, legendary: 0 };
+  }
+  if (!state.shop.daily || typeof state.shop.daily !== "object") {
+    state.shop.daily = { dateKey: null, buys: { basic: 0, advanced: 0, legendary: 0 } };
+  }
+  if (!state.shop.daily.buys || typeof state.shop.daily.buys !== "object") {
+    state.shop.daily.buys = { basic: 0, advanced: 0, legendary: 0 };
+  }
+}
+
+function dateKeyLocal(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const da = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${da}`;
+}
+
+function resetDailyIfNeeded(){
+  ensureShopState();
+  const k = dateKeyLocal();
+  if (state.shop.daily.dateKey !== k) {
+    state.shop.daily.dateKey = k;
+    state.shop.daily.buys = { basic: 0, advanced: 0, legendary: 0 };
+  }
+}
+
+function randInt(min, max){
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 function randPick(arr){
-  return arr[Math.floor(Math.random() * arr.length)];
+  return arr[Math.floor(Math.random()*arr.length)];
 }
 
-function rollCrateOutcome(){
-  const r = Math.random();
-  const p0 = CRATE.drops.empty;
-  const p1 = p0 + CRATE.drops.common;
-
-  if (r < p0) return { type: "empty" };
-  if (r < p1) return { type: "common", id: randPick(CRATE.commonPool) };
-  return { type: "unique", id: randPick(CRATE.uniquePool) };
+function uniquesOwnedCount(){
+  const owned = state.inventory?.nftUniques || {};
+  return Object.keys(owned).filter(k => owned[k]).length;
 }
 
-function buyCrate(){
-  const cost = CRATE.priceRank;
-  if ((state.resources.rank || 0) < cost){
-    log(`Not enough Rank. Need ${cost}.`, { negative:true, tag:"CRATE" });
+function pityThreshold(crateKey){
+  const cfg = CRATES[crateKey];
+  const u = uniquesOwnedCount();
+  const arr = cfg.pityByUniquesOwned;
+  if (u <= 0) return arr[0];
+  if (u === 1) return arr[1];
+  return arr[2];
+}
+
+function canBuyCrate(crateKey){
+  ensureShopState();
+  resetDailyIfNeeded();
+
+  const cfg = CRATES[crateKey];
+  const now = Date.now();
+
+  // cooldown
+  const next = state.shop.cooldowns[crateKey] || 0;
+  if (now < next) {
+    return { ok:false, reason:`Cooldown: ${Math.ceil((next-now)/1000)}s` };
+  }
+
+  // daily limit
+  const bought = state.shop.daily.buys[crateKey] || 0;
+  if (bought >= cfg.limitPerDay) {
+    return { ok:false, reason:`Daily limit reached (${cfg.limitPerDay})` };
+  }
+
+  // funds
+  if ((state.resources.rank || 0) < cfg.priceRank) {
+    return { ok:false, reason:`Not enough Rank. Need ${cfg.priceRank}.` };
+  }
+
+  return { ok:true };
+}
+
+function buyCrateType(crateKey){
+  ensureShopState();
+  const cfg = CRATES[crateKey];
+  const check = canBuyCrate(crateKey);
+  if (!check.ok){
+    log(check.reason, { negative:true, tag:"SHOP" });
     return false;
   }
 
-  state.resources.rank -= cost;
-  state.inventory.crates = (state.inventory.crates || 0) + 1;
+  state.resources.rank -= cfg.priceRank;
+
+  state.inventory.crates[crateKey] = (state.inventory.crates[crateKey] || 0) + 1;
+
+  resetDailyIfNeeded();
+  state.shop.daily.buys[crateKey] = (state.shop.daily.buys[crateKey] || 0) + 1;
+
+  state.shop.cooldowns[crateKey] = Date.now() + cfg.cooldownMs;
 
   updateResourcesUI();
-  updateNFTsUI();      // crate sayısı UI’da görünecek
+  updateNFTsUI();
   scheduleSaveV1();
 
-  log(`Bought 1 Crate → -${cost} Rank.`, { positive:true, tag:"CRATE" });
+  log(`Bought 1 ${cfg.name} Crate → -${cfg.priceRank} Rank.`, { positive:true, tag:"SHOP" });
   return true;
 }
 
-function openCrate(){
-  if ((state.inventory.crates || 0) <= 0){
-    log("No crates to open.", { negative:true, tag:"CRATE" });
-    return null;
+function rollOpenOutcome(crateKey){
+  // nothing yok: her zaman common var. Unique (pity + chance) + bonus rank opsiyonel.
+  ensureShopState();
+  const cfg = CRATES[crateKey];
+
+  const pity = state.shop.pity[crateKey] || 0;
+  const th = pityThreshold(crateKey);
+
+  let gotUnique = false;
+  if (pity + 1 >= th) {
+    gotUnique = true; // pity guarantee
+  } else {
+    gotUnique = Math.random() < cfg.uniqueBaseChance;
   }
 
-  state.inventory.crates -= 1;
-
-  const out = rollCrateOutcome();
-
-  if (out.type === "empty"){
-    log("Crate opened → empty.", { tag:"CRATE" });
+  // COMMON guaranteed
+  const commonCount = randInt(cfg.commonQty[0], cfg.commonQty[1]);
+  const commons = [];
+  for (let i=0; i<commonCount; i++){
+    commons.push(randPick(NFT_POOLS.commonPool));
   }
 
-  if (out.type === "common"){
-    const id = out.id;
+  // UNIQUE (1 adet)
+  let uniqueId = null;
+  if (gotUnique) {
+    uniqueId = randPick(NFT_POOLS.uniquePool);
+  }
+
+  // BONUS rank
+  let bonusRank = 0;
+  if (Math.random() < cfg.bonusRankChance){
+    bonusRank = randInt(cfg.bonusRank[0], cfg.bonusRank[1]);
+  }
+
+  return { commons, uniqueId, bonusRank, gotUnique, pityUsed: gotUnique && (pity + 1 >= th) };
+}
+
+function applyOpenOutcome(crateKey, out){
+  // consume pity
+  if (out.gotUnique) state.shop.pity[crateKey] = 0;
+  else state.shop.pity[crateKey] = (state.shop.pity[crateKey] || 0) + 1;
+
+  // apply commons (stack)
+  out.commons.forEach(id=>{
     state.inventory.nftCommons[id] = (state.inventory.nftCommons[id] || 0) + 1;
-    log(`Crate opened → Common NFT ${id} (+1).`, { positive:true, tag:"CRATE" });
-  }
+  });
 
-  if (out.type === "unique"){
-    const id = out.id;
-
-    // 1/account rule: aynı unique varsa tekrar veremeyiz → fallback common
-    if (state.inventory.nftUniques[id]){
-      const fallback = randPick(CRATE.commonPool);
-      state.inventory.nftCommons[fallback] = (state.inventory.nftCommons[fallback] || 0) + 1;
-      log(`Unique ${id} already owned → fallback Common ${fallback} (+1).`, { tag:"CRATE" });
+  // apply unique (1/account rule + fallback common)
+  if (out.uniqueId){
+    const id = out.uniqueId;
+    if (state.inventory.nftUniques[id]) {
+      // fallback: give extra common if duplicate unique
+      const fb = randPick(NFT_POOLS.commonPool);
+      state.inventory.nftCommons[fb] = (state.inventory.nftCommons[fb] || 0) + 1;
+      out.uniqueId = null;
+      out.duplicateUnique = id;
+      out.fallbackCommon = fb;
     } else {
       state.inventory.nftUniques[id] = true;
-      log(`Crate opened → UNIQUE NFT ${id} acquired!`, { positive:true, tag:"CRATE" });
     }
   }
 
+  // apply bonus rank
+  if (out.bonusRank > 0){
+    state.resources.rank = (state.resources.rank || 0) + out.bonusRank;
+  }
+}
+
+function crateCountText(){
+  ensureShopState();
+  const c = state.inventory?.crates || {};
+  return `Crates: B ${c.basic||0} / A ${c.advanced||0} / L ${c.legendary||0}`;
+}
+
+function openCrateSelected(crateKey){
+  ensureShopState();
+
+  const have = state.inventory.crates[crateKey] || 0;
+  if (have <= 0){
+    log(`No ${CRATES[crateKey].name} crates to open.`, { negative:true, tag:"CRATE" });
+    return null;
+  }
+
+  state.inventory.crates[crateKey] = have - 1;
+  state.shop.lastOpenedType = crateKey;
+
+  const out = rollOpenOutcome(crateKey);
+  applyOpenOutcome(crateKey, out);
+
+  updateResourcesUI();
   updateNFTsUI();
   scheduleSaveV1();
+
+  // modal content
+  const lines = [];
+  lines.push(`<div><strong>${CRATES[crateKey].name} Crate</strong> opened.</div>`);
+  lines.push(`<div>✅ Commons: <strong>${out.commons.length}</strong> (${out.commons.join(", ")})</div>`);
+  if (out.uniqueId) lines.push(`<div>🌟 Unique: <strong>${out.uniqueId}</strong>${out.pityUsed ? " <span class='mini'>(pity)</span>" : ""}</div>`);
+  if (out.duplicateUnique) lines.push(`<div class="mini">Unique duplicate (${out.duplicateUnique}) → fallback common: ${out.fallbackCommon}</div>`);
+  if (!out.uniqueId && !out.duplicateUnique) lines.push(`<div class="mini">No unique this time.</div>`);
+  if (out.bonusRank > 0) lines.push(`<div>➕ Bonus Rank: <strong>${out.bonusRank}</strong></div>`);
+
+  const body = document.getElementById("crateModalBody");
+  if (body) body.innerHTML = lines.join("");
+
+  openModal("crateModal");
+
+  log(`Opened ${CRATES[crateKey].name} Crate.`, { positive:true, tag:"CRATE" });
   return out;
 }
 
@@ -4133,17 +4478,39 @@ if (tabNFTs) tabNFTs.addEventListener("click", ()=> {
 
 if (tabDev) tabDev.addEventListener("click", ()=> { setActiveTab("dev"); goPage(3); });
 
-const buyCrateBtn = document.getElementById("buyCrateBtn");
 const openCrateBtn = document.getElementById("openCrateBtn");
+const crateTypeSelect = document.getElementById("crateTypeSelect");
 
-if (buyCrateBtn) buyCrateBtn.addEventListener("click", ()=>{
+const buyBasicBtn = document.getElementById("buyCrateBasicBtn");
+const buyAdvBtn = document.getElementById("buyCrateAdvancedBtn");
+const buyLegBtn = document.getElementById("buyCrateLegendaryBtn");
+
+if (buyBasicBtn) buyBasicBtn.addEventListener("click", ()=>{
   if ((state.buildings.dappStore || 0) < 1) { setPlaceStatus("dApp Store required."); return; }
-  buyCrate();
+  buyCrateType("basic");
+});
+
+if (buyAdvBtn) buyAdvBtn.addEventListener("click", ()=>{
+  if ((state.buildings.dappStore || 0) < 1) { setPlaceStatus("dApp Store required."); return; }
+  buyCrateType("advanced");
+});
+
+if (buyLegBtn) buyLegBtn.addEventListener("click", ()=>{
+  if ((state.buildings.dappStore || 0) < 1) { setPlaceStatus("dApp Store required."); return; }
+  buyCrateType("legendary");
 });
 
 if (openCrateBtn) openCrateBtn.addEventListener("click", ()=>{
   if ((state.buildings.dappStore || 0) < 1) { setPlaceStatus("dApp Store required."); return; }
-  openCrate();
+  const k = (crateTypeSelect && crateTypeSelect.value) ? crateTypeSelect.value : (state.shop?.lastOpenedType || "basic");
+  openCrateSelected(k);
+});
+
+// modal: open another
+const openAnotherBtn = document.getElementById("openAnotherBtn");
+if (openAnotherBtn) openAnotherBtn.addEventListener("click", ()=>{
+  const k = state.shop?.lastOpenedType || (crateTypeSelect && crateTypeSelect.value) || "basic";
+  openCrateSelected(k);
 });
 
 
@@ -4169,6 +4536,43 @@ if (openCrateBtn) openCrateBtn.addEventListener("click", ()=>{
   const nextBtn = document.getElementById("seedNext");
   if (prevBtn) prevBtn.addEventListener("click", prevSeedPage);
   if (nextBtn) nextBtn.addEventListener("click", nextSeedPage);
+
+const devRank1000Btn = document.getElementById("devRank1000Btn");
+if (devRank1000Btn) devRank1000Btn.addEventListener("click", ()=>{
+  state.resources.rank = (state.resources.rank || 0) + 1000;
+  updateResourcesUI();
+  scheduleSaveV1();
+  log("+1000 Rank (DEV).", { positive:true, tag:"DEV" });
+});
+
+const devGiveCratesBtn = document.getElementById("devGiveCratesBtn");
+if (devGiveCratesBtn) devGiveCratesBtn.addEventListener("click", ()=>{
+  ensureShopState();
+  state.inventory.crates.basic += 3;
+  state.inventory.crates.advanced += 2;
+  state.inventory.crates.legendary += 1;
+  updateNFTsUI();
+  scheduleSaveV1();
+  log("Gave crates: +3 basic, +2 advanced, +1 legendary (DEV).", { positive:true, tag:"DEV" });
+});
+
+const devResetPityBtn = document.getElementById("devResetPityBtn");
+if (devResetPityBtn) devResetPityBtn.addEventListener("click", ()=>{
+  ensureShopState();
+  state.shop.pity = { basic:0, advanced:0, legendary:0 };
+  updateNFTsUI();
+  scheduleSaveV1();
+  log("Pity reset (DEV).", { positive:true, tag:"DEV" });
+});
+
+const devPrintShopBtn = document.getElementById("devPrintShopBtn");
+if (devPrintShopBtn) devPrintShopBtn.addEventListener("click", ()=>{
+  ensureShopState();
+  console.log("SHOP_STATE", JSON.parse(JSON.stringify(state.shop)));
+  console.log("CRATES", CRATES);
+  log("Printed shop state to console.", { tag:"DEV" });
+});
+
 
 // Swipe/scroll ile geçince active tab güncelle
 if (pager){
