@@ -1575,19 +1575,17 @@ html, body {
 
 </section>
 
-<section id="pageUpgrade" class="page">
-  <div class="card">
-    <div class="card-title">Overclock</div>
-    <div class="mini">Spend ⚡ to boost profit, lucky chance, or speed.</div>
+<section class="page" id="pageUpgrade">
+  <div class="card-header">
+    <div class="card-title">Upgrade</div>
+  </div>
 
+  <div class="card">
+    <div class="mini">Spend ⚡ to boost profit, lucky chance, or speed.</div>
     <div id="upgradeList" class="stack" style="margin-top:10px;"></div>
   </div>
 </section>
 
-<section class="page" id="pageDev">
-<div class="card-header">
-  <div class="card-title">dev</div>
-</div>
 
 <div class="btn-group">
   <button class="btn btn-sm" id="pass5sButton">+5s Tick</button>
@@ -4406,13 +4404,15 @@ const pager = document.getElementById("pager");
 const tabNode = document.getElementById("tabNode");
 const tabBuildings = document.getElementById("tabBuildings");
 const tabNFTs = document.getElementById("tabNFTs");
+const tabUpgrade = document.getElementById("tabUpgrade");
 const tabDev = document.getElementById("tabDev");
 
 function setActiveTab(which){
-  [tabNode, tabBuildings, tabNFTs, tabDev].forEach(b=> b && b.classList.remove("active"));
+  [tabNode, tabBuildings, tabNFTs, tabUpgrade, tabDev].forEach(b=> b && b.classList.remove("active"));
   if (which === "node" && tabNode) tabNode.classList.add("active");
   if (which === "buildings" && tabBuildings) tabBuildings.classList.add("active");
   if (which === "nfts" && tabNFTs) tabNFTs.classList.add("active");
+  if (which === "upgrade" && tabUpgrade) tabUpgrade.classList.add("active");
   if (which === "dev" && tabDev) tabDev.classList.add("active");
 }
 
@@ -4445,7 +4445,11 @@ if (tabNFTs) tabNFTs.addEventListener("click", ()=> {
   requestAnimationFrame(()=> updateNFTsUI());
 });
 
-if (tabUpgrade) tabUpgrade.addEventListener("click", ()=> { setActiveTab("upgrades"); goPage(3); });
+if (tabUpgrade) tabUpgrade.addEventListener("click", ()=> {
+  setActiveTab("upgrade");
+  goPage(3);
+  requestAnimationFrame(()=> renderUpgradesUI());
+});
 
 if (tabDev) tabDev.addEventListener("click", ()=> { setActiveTab("dev"); goPage(4); });
 
