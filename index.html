@@ -1453,157 +1453,147 @@ html, body {
 
           <div class="card main-panel" id="mainPanel">
 
-            <div class="panel-tabs">
-              <button class="tab-btn active" id="tabNode">Power Grid</button>
-              <button class="tab-btn" id="tabBuildings">Buildings</button>
-              <button class="tab-btn" id="tabNFTs">NFTs</button>
-              <button class="tab-btn" id="tabUpgrade">Upgrade</button>
-              <button class="tab-btn" id="tabDev">dev</button>
-            </div>
-
-            <div class="panel-body">
-              <div class="pager" id="pager">
-      
-<section class="page" id="pageNode">
-
-  <div class="seedbar-wrap">
-    <button class="seed-arrow" id="seedPrev" aria-label="Previous">◀</button>
-    <div class="seedbar" id="nodeSeedBar"></div>
-    <button class="seed-arrow" id="seedNext" aria-label="Next">▶</button>
-  </div>
-
-  <div id="powerGrid" style="margin-top:10px;"></div>
-
-</section>
-
-<section class="page" id="pageBuildings">
-
-  <div class="map-header">
-    <div class="map-hint map-status" id="placeStatus">Idle</div>
-    <button class="btn btn-sm regen-mini" id="regenMapBtn">New Map</button>
-  </div>
-
-
-  <div class="map-wrap">
-    <canvas id="buildMap" class="map-canvas"></canvas>
-  </div>
-
-
-  <div class="map-toolbar" id="confirmBar" style="display:none;">
-    <button class="btn btn-primary btn-sm" id="confirmYesBtn">Build</button>
-    <button class="btn btn-danger btn-sm" id="confirmNoBtn">Cancel</button>
-  </div>
-
-
-  <div class="buildbar" id="buildBar"></div>
-
-</section>
-
-<section class="page" id="pageNFTs">
-<div class="nft-wrap" id="nftWrap">
-  <div id="nftLibrary" class="nft-lib locked">
-
-    <!-- SHOP / OPEN -->
-    <div class="nft-actions" style="gap:10px; flex-direction:column; align-items:stretch;">
-      <div class="mini" style="opacity:.9;">SHOP — buy crates with Rank (daily limits + cooldown)</div>
-
-      <div class="nft-shop" style="display:grid; grid-template-columns:1fr; gap:10px;">
-        <div class="card" style="padding:12px;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div><strong>Basic Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
-            <div class="mini" id="basicMeta">—</div>
-          </div>
-          <div class="mini" id="basicRules">—</div>
-          <button id="buyCrateBasicBtn" class="btn btn-primary btn-sm">Buy Basic</button>
-        </div>
-
-        <div class="card" style="padding:12px;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div><strong>Advanced Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
-            <div class="mini" id="advMeta">—</div>
-          </div>
-          <div class="mini" id="advRules">—</div>
-          <button id="buyCrateAdvancedBtn" class="btn btn-primary btn-sm">Buy Advanced</button>
-        </div>
-
-        <div class="card" style="padding:12px;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div><strong>Legendary Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
-            <div class="mini" id="legMeta">—</div>
-          </div>
-          <div class="mini" id="legRules">—</div>
-          <button id="buyCrateLegendaryBtn" class="btn btn-primary btn-sm">Buy Legendary</button>
-        </div>
-      </div>
-
-      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-        <div class="mini" id="crateCount">Crates: 0</div>
-
-        <select id="crateTypeSelect" class="select" style="min-width:170px;">
-          <option value="basic">Open: Basic</option>
-          <option value="advanced">Open: Advanced</option>
-          <option value="legendary">Open: Legendary</option>
-        </select>
-
-        <button id="openCrateBtn" class="btn">Open Selected</button>
-      </div>
-    </div>
-
-    <!-- COLLECTIONS -->
-    <div class="nft-section">
-      <div class="nft-h">Uniques</div>
-      <div id="nftUniquesGrid" class="nft-grid"></div>
-    </div>
-
-    <div class="nft-section">
-      <div class="nft-h">Commons</div>
-      <div id="nftCommonsGrid" class="nft-grid"></div>
-    </div>
-
-  </div><!-- /nftLibrary -->
-
-  <!-- LOCK OVERLAY (blur devam edecek) -->
-  <div class="nft-lock" id="nftLock">
-    <div class="nft-lock-card">
-      <div class="nft-lock-title">NFT Library Locked</div>
-      <div class="nft-lock-sub">Build <strong>dApp Store</strong> to unlock Lucky Grids and NFTs.</div>
-      <button class="btn btn-primary btn-sm" id="nftGoBuildBtn">Go to Buildings</button>
-    </div>
-  </div>
-
-</div><!-- /nftWrap -->
-
-</section>
-
-<section class="page" id="pageUpgrade">
-  <div class="card-header">
-    <div class="card-title">Upgrade</div>
-  </div>
-
-  <div class="card">
-    <div class="mini">Spend ⚡ to boost profit, lucky chance, or speed.</div>
-    <div id="upgradeList" class="stack" style="margin-top:10px;"></div>
-  </div>
-</section>
-
-
-<div class="btn-group">
-  <button class="btn btn-sm" id="pass5sButton">+5s Tick</button>
-  <button class="btn btn-sm" id="addSolButton">+1 SOL</button>
-  <button class="btn btn-sm" id="buyPackButton">Buy Pack (0.5 SOL)</button>
-  <button class="btn btn-sm" id="devStreakButton">Streak +1</button>
-  <button class="btn btn-sm" id="maxAllButton">Max All</button>
-  <button class="btn btn-sm" id="devRank1000Btn">+1000 Rank</button>
-  <button class="btn btn-sm" id="devGiveCratesBtn">Give Crates (B/A/L)</button>
-  <button class="btn btn-sm" id="devResetPityBtn">Reset Pity</button>
-  <button class="btn btn-sm" id="devPrintShopBtn">Print Shop</button>
-  <button class="btn btn-sm" onclick="resetGame()">RESET GAME</button>
+<div class="panel-tabs">
+  <button class="tab-btn active" id="tabNode">Power Grid</button>
+  <button class="tab-btn" id="tabBuildings">Buildings</button>
+  <button class="tab-btn" id="tabNFTs">NFTs</button>
+  <button class="tab-btn" id="tabUpgrade">Upgrade</button>
+  <button class="tab-btn" id="tabDev">Dev</button>
 </div>
-</section>
 
+<div class="panel-body">
+  <div class="pager" id="pager">
 
+    <section class="page" id="pageNode">
+      <div class="seedbar-wrap">
+        <button class="seed-arrow" id="seedPrev" aria-label="Previous">◀</button>
+        <div class="seedbar" id="nodeSeedBar"></div>
+        <button class="seed-arrow" id="seedNext" aria-label="Next">▶</button>
+      </div>
+      <div id="powerGrid" style="margin-top:10px;"></div>
+    </section>
+
+    <section class="page" id="pageBuildings">
+      <div class="map-header">
+        <div class="map-hint map-status" id="placeStatus">Idle</div>
+        <button class="btn btn-sm regen-mini" id="regenMapBtn">New Map</button>
+      </div>
+
+      <div class="map-wrap">
+        <canvas id="buildMap" class="map-canvas"></canvas>
+      </div>
+
+      <div class="map-toolbar" id="confirmBar" style="display:none;">
+        <button class="btn btn-primary btn-sm" id="confirmYesBtn">Build</button>
+        <button class="btn btn-danger btn-sm" id="confirmNoBtn">Cancel</button>
+      </div>
+
+      <div class="buildbar" id="buildBar"></div>
+    </section>
+
+    <section class="page" id="pageNFTs">
+      <div class="nft-wrap" id="nftWrap">
+        <div id="nftLibrary" class="nft-lib locked">
+          <!-- SHOP / OPEN -->
+          <div class="nft-actions" style="gap:10px; flex-direction:column; align-items:stretch;">
+            <div class="mini" style="opacity:.9;">SHOP — buy crates with Rank (daily limits + cooldown)</div>
+
+            <div class="nft-shop" style="display:grid; grid-template-columns:1fr; gap:10px;">
+              <div class="card" style="padding:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div><strong>Basic Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
+                  <div class="mini" id="basicMeta">—</div>
+                </div>
+                <div class="mini" id="basicRules">—</div>
+                <button id="buyCrateBasicBtn" class="btn btn-primary btn-sm">Buy Basic</button>
+              </div>
+
+              <div class="card" style="padding:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div><strong>Advanced Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
+                  <div class="mini" id="advMeta">—</div>
+                </div>
+                <div class="mini" id="advRules">—</div>
+                <button id="buyCrateAdvancedBtn" class="btn btn-primary btn-sm">Buy Advanced</button>
+              </div>
+
+              <div class="card" style="padding:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div><strong>Legendary Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
+                  <div class="mini" id="legMeta">—</div>
+                </div>
+                <div class="mini" id="legRules">—</div>
+                <button id="buyCrateLegendaryBtn" class="btn btn-primary btn-sm">Buy Legendary</button>
               </div>
             </div>
+
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <div class="mini" id="crateCount">Crates: 0</div>
+
+              <select id="crateTypeSelect" class="select" style="min-width:170px;">
+                <option value="basic">Open: Basic</option>
+                <option value="advanced">Open: Advanced</option>
+                <option value="legendary">Open: Legendary</option>
+              </select>
+
+              <button id="openCrateBtn" class="btn">Open Selected</button>
+            </div>
+          </div>
+
+          <!-- COLLECTIONS -->
+          <div class="nft-section">
+            <div class="nft-h">Uniques</div>
+            <div id="nftUniquesGrid" class="nft-grid"></div>
+          </div>
+
+          <div class="nft-section">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+              <div class="nft-h">Commons</div>
+              <button class="btn btn-sm" id="burnCommonsBtn">Burn</button>
+            </div>
+            <div id="nftCommonsGrid" class="nft-grid"></div>
+          </div>
+        </div>
+
+        <div class="nft-lock" id="nftLock">
+          <div class="nft-lock-card">
+            <div class="nft-lock-title">NFT Library Locked</div>
+            <div class="nft-lock-sub">Build <strong>dApp Store</strong> to unlock Lucky Grids and NFTs.</div>
+            <button class="btn btn-primary btn-sm" id="nftGoBuildBtn">Go to Buildings</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="pageUpgrade">
+      <div class="card-header">
+        <div class="card-title">Upgrade</div>
+      </div>
+
+      <div class="card">
+        <div class="mini">Spend ⚡ to boost profit, lucky chance, or speed.</div>
+        <div id="upgradeList" class="stack" style="margin-top:10px;"></div>
+      </div>
+    </section>
+
+    <section class="page" id="pageDev">
+      <div class="btn-group">
+        <button class="btn btn-sm" id="pass5sButton">+5s Tick</button>
+        <button class="btn btn-sm" id="addSolButton">+1 SOL</button>
+        <button class="btn btn-sm" id="buyPackButton">Buy Pack (0.5 SOL)</button>
+        <button class="btn btn-sm" id="devStreakButton">Streak +1</button>
+        <button class="btn btn-sm" id="maxAllButton">Max All</button>
+        <button class="btn btn-sm" id="devRank1000Btn">+1000 Rank</button>
+        <button class="btn btn-sm" id="devGiveCratesBtn">Give Crates (B/A/L)</button>
+        <button class="btn btn-sm" id="devResetPityBtn">Reset Pity</button>
+        <button class="btn btn-sm" id="devPrintShopBtn">Print Shop</button>
+        <button class="btn btn-sm" onclick="resetGame()">RESET GAME</button>
+      </div>
+    </section>
+
+  </div>
+</div>
+
 
           </div>
 
@@ -1731,21 +1721,49 @@ html, body {
       </div>
 
       <div class="modal-backdrop" id="crateModal">
+        <div class="modal">
+          <div class="modal-header">
+            <div class="modal-title">CRATE RESULT</div>
+            <div class="modal-close" data-close="crateModal">✕</div>
+          </div>
+
+          <div class="modal-body">
+            <div id="crateModalBody" class="mini" style="line-height:1.5;">—</div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-primary btn-sm" id="openAnotherBtn">Open another</button>
+            <button class="btn btn-sm" data-close="crateModal">Close</button>
+          </div>
+        </div>
+
+        <div class="modal-backdrop" id="burnCommonsModal">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">CRATE RESULT</div>
-      <div class="modal-close" data-close="crateModal">✕</div>
+      <div class="modal-title">BURN COMMONS</div>
+      <div class="modal-close" data-close="burnCommonsModal">✕</div>
     </div>
 
     <div class="modal-body">
-      <div id="crateModalBody" class="mini" style="line-height:1.5;">—</div>
+      <div class="mini" style="line-height:1.5;">
+        Burn commons → gain <strong>Rank</strong>.
+      </div>
+
+      <div class="line" style="margin-top:10px;">
+        <div class="mini">Amount</div>
+        <input id="burnCommonsAmount" type="number" min="1" value="1" style="width:100%;">
+      </div>
+
+      <div id="burnCommonsHint" class="mini" style="margin-top:8px;opacity:0.85;"></div>
     </div>
 
     <div class="btn-group">
-      <button class="btn btn-primary btn-sm" id="openAnotherBtn">Open another</button>
-      <button class="btn btn-sm" data-close="crateModal">Close</button>
+      <button class="btn btn-primary btn-sm" id="burnCommonsConfirmBtn">Burn</button>
+      <button class="btn btn-sm" data-close="burnCommonsModal">Close</button>
     </div>
   </div>
+</div>
+
 </div>
 
 <script>
@@ -1802,6 +1820,12 @@ function defaultSave(){
 
 
   streak: { current: 0, lastClaimDate: null },
+
+  upgrades: {
+  profitLvl: 0, // harvest gain multiplier
+  luckyLvl: 0,  // lucky chance bonus
+  speedLvl: 0,  // grow time reduction
+},
 
   progression: {
   chapter: 1,
@@ -3002,10 +3026,99 @@ function updateNFTsUI(){
     disableBuy("buyCrateLegendaryBtn","legendary");
 
   } catch(e) {}
-
-
 }
 
+function openBurnCommons(){
+  const inv = state.inventory || {};
+  const total = Object.values(inv.nftCommons || {}).reduce((a,b)=>a+(b||0),0);
+
+  const hint = document.getElementById("burnCommonsHint");
+  if (hint) hint.textContent = `You have ${total} commons. Rate: 100 Rank per common.`;
+
+  const amtEl = document.getElementById("burnCommonsAmount");
+  if (amtEl) amtEl.value = "1";
+
+  openModal("burnCommonsModal");
+}
+
+function confirmBurnCommons(){
+  const inv = state.inventory || {};
+  const commons = inv.nftCommons || {};
+  const total = Object.values(commons).reduce((a,b)=>a+(b||0),0);
+
+  const amtEl = document.getElementById("burnCommonsAmount");
+  let amt = Math.max(1, parseInt(amtEl ? amtEl.value : "1", 10) || 1);
+  if (amt > total) amt = total;
+  if (amt <= 0) return;
+
+  // En çok olandan düşerek yak
+  let left = amt;
+  const keys = Object.keys(commons).sort((a,b)=>(commons[b]||0)-(commons[a]||0));
+  for (const k of keys){
+    if (left <= 0) break;
+    const have = commons[k] || 0;
+    if (have <= 0) continue;
+    const take = Math.min(have, left);
+    commons[k] = have - take;
+    left -= take;
+  }
+
+  inv.nftCommons = commons;
+
+  const gainRank = amt * 100;
+  state.resources.rank += gainRank;
+
+  updateResourcesUI();
+  updateNFTsUI();
+  scheduleSaveV1();
+
+  closeModal("burnCommonsModal");
+  log(`Burned ${amt} commons → +${gainRank} Rank.`, { positive:true, tag:"BURN" });
+}
+
+function renderUpgradesUI(){
+  const el = document.getElementById("upgradeList");
+  if (!el) return;
+
+  const u = state.upgrades || { profitLvl:0, luckyLvl:0, speedLvl:0 };
+
+  const rows = [
+    { key:"profitLvl", name:"Profit Boost", desc:"+5% per level", base: 50 },
+    { key:"luckyLvl",  name:"Lucky Boost",  desc:"+0.3% per level", base: 80 },
+    { key:"speedLvl",  name:"Speed Boost",  desc:"-4% grow time per level", base: 70 },
+  ];
+
+  el.innerHTML = rows.map(r=>{
+    const lvl = u[r.key] || 0;
+    const cost = Math.round(r.base * Math.pow(1.25, lvl));
+    const can = state.resources.power >= cost;
+
+    return `
+      <div class="line" style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <div>
+          <div><strong>${r.name}</strong> <span class="mini">Lv ${lvl}</span></div>
+          <div class="mini">${r.desc}</div>
+        </div>
+        <button class="btn btn-sm" ${can ? "" : "disabled"} onclick="buyUpgrade('${r.key}', ${cost})">
+          Buy (${cost}⚡)
+        </button>
+      </div>
+    `;
+  }).join("");
+}
+
+function buyUpgrade(key, cost){
+  if (!state.upgrades) return;
+  if (state.resources.power < cost) return;
+
+  state.resources.power -= cost;
+  state.upgrades[key] = (state.upgrades[key] || 0) + 1;
+
+  updateResourcesUI();
+  renderUpgradesUI();
+  scheduleSaveV1();
+  log(`Overclock: ${key} upgraded.`, { positive:true, tag:"UPGRADE" });
+}
 
 function anyBuildBusy(){
   return !!(state.buildBusy.powerPlant || state.buildBusy.dappStore || state.buildBusy.furnace);
@@ -3946,7 +4059,19 @@ function luckyChance(){
   const base = 0.04;
   const perTier = 0.01;
   const cap = 0.14;
-  return Math.min(cap, base + (lvl - 1) * perTier);
+  const upgradeBonus = ((state.upgrades?.luckyLvl) || 0) * 0.003; // lvl başı +0.3%
+return Math.min(cap, base + (lvl - 1) * perTier + upgradeBonus);
+}
+
+function overclockProfitMult(){
+  const lvl = (state.upgrades?.profitLvl) || 0;
+  return 1 + (lvl * 0.05); // her lvl +5%
+}
+
+function overclockSpeedMult(){
+  const lvl = (state.upgrades?.speedLvl) || 0;
+  const mult = 1 - Math.min(0.40, lvl * 0.04); // cap: %40 hızlanma
+  return mult;
 }
 
 function updateLuckyUI(){
@@ -4200,8 +4325,9 @@ function nodeTryDeploy(idx){
 
 n.seed = state.powerGrid.selectedSeed;
 n.stage = 1;
-n.readyIn = s.grow;
-n.total = s.grow;
+const t = Math.max(0.5, s.grow * overclockSpeedMult());
+n.readyIn = t;
+n.total = t;
 
 // ✅ lucky roll only once, on FIRST deploy
 n.luckyTier = rollLuckyTier();
@@ -4218,10 +4344,12 @@ function nodeTryHarvest(idx){
   if (n.readyIn > 0) return;
 
   const s = NODE_SEEDS[n.seed];
-  const gain = nodeSeedProfit(n.seed);
+  let gain = nodeSeedProfit(n.seed);
+  gain = Math.max(1, Math.round(gain * overclockProfitMult()));
 
   state.resources.power += gain;
   spawnNodePopup(getNodeCellEl(idx), `+${gain}⚡`, "power pos");
+
   updateResourcesUI();
   updateHourlyRates();
 
@@ -4252,8 +4380,9 @@ function nodeTryHarvest(idx){
   n.luckyTier = null;
 } else {
   n.stage += 1;
-  n.readyIn = s.grow;
-  n.total = s.grow;
+  const t = Math.max(0.5, s.grow * overclockSpeedMult());
+  n.readyIn = t;
+  n.total = t;
 }
 
   renderPowerGrid();
@@ -4416,11 +4545,22 @@ function setActiveTab(which){
   if (which === "dev" && tabDev) tabDev.classList.add("active");
 }
 
+let isProgrammaticScroll = false;
+
 function goPage(index){
   if (!pager) return;
   const w = pager.clientWidth;
+
+  // ✅ Tab click ile başlatılan scroll sırasında scroll listener active-tab’i değiştirmesin
+  isProgrammaticScroll = true;
+
   pager.scrollTo({ left: index * w, behavior: "smooth" });
+
+  // Scroll bitince kilidi kaldır (smooth scroll süresi cihazdan cihaza değişir)
+  window.clearTimeout(goPage._t);
+  goPage._t = window.setTimeout(()=> { isProgrammaticScroll = false; }, 350);
 }
+
 
 const nftGoBuildBtn = document.getElementById("nftGoBuildBtn");
 if (nftGoBuildBtn){
@@ -4480,6 +4620,13 @@ if (openCrateBtn) openCrateBtn.addEventListener("click", ()=>{
   const k = (crateTypeSelect && crateTypeSelect.value) ? crateTypeSelect.value : (state.shop?.lastOpenedType || "basic");
   openCrateSelected(k);
 });
+
+// --- Burn Commons (NFTs) ---
+const burnCommonsBtn = document.getElementById("burnCommonsBtn");
+if (burnCommonsBtn) burnCommonsBtn.addEventListener("click", openBurnCommons);
+
+const burnCommonsConfirmBtn = document.getElementById("burnCommonsConfirmBtn");
+if (burnCommonsConfirmBtn) burnCommonsConfirmBtn.addEventListener("click", confirmBurnCommons);
 
 // modal: open another
 const openAnotherBtn = document.getElementById("openAnotherBtn");
@@ -4549,16 +4696,27 @@ if (devPrintShopBtn) devPrintShopBtn.addEventListener("click", ()=>{
 });
 
 
-// Swipe/scroll ile geçince active tab güncelle
+// Swipe/scroll ile geçince active tab güncelle (5 sayfa)
 if (pager){
+  let lastIdx = -1;
+
   pager.addEventListener("scroll", ()=>{
-    const idx = Math.round(pager.scrollLeft / Math.max(1, pager.clientWidth));
+    if (isProgrammaticScroll) return;
+
+    const w = Math.max(1, pager.clientWidth);
+    const idx = Math.round(pager.scrollLeft / w);
+
+    if (idx === lastIdx) return;
+    lastIdx = idx;
+
     if (idx === 0) setActiveTab("node");
-    if (idx === 1) setActiveTab("buildings");
-    if (idx === 2) setActiveTab("nfts");
-    if (idx === 3) setActiveTab("dev");
+    else if (idx === 1) setActiveTab("buildings");
+    else if (idx === 2) setActiveTab("nfts");
+    else if (idx === 3) setActiveTab("upgrade");
+    else if (idx === 4) setActiveTab("dev");
   }, { passive:true });
 }
+
 
         el.claimStreakButton.addEventListener("click", claimStreak);
 
@@ -4772,6 +4930,7 @@ if (!state.inventory) {
   loadPlotSprites();
   loadStreakFromStorage();  // streak state'i geri yükle
   updateResourcesUI();
+  renderUpgradesUI();
   updateBuildingLevelsUI();
   updateBuildingCostsUI();
   updateHourlyRates();
