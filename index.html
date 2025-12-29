@@ -1736,13 +1736,14 @@ html, body {
             <button class="btn btn-sm" data-close="crateModal">Close</button>
           </div>
         </div>
+       </div>
 
         <div class="modal-backdrop" id="burnCommonsModal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">BURN COMMONS</div>
-      <div class="modal-close" data-close="burnCommonsModal">✕</div>
-    </div>
+          <div class="modal">
+            <div class="modal-header">
+              <div class="modal-title">BURN COMMONS</div>
+              <div class="modal-close" data-close="burnCommonsModal">✕</div>
+            </div>
 
     <div class="modal-body">
       <div class="mini" style="line-height:1.5;">
@@ -1761,7 +1762,6 @@ html, body {
       <button class="btn btn-primary btn-sm" id="burnCommonsConfirmBtn">Burn</button>
       <button class="btn btn-sm" data-close="burnCommonsModal">Close</button>
     </div>
-  </div>
 </div>
 
 </div>
@@ -3033,7 +3033,11 @@ function openBurnCommons(){
   const total = Object.values(inv.nftCommons || {}).reduce((a,b)=>a+(b||0),0);
 
   const hint = document.getElementById("burnCommonsHint");
-  if (hint) hint.textContent = `You have ${total} commons. Rate: 100 Rank per common.`;
+  if (hint){
+    hint.textContent = `You have ${total} commons. Rate: 100 Rank per common.`;
+    hint.style.color = "var(--text-muted)";
+    hint.style.opacity = "0.85";
+  }
 
   const amtEl = document.getElementById("burnCommonsAmount");
   if (amtEl) amtEl.value = "1";
@@ -3047,9 +3051,32 @@ function confirmBurnCommons(){
   const total = Object.values(commons).reduce((a,b)=>a+(b||0),0);
 
   const amtEl = document.getElementById("burnCommonsAmount");
-  let amt = Math.max(1, parseInt(amtEl ? amtEl.value : "1", 10) || 1);
-  if (amt > total) amt = total;
-  if (amt <= 0) return;
+  const raw = (amtEl ? amtEl.value : "").trim();
+  const amt = parseInt(raw, 10);
+
+  const hint = document.getElementById("burnCommonsHint");
+  const setHint = (msg) => {
+    if (!hint) return;
+    hint.textContent = msg;
+    hint.style.color = "var(--danger, #ff5c5c)";
+    hint.style.opacity = "1";
+  };
+
+  if (!Number.isFinite(amt) || raw === ""){
+    setHint("Enter a valid amount.");
+    return;
+  }
+
+  if (amt <= 0){
+    setHint("Amount must be at least 1.");
+    return;
+  }
+
+  if (amt > total){
+    setHint(`Not enough commons. You have ${total}, tried to burn ${amt}.`);
+    return;
+  }
+
 
   // En çok olandan düşerek yak
   let left = amt;
@@ -3080,7 +3107,10 @@ function renderUpgradesUI(){
   const el = document.getElementById("upgradeList");
   if (!el) return;
 
-  const u = state.upgrades || { profitLvl:0, luckyLvl:0, speedLvl:0 };
+  if (!state.upgrades){
+  state.upgrades = { profitLvl:0, luckyLvl:0, speedLvl:0 };
+}
+const u = state.upgrades;
 
   const rows = [
     { key:"profitLvl", name:"Profit Boost", desc:"+5% per level", base: 50 },
@@ -3108,7 +3138,11 @@ function renderUpgradesUI(){
 }
 
 function buyUpgrade(key, cost){
-  if (!state.upgrades) return;
+  // ✅ upgrades yoksa yarat (butonlar boşa tıklanmasın)
+  if (!state.upgrades){
+    state.upgrades = { profitLvl:0, luckyLvl:0, speedLvl:0 };
+  }
+
   if (state.resources.power < cost) return;
 
   state.resources.power -= cost;
@@ -4776,6 +4810,17 @@ if (pager){
 
       document.querySelectorAll(".modal-close").forEach(btn => {
   btn.addEventListener("click", () => closeModal(btn.dataset.close));
+});
+
+// ✅ Close buttons like: <button data-close="crateModal">Close</button>
+document.querySelectorAll("[data-close]").forEach(btn => {
+  // .modal-close zaten yukarıda bağlı; tekrar bağlamanın zararı yok ama istersek filtreleyelim:
+  if (btn.classList.contains("modal-close")) return;
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeModal(btn.dataset.close);
+  });
 });
 
 // ✅ Close modal when clicking outside (backdrop)
