@@ -1458,6 +1458,7 @@ html, body {
   <button class="tab-btn" id="tabBuildings">Buildings</button>
   <button class="tab-btn" id="tabNFTs">NFTs</button>
   <button class="tab-btn" id="tabUpgrade">Upgrade</button>
+  <button class="tab-btn" id="tabSkills">Skills</button>
   <button class="tab-btn" id="tabDev">Dev</button>
 </div>
 
@@ -1576,20 +1577,74 @@ html, body {
       </div>
     </section>
 
-    <section class="page" id="pageDev">
-      <div class="btn-group">
-        <button class="btn btn-sm" id="pass5sButton">+5s Tick</button>
-        <button class="btn btn-sm" id="addSolButton">+1 SOL</button>
-        <button class="btn btn-sm" id="buyPackButton">Buy Pack (0.5 SOL)</button>
-        <button class="btn btn-sm" id="devStreakButton">Streak +1</button>
-        <button class="btn btn-sm" id="maxAllButton">Max All</button>
-        <button class="btn btn-sm" id="devRank1000Btn">+1000 Rank</button>
-        <button class="btn btn-sm" id="devGiveCratesBtn">Give Crates (B/A/L)</button>
-        <button class="btn btn-sm" id="devResetPityBtn">Reset Pity</button>
-        <button class="btn btn-sm" id="devPrintShopBtn">Print Shop</button>
-        <button class="btn btn-sm" onclick="resetGame()">RESET GAME</button>
+<section class="page" id="pageSkills">
+  <div class="card-header">
+    <div class="card-title">Skills</div>
+  </div>
+
+  <div class="card">
+    <div class="mini">Diagnostics (hidden from players later).</div>
+
+    <div class="stack" style="margin-top:10px;">
+      <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="mini">Profit</div>
+        <div><strong id="skillsProfitText">x1.00</strong></div>
       </div>
-    </section>
+
+      <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="mini">Grow time</div>
+        <div><strong id="skillsSpeedText">-0%</strong></div>
+      </div>
+
+      <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="mini">Lucky bonus</div>
+        <div><strong id="skillsLuckyBonusText">+0.0%</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:10px;">
+    <div class="mini">Hidden RNG</div>
+
+    <div class="stack" style="margin-top:10px;">
+      <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="mini">Lucky chance (total)</div>
+        <div><strong id="skillsLuckyChanceText">0%</strong></div>
+      </div>
+
+      <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="mini">Pity (Basic)</div>
+        <div><strong id="skillsPityBasic">0</strong></div>
+      </div>
+
+      <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="mini">Pity (Advanced)</div>
+        <div><strong id="skillsPityAdvanced">0</strong></div>
+      </div>
+
+      <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="mini">Pity (Legendary)</div>
+        <div><strong id="skillsPityLegendary">0</strong></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="page" id="pageDev">
+  <div class="btn-group">
+    <button class="btn btn-sm" id="pass5sButton">+5s Tick</button>
+    <button class="btn btn-sm" id="addSolButton">+1 SOL</button>
+    <button class="btn btn-sm" id="buyPackButton">Buy Pack (0.5 SOL)</button>
+    <button class="btn btn-sm" id="devStreakButton">Streak +1</button>
+    <button class="btn btn-sm" id="maxAllButton">Max All</button>
+    <button class="btn btn-sm" id="devRank1000Btn">+1000 Rank</button>
+    <button class="btn btn-sm" id="devGiveCratesBtn">Give Crates (B/A/L)</button>
+    <button class="btn btn-sm" id="devResetPityBtn">Reset Pity</button>
+    <button class="btn btn-sm" id="devPrintShopBtn">Print Shop</button>
+    <button class="btn btn-sm" onclick="resetGame()">RESET GAME</button>
+  </div>
+</section>
 
   </div>
 </div>
@@ -3137,6 +3192,34 @@ const u = state.upgrades;
   }).join("");
 }
 
+function renderSkillsUI(){
+  // Upgrade effect readouts (single-line)
+  const profitMult = overclockProfitMult(); // x1.xx
+  const speedMult = overclockSpeedMult();   // 0..1 (time multiplier)
+  const speedReductionPct = Math.round((1 - speedMult) * 100);
+
+  const luckyLvl = (state.upgrades?.luckyLvl) || 0;
+  const luckyBonusPct = (luckyLvl * 0.3).toFixed(1); // lvl başı +0.3%
+
+  const luckyTotalPct = Math.round(luckyChance() * 100);
+
+  const pity = state.shop?.pity || { basic:0, advanced:0, legendary:0 };
+
+  const setText = (id, val)=>{
+    const elx = document.getElementById(id);
+    if (elx) elx.textContent = val;
+  };
+
+  setText("skillsProfitText", "x" + profitMult.toFixed(2));
+  setText("skillsSpeedText", "-" + speedReductionPct + "%");
+  setText("skillsLuckyBonusText", "+" + luckyBonusPct + "%");
+
+  setText("skillsLuckyChanceText", luckyTotalPct + "%");
+  setText("skillsPityBasic", String(pity.basic || 0));
+  setText("skillsPityAdvanced", String(pity.advanced || 0));
+  setText("skillsPityLegendary", String(pity.legendary || 0));
+}
+
 function buyUpgrade(key, cost){
   // ✅ upgrades yoksa yarat (butonlar boşa tıklanmasın)
   if (!state.upgrades){
@@ -4568,14 +4651,16 @@ const tabNode = document.getElementById("tabNode");
 const tabBuildings = document.getElementById("tabBuildings");
 const tabNFTs = document.getElementById("tabNFTs");
 const tabUpgrade = document.getElementById("tabUpgrade");
+const tabSkills = document.getElementById("tabSkills");
 const tabDev = document.getElementById("tabDev");
 
 function setActiveTab(which){
-  [tabNode, tabBuildings, tabNFTs, tabUpgrade, tabDev].forEach(b=> b && b.classList.remove("active"));
+  [tabNode, tabBuildings, tabNFTs, tabUpgrade, tabSkills, tabDev].forEach(b=> b && b.classList.remove("active"));
   if (which === "node" && tabNode) tabNode.classList.add("active");
   if (which === "buildings" && tabBuildings) tabBuildings.classList.add("active");
   if (which === "nfts" && tabNFTs) tabNFTs.classList.add("active");
   if (which === "upgrade" && tabUpgrade) tabUpgrade.classList.add("active");
+  if (which === "skills" && tabSkills) tabSkills.classList.add("active");
   if (which === "dev" && tabDev) tabDev.classList.add("active");
 }
 
@@ -4625,7 +4710,13 @@ if (tabUpgrade) tabUpgrade.addEventListener("click", ()=> {
   requestAnimationFrame(()=> renderUpgradesUI());
 });
 
-if (tabDev) tabDev.addEventListener("click", ()=> { setActiveTab("dev"); goPage(4); });
+if (tabSkills) tabSkills.addEventListener("click", ()=> {
+  setActiveTab("skills");
+  goPage(4);
+  requestAnimationFrame(()=> renderSkillsUI());
+});
+
+if (tabDev) tabDev.addEventListener("click", ()=> { setActiveTab("dev"); goPage(5); });
 
 const openCrateBtn = document.getElementById("openCrateBtn");
 const crateTypeSelect = document.getElementById("crateTypeSelect");
@@ -4747,7 +4838,8 @@ if (pager){
     else if (idx === 1) setActiveTab("buildings");
     else if (idx === 2) setActiveTab("nfts");
     else if (idx === 3) setActiveTab("upgrade");
-    else if (idx === 4) setActiveTab("dev");
+    else if (idx === 4) setActiveTab("skills");
+    else if (idx === 5) setActiveTab("dev");
   }, { passive:true });
 }
 
