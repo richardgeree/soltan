@@ -1579,7 +1579,6 @@ html, body {
   </div>
 
   <div class="card">
-    <div class="mini">Diagnostics (hidden from players later).</div>
 
     <div class="stack" style="margin-top:10px;">
       <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
@@ -3092,10 +3091,14 @@ function updateNFTsCooldownUI(){
   if (!pager) return;
 
   const w = Math.max(1, pager.clientWidth);
-  const idx = Math.round(pager.scrollLeft / w);
+  const nftsPage = document.getElementById("pageNFTs");
+  if (!nftsPage) return;
 
-  // NFTs sayfası index 2
-  if (idx !== 2) return;
+  // visible check: pager viewport içinde mi?
+  const pr = pager.getBoundingClientRect();
+  const nr = nftsPage.getBoundingClientRect();
+  const visible = (nr.left < pr.right - 10) && (nr.right > pr.left + 10);
+  if (!visible) return;
 
   const unlocked = (state.buildings.dappStore || 0) >= 1;
   if (!unlocked) return;
