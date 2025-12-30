@@ -162,6 +162,19 @@ body {
     0 8px 24px rgba(0,0,0,.45);
 }
 
+/* Skills pity ratio: keep it on one line */
+.pityValue{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.pityValue .mini{
+  display: inline !important;
+  white-space: nowrap;
+}
+
+
 .shell::-webkit-scrollbar {
   width: 0;
   height: 0;
@@ -1504,7 +1517,7 @@ html, body {
             <div class="nft-shop" style="display:grid; grid-template-columns:1fr; gap:10px;">
               <div class="card" style="padding:12px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <div><strong>Basic Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
+                  <div><strong>Basic Crate</strong></div>
                   <div class="mini" id="basicMeta">—</div>
                 </div>
                 <div class="mini" id="basicRules">—</div>
@@ -1513,7 +1526,7 @@ html, body {
 
               <div class="card" style="padding:12px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <div><strong>Advanced Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
+                  <div><strong>Advanced Crate</strong></div>
                   <div class="mini" id="advMeta">—</div>
                 </div>
                 <div class="mini" id="advRules">—</div>
@@ -1522,7 +1535,7 @@ html, body {
 
               <div class="card" style="padding:12px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <div><strong>Legendary Crate</strong> <span class="mini">(COMMON guaranteed)</span></div>
+                  <div><strong>Legendary Crate</strong></div>
                   <div class="mini" id="legMeta">—</div>
                 </div>
                 <div class="mini" id="legRules">—</div>
@@ -1616,17 +1629,27 @@ html, body {
 
       <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
         <div class="mini">Pity (Basic)</div>
-        <strong id="skillsPityBasic">0</strong><span class="mini" style="display:inline;margin-left:8px;">/ <span id="skillsPityBasicTh">0</span></span>
+        <div class="pityValue">
+          <strong id="skillsPityBasic">0</strong>
+          <span class="mini">/ <span id="skillsPityBasicTh">0</span></span>
+        </div>
       </div>
 
-      <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
         <div class="mini">Pity (Advanced)</div>
-        <strong id="skillsPityAdvanced">0</strong><span class="mini" style="display:inline;margin-left:8px;">/ <span id="skillsPityAdvancedTh">0</span></span>
+        <div class="pityValue">
+          <strong id="skillsPityAdvanced">0</strong>
+          <span class="mini">/ <span id="skillsPityAdvancedTh">0</span></span>
+        </div>
       </div>
 
-      <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+
+            <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
         <div class="mini">Pity (Legendary)</div>
-        <strong id="skillsPityLegendary">0</strong><span class="mini"> / <span id="skillsPityLegendaryTh">0</span></span>
+        <div class="pityValue">
+          <strong id="skillsPityLegendary">0</strong>
+          <span class="mini">/ <span id="skillsPityLegendaryTh">0</span></span>
+        </div>
       </div>
     </div>
   </div>
