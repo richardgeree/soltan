@@ -1100,6 +1100,8 @@ html, body {
 }
 
 .hud-lucky{
+  /* hidden from players for now (shown in Skills instead) */
+  display: none;
   margin-top: 6px;
   font-size: 12px;
   color: var(--text-muted);
@@ -1614,17 +1616,17 @@ html, body {
 
       <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
         <div class="mini">Pity (Basic)</div>
-        <div><strong id="skillsPityBasic">0</strong></div>
+        <strong id="skillsPityBasic">0</strong><span class="mini" style="display:inline;margin-left:8px;">/ <span id="skillsPityBasicTh">0</span></span>
       </div>
 
       <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
         <div class="mini">Pity (Advanced)</div>
-        <div><strong id="skillsPityAdvanced">0</strong></div>
+        <strong id="skillsPityAdvanced">0</strong><span class="mini" style="display:inline;margin-left:8px;">/ <span id="skillsPityAdvancedTh">0</span></span>
       </div>
 
       <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
         <div class="mini">Pity (Legendary)</div>
-        <div><strong id="skillsPityLegendary">0</strong></div>
+        <strong id="skillsPityLegendary">0</strong><span class="mini"> / <span id="skillsPityLegendaryTh">0</span></span>
       </div>
     </div>
   </div>
@@ -3051,17 +3053,15 @@ function updateNFTsUI(){
     const legRules = document.getElementById("legRules");
 
     const setMeta = (key, metaEl, rulesEl)=>{
-      const cfg = CRATES[key];
-      const cd = Math.max(0, (state.shop.cooldowns[key] || 0) - now);
-      const cdS = Math.ceil(cd/1000);
-      const bought = state.shop.daily.buys[key] || 0;
-      const left = Math.max(0, cfg.limitPerDay - bought);
-      const pity = state.shop.pity[key] || 0;
-      const th = pityThreshold(key);
+    const cfg = CRATES[key];
+    const cd = Math.max(0, (state.shop.cooldowns[key] || 0) - now);
+    const cdS = Math.ceil(cd/1000);
+    const bought = state.shop.daily.buys[key] || 0;
+    const left = Math.max(0, cfg.limitPerDay - bought);
 
-      if (metaEl) metaEl.textContent = `Have: ${c[key]||0} | Price: ${cfg.priceRank} | Left today: ${left}`;
-      if (rulesEl) rulesEl.textContent = `Cooldown: ${cdS}s | Pity: ${pity+1}/${th} (unique guarantee at ${th})`;
-    };
+    if (metaEl) metaEl.textContent = `Have: ${c[key]||0} | Price: ${cfg.priceRank} | Left today: ${left}`;
+    if (rulesEl) rulesEl.textContent = `Cooldown: ${cdS}s`;
+  };
 
     setMeta("basic", basicMeta, basicRules);
     setMeta("advanced", advMeta, advRules);
@@ -3215,9 +3215,15 @@ function renderSkillsUI(){
   setText("skillsLuckyBonusText", "+" + luckyBonusPct + "%");
 
   setText("skillsLuckyChanceText", luckyTotalPct + "%");
-  setText("skillsPityBasic", String(pity.basic || 0));
-  setText("skillsPityAdvanced", String(pity.advanced || 0));
-  setText("skillsPityLegendary", String(pity.legendary || 0));
+
+  setText("skillsPityBasic", String((pity.basic || 0) + 1));
+  setText("skillsPityAdvanced", String((pity.advanced || 0) + 1));
+  setText("skillsPityLegendary", String((pity.legendary || 0) + 1));
+
+  setText("skillsPityBasicTh", String(pityThreshold("basic")));
+  setText("skillsPityAdvancedTh", String(pityThreshold("advanced")));
+  setText("skillsPityLegendaryTh", String(pityThreshold("legendary")));
+
 }
 
 function buyUpgrade(key, cost){
@@ -4072,7 +4078,7 @@ function openCrateSelected(crateKey){
   const lines = [];
   lines.push(`<div><strong>${CRATES[crateKey].name} Crate</strong> opened.</div>`);
   lines.push(`<div>✅ Commons: <strong>${out.commons.length}</strong> (${out.commons.join(", ")})</div>`);
-  if (out.uniqueId) lines.push(`<div>🌟 Unique: <strong>${out.uniqueId}</strong>${out.pityUsed ? " <span class='mini'>(pity)</span>" : ""}</div>`);
+  if (out.uniqueId) lines.push(`<div>🌟 Unique: <strong>${out.uniqueId}</strong></div>`);
   if (out.duplicateUnique) lines.push(`<div class="mini">Unique duplicate (${out.duplicateUnique}) → fallback common: ${out.fallbackCommon}</div>`);
   if (!out.uniqueId && !out.duplicateUnique) lines.push(`<div class="mini">No unique this time.</div>`);
   if (out.bonusRank > 0) lines.push(`<div>➕ Bonus Rank: <strong>${out.bonusRank}</strong></div>`);
@@ -4196,6 +4202,9 @@ function updateLuckyUI(){
 
   const p = luckyChance(); // 0..1
   el.luckyChanceValue.textContent = Math.round(p * 100) + "%";
+
+  // keep diagnostics in sync (Skills + Dev)
+  if (typeof renderSkillsUI === "function") renderSkillsUI();
 }
 
 // Lucky roll:
