@@ -1649,6 +1649,29 @@ html, body {
     <button class="btn btn-sm" id="devPrintShopBtn">Print Shop</button>
     <button class="btn btn-sm" onclick="resetGame()">RESET GAME</button>
   </div>
+  <div class="card" style="margin-top:12px;">
+  <div class="mini">Economy telemetry (last 15 min → hourly).</div>
+
+  <div class="stack" style="margin-top:10px;">
+    <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+      <div class="mini">Power/hr (net)</div>
+      <div><strong id="devPowerPerHour">—</strong></div>
+    </div>
+    <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+      <div class="mini">Nodes/hr</div>
+      <div><strong id="devNodesPerHour">—</strong></div>
+    </div>
+    <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+      <div class="mini">Passive/hr</div>
+      <div><strong id="devPassivePerHour">—</strong></div>
+    </div>
+    <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+      <div class="mini">Upgrade spend/hr</div>
+      <div><strong id="devSpendPerHour">—</strong></div>
+    </div>
+  </div>
+</div>
+
 </section>
 
   </div>
@@ -3074,7 +3097,7 @@ function updateNFTsUI(){
     const disableBuy = (btnId, key)=>{
       const btn = document.getElementById(btnId);
       if (!btn) return;
-      const check = canBuyCrate(key);
+      const check = canBuyCrate(key, now);
       btn.disabled = !check.ok;
       btn.title = check.ok ? "" : check.reason;
     };
@@ -3133,14 +3156,14 @@ function updateNFTsCooldownUI(){
   const disableBuy = (btnId, key)=>{
     const btn = document.getElementById(btnId);
     if (!btn) return;
-    const check = canBuyCrate(key);
+    const check = canBuyCrate(key, now);
     btn.disabled = !check.ok;
     btn.title = check.ok ? "" : check.reason;
   };
 
-  disableBuy("buyCrateBasic", "basic");
-  disableBuy("buyCrateAdvanced", "advanced");
-  disableBuy("buyCrateLegendary", "legendary");
+  disableBuy("buyCrateBasicBtn", "basic");
+  disableBuy("buyCrateAdvancedBtn", "advanced");
+  disableBuy("buyCrateLegendaryBtn", "legendary");
 }
 
 function openBurnCommons(){
@@ -3296,6 +3319,27 @@ function renderSkillsUI(){
 
 }
 
+function renderTelemetryUI(){
+  const elNet = document.getElementById("devPowerPerHour");
+  if (!elNet) return;
+  if (!state.telemetry) return;
+
+  const windowMs = 15 * 60 * 1000;
+  const now = Date.now();
+  const ageMs = Math.max(1, now - (state.telemetry.startMs || now));
+  const scale = 3600000 / Math.min(windowMs, ageMs);
+
+  const nodes = (state.telemetry.powerFromNodes || 0) * scale;
+  const passive = (state.telemetry.powerFromPassive || 0) * scale;
+  const spend = (state.telemetry.powerSpentOnUpgrades || 0) * scale;
+  const net = nodes + passive - spend;
+
+  elNet.textContent = String(Math.round(net));
+  const a = document.getElementById("devNodesPerHour"); if (a) a.textContent = String(Math.round(nodes));
+  const b = document.getElementById("devPassivePerHour"); if (b) b.textContent = String(Math.round(passive));
+  const c = document.getElementById("devSpendPerHour"); if (c) c.textContent = String(Math.round(spend));
+}
+
 function buyUpgrade(key, cost){
   // ✅ upgrades yoksa yarat
   if (!state.upgrades){
@@ -3308,6 +3352,7 @@ function buyUpgrade(key, cost){
   if (state.resources.power < cost) return;
 
   state.resources.power -= cost;
+  if (state.telemetry) state.telemetry.powerSpentOnUpgrades += cost;
   state.upgrades[key] = (state.upgrades[key] || 0) + 1;
 
   updateResourcesUI();
@@ -3479,6 +3524,7 @@ function updateBuildingLevelsUI(){
       const gains = computePassiveGains();
       if(gains.eGain === 0) return;
       state.resources.power += gains.eGain;
+      if (state.telemetry) state.telemetry.powerFromPassive += gains.eGain;
 
       updateResourcesUI();
       updateHourlyRates();
@@ -4061,12 +4107,12 @@ function pityThreshold(crateKey){
   return arr[2];
 }
 
-function canBuyCrate(crateKey){
+function canBuyCrate(crateKey, nowOverride){
   ensureShopState();
   resetDailyIfNeeded();
 
   const cfg = CRATES[crateKey];
-  const now = Date.now();
+  const now = (nowOverride ?? Date.now());
 
   // cooldown
   const next = state.shop.cooldowns[crateKey] || 0;
@@ -4609,6 +4655,7 @@ function nodeTryHarvest(idx){
   gain = Math.max(1, Math.round(gain * overclockProfitMult()));
 
   state.resources.power += gain;
+  if (state.telemetry) state.telemetry.powerFromNodes += gain;
   spawnNodePopup(getNodeCellEl(idx), `+${gain}⚡`, "power pos");
 
   updateResourcesUI();
@@ -5200,14 +5247,26 @@ if (!state.user) {
     telegramId: null
   };
 }
+
 // === 0.2 INVENTORY (init-time guarantee) ===
 if (!state.inventory) {
   state.inventory = {
-    crates: 0,            // unopened crates
+    crates: { basic:0, advanced:0, legendary:0 }, // unopened crates
     nftCommons: {},       // { "nft_id": count }
     nftUniques: {},       // { "nft_id": true }
   };
 }
+
+// === 0.25 TELEMETRY (init-time guarantee) ===
+if (!state.telemetry){
+  state.telemetry = {
+    startMs: Date.now(),
+    powerFromNodes: 0,
+    powerFromPassive: 0,
+    powerSpentOnUpgrades: 0
+  };
+}
+
   loadPlotSprites();
   loadStreakFromStorage();  // streak state'i geri yükle
   updateResourcesUI();
@@ -5232,6 +5291,16 @@ if (!state.inventory) {
   setInterval(nodeTick, 100);
   setInterval(updateBuildProgressUI, 120);
   setInterval(updateNFTsCooldownUI, 250);
+  setInterval(renderTelemetryUI, 500);
+
+setInterval(()=>{
+  if (!state.telemetry) return;
+  state.telemetry.startMs = Date.now();
+  state.telemetry.powerFromNodes = 0;
+  state.telemetry.powerFromPassive = 0;
+  state.telemetry.powerSpentOnUpgrades = 0;
+}, 15 * 60 * 1000);
+
   updateWalletUI();
   updateStreakUI();         // streak buton + label durumu
   setInterval(passiveTick, PASSIVE_TICK_SECONDS * 1000);
