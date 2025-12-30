@@ -3106,6 +3106,59 @@ function updateNFTsUI(){
   } catch(e) {}
 }
 
+function updateNFTsCooldownUI(){
+  const pager = document.getElementById("pager");
+  if (!pager) return;
+
+  const w = Math.max(1, pager.clientWidth);
+  const idx = Math.round(pager.scrollLeft / w);
+
+  // NFTs sayfası index 2
+  if (idx !== 2) return;
+
+  const unlocked = (state.buildings.dappStore || 0) >= 1;
+  if (!unlocked) return;
+
+  const now = Date.now();
+  const c = state.inventory.crates || { basic:0, advanced:0, legendary:0 };
+
+  const basicMeta = document.getElementById("basicMeta");
+  const advMeta = document.getElementById("advMeta");
+  const legMeta = document.getElementById("legMeta");
+
+  const basicRules = document.getElementById("basicRules");
+  const advRules = document.getElementById("advRules");
+  const legRules = document.getElementById("legRules");
+
+  const setMeta = (key, metaEl, rulesEl)=>{
+    const cfg = CRATES[key];
+    const cd = Math.max(0, (state.shop.cooldowns[key] || 0) - now);
+    const cdS = Math.ceil(cd/1000);
+    const bought = state.shop.daily.buys[key] || 0;
+    const left = Math.max(0, cfg.limitPerDay - bought);
+
+    if (metaEl) metaEl.textContent = `Have: ${c[key]||0} | Price: ${cfg.priceRank} | Left today: ${left}`;
+    if (rulesEl) rulesEl.textContent = `Cooldown: ${cdS}s`;
+  };
+
+  setMeta("basic", basicMeta, basicRules);
+  setMeta("advanced", advMeta, advRules);
+  setMeta("legendary", legMeta, legRules);
+
+  // buy butonları cooldown/limit'e göre live disable olsun
+  const disableBuy = (btnId, key)=>{
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    const check = canBuyCrate(key);
+    btn.disabled = !check.ok;
+    btn.title = check.ok ? "" : check.reason;
+  };
+
+  disableBuy("buyCrateBasic", "basic");
+  disableBuy("buyCrateAdvanced", "advanced");
+  disableBuy("buyCrateLegendary", "legendary");
+}
+
 function openBurnCommons(){
   const inv = state.inventory || {};
   const total = Object.values(inv.nftCommons || {}).reduce((a,b)=>a+(b||0),0);
@@ -3882,6 +3935,45 @@ const NFT_POOLS = {
   uniquePool: ["U01","U02","U03","U04"]
 };
 
+const CRATE_TABLES = {
+  basic: {
+    // basic: erken oyun, daha çok C01-C08 ağırlıklı
+    common: [
+      ["C01",3],["C02",3],["C03",3],["C04",3],
+      ["C05",2],["C06",2],["C07",2],["C08",2],
+      ["C09",1],["C10",1],["C11",1],["C12",1],
+      ["C13",1],["C14",1],["C15",1],["C16",1]
+    ],
+    unique: [
+      ["U01",4],["U02",3],["U03",2],["U04",1]
+    ]
+  },
+  advanced: {
+    // advanced: orta havuzlar ağırlaşsın
+    common: [
+      ["C01",1],["C02",1],["C03",1],["C04",1],
+      ["C05",2],["C06",2],["C07",2],["C08",2],
+      ["C09",3],["C10",3],["C11",3],["C12",3],
+      ["C13",2],["C14",2],["C15",2],["C16",2]
+    ],
+    unique: [
+      ["U01",1],["U02",2],["U03",3],["U04",4]
+    ]
+  },
+  legendary: {
+    // legendary: geç oyun commons ağır (C09-C16)
+    common: [
+      ["C01",0.5],["C02",0.5],["C03",0.5],["C04",0.5],
+      ["C05",1],["C06",1],["C07",1],["C08",1],
+      ["C09",3],["C10",3],["C11",3],["C12",3],
+      ["C13",4],["C14",4],["C15",4],["C16",4]
+    ],
+    unique: [
+      ["U01",1],["U02",1],["U03",2],["U04",6]
+    ]
+  }
+};
+
 function ensureShopState(){
   if (!state.shop || typeof state.shop !== "object") {
     state.shop = {
@@ -3935,6 +4027,27 @@ function randInt(min, max){
 }
 function randPick(arr){
   return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function randPickWeighted(entries){
+  // entries: [ [id, weight], ... ]
+  if (!Array.isArray(entries) || entries.length === 0) return null;
+  let total = 0;
+  for (const e of entries){
+    const w = Number(e?.[1] ?? 0);
+    if (w > 0) total += w;
+  }
+  if (total <= 0) return entries[0][0];
+
+  let r = Math.random() * total;
+  for (const e of entries){
+    const id = e[0];
+    const w = Number(e?.[1] ?? 0);
+    if (w <= 0) continue;
+    r -= w;
+    if (r <= 0) return id;
+  }
+  return entries[entries.length - 1][0];
 }
 
 function uniquesOwnedCount(){
@@ -4022,14 +4135,17 @@ function rollOpenOutcome(crateKey){
   // COMMON guaranteed
   const commonCount = randInt(cfg.commonQty[0], cfg.commonQty[1]);
   const commons = [];
+  const table = CRATE_TABLES[crateKey] || null;
   for (let i=0; i<commonCount; i++){
-    commons.push(randPick(NFT_POOLS.commonPool));
+    const id = table?.common ? randPickWeighted(table.common) : randPick(NFT_POOLS.commonPool);
+    commons.push(id);
   }
 
   // UNIQUE (1 adet)
   let uniqueId = null;
   if (gotUnique) {
-    uniqueId = randPick(NFT_POOLS.uniquePool);
+    const table = CRATE_TABLES[crateKey] || null;
+    uniqueId = table?.unique ? randPickWeighted(table.unique) : randPick(NFT_POOLS.uniquePool);
   }
 
   // BONUS rank
@@ -5118,6 +5234,7 @@ if (!state.inventory) {
   updateLuckyUI();
   setInterval(nodeTick, 100);
   setInterval(updateBuildProgressUI, 120);
+  setInterval(updateNFTsCooldownUI, 250);
   updateWalletUI();
   updateStreakUI();         // streak buton + label durumu
   setInterval(passiveTick, PASSIVE_TICK_SECONDS * 1000);
