@@ -1112,21 +1112,6 @@ html, body {
   gap: 8px;
 }
 
-.hud-lucky{
-  /* hidden from players for now (shown in Skills instead) */
-  display: none;
-  margin-top: 6px;
-  font-size: 12px;
-  color: var(--text-muted);
-  text-align: left;
-  padding: 0 2px;
-}
-
-.hud-lucky strong{
-  color: var(--text-main);
-  font-weight: 700;
-}
-
 .resources-title{
   font-size: 11px;
   letter-spacing: 0.12em;
@@ -1458,10 +1443,6 @@ html, body {
               <button class="btn btn-primary btn-sm" id="claimStreakButton">
                Claim
               </button>
-            </div>
-  
-            <div class="hud-lucky" id="luckyMiniRow">
-              ✨ Lucky: <strong id="luckyChanceValue">0%</strong>
             </div>
 
           </div>
@@ -3234,6 +3215,13 @@ function confirmBurnCommons(){
   log(`Burned ${amt} commons → +${gainRank} Rank.`, { positive:true, tag:"BURN" });
 }
 
+const UPGRADE_GROWTH = 1.30;
+const UPGRADE_CAPS = {
+  profitLvl: 40,
+  luckyLvl:  30,
+  speedLvl:  10
+};
+
 function renderUpgradesUI(){
   const el = document.getElementById("upgradeList");
   if (!el) return;
@@ -3244,15 +3232,18 @@ function renderUpgradesUI(){
 const u = state.upgrades;
 
   const rows = [
-    { key:"profitLvl", name:"Profit Boost", desc:"+5% per level", base: 50 },
-    { key:"luckyLvl",  name:"Lucky Boost",  desc:"+0.3% per level", base: 80 },
-    { key:"speedLvl",  name:"Speed Boost",  desc:"-4% grow time per level", base: 70 },
+    { key:"profitLvl", name:"Profit Boost", desc:"+5% per level", base: 25 },
+    { key:"luckyLvl",  name:"Lucky Boost",  desc:"+0.3% per level", base: 40 },
+    { key:"speedLvl",  name:"Speed Boost",  desc:"-4% grow time per level", base: 35 },
   ];
 
   el.innerHTML = rows.map(r=>{
     const lvl = u[r.key] || 0;
-    const cost = Math.round(r.base * Math.pow(1.25, lvl));
-    const can = state.resources.power >= cost;
+    const cap = UPGRADE_CAPS[r.key] ?? 999;
+    const atCap = lvl >= cap;
+
+    const cost = Math.round(r.base * Math.pow(UPGRADE_GROWTH, lvl));
+    const can = (!atCap) && (state.resources.power >= cost);
 
     return `
       <div class="line" style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
@@ -3260,7 +3251,7 @@ const u = state.upgrades;
           <div><strong>${r.name}</strong> <span class="mini">Lv ${lvl}</span></div>
           <div class="mini">${r.desc}</div>
         </div>
-        <button class="btn btn-sm" ${can ? "" : "disabled"} onclick="buyUpgrade('${r.key}', ${cost})">
+        <button class="btn btn-sm" ${can ? "" : "disabled"} onclick="buyUpgrade('${r.key}', ${cost})" title="${atCap ? "MAX level" : ""}">
           Buy (${cost}⚡)
         </button>
       </div>
@@ -3303,10 +3294,13 @@ function renderSkillsUI(){
 }
 
 function buyUpgrade(key, cost){
-  // ✅ upgrades yoksa yarat (butonlar boşa tıklanmasın)
+  // ✅ upgrades yoksa yarat
   if (!state.upgrades){
     state.upgrades = { profitLvl:0, luckyLvl:0, speedLvl:0 };
   }
+
+  const cap = UPGRADE_CAPS[key] ?? 999;
+  if ((state.upgrades[key] || 0) >= cap) return;
 
   if (state.resources.power < cost) return;
 
@@ -3890,37 +3884,37 @@ const CRATES = {
   basic: {
     key: "basic",
     name: "Basic",
-    priceRank: 60,
-    cooldownMs: 60 * 1000,     // 1 dk
-    limitPerDay: 10,
+    priceRank: 30,
+    cooldownMs: 45 * 1000,     
+    limitPerDay: 12,
     commonQty: [1, 2],         // her açılışta en az 1 common
     uniqueBaseChance: 0.10,    // %10
-    bonusRankChance: 0.20,     // %20 bonus rank
-    bonusRank: [5, 12],
+    bonusRankChance: 0.18,     
+    bonusRank: [3, 8],
     // pity eşikleri: ilk unique hızlı, ikinci de kısa süre sonra, sonra normale döner
     pityByUniquesOwned: [3, 5, 9] // 0 unique → 3; 1 unique → 5; 2+ → 9
   },
   advanced: {
     key: "advanced",
     name: "Advanced",
-    priceRank: 140,
-    cooldownMs: 2 * 60 * 1000, // 2 dk
-    limitPerDay: 6,
+    priceRank: 90,
+    cooldownMs: 90 * 1000, 
+    limitPerDay: 7,
     commonQty: [2, 3],
     uniqueBaseChance: 0.16,
-    bonusRankChance: 0.28,
-    bonusRank: [10, 24],
+    bonusRankChance: 0.25,
+    bonusRank: [6, 16],
     pityByUniquesOwned: [2, 4, 7]
   },
   legendary: {
     key: "legendary",
     name: "Legendary",
-    priceRank: 320,
-    cooldownMs: 5 * 60 * 1000, // 5 dk
-    limitPerDay: 3,
+    priceRank: 200,
+    cooldownMs: 240 * 1000, 
+    limitPerDay: 4,
     commonQty: [3, 5],
     uniqueBaseChance: 0.25,
-    bonusRankChance: 0.40,
+    bonusRankChance: 0.33,
     bonusRank: [20, 50],
     pityByUniquesOwned: [1, 2, 4]
   }
@@ -4232,14 +4226,14 @@ function openCrateSelected(crateKey){
 }
 
 const NODE_SEEDS = {
-  electron:   { label:"Electron",   iconSrc:"assets/nodes/node_electron.png",   cost:1,   grow:2,  harvests:3 },
-  transistor: { label:"Transistor", iconSrc:"assets/nodes/node_transistor.png", cost:3,   grow:4,  harvests:3 },
-  microchip:  { label:"Microchip",  iconSrc:"assets/nodes/node_microchip.png",  cost:7,   grow:7,  harvests:3 },
-  ram:        { label:"RAM",        iconSrc:"assets/nodes/node_ram.png",        cost:15,  grow:12,  harvests:3 },
-  cpu:        { label:"CPU",        iconSrc:"assets/nodes/node_cpu.png",        cost:25,  grow:17,  harvests:3 },
-  gpu:        { label:"GPU",        iconSrc:"assets/nodes/node_gpu.png",        cost:60,  grow:40, harvests:3 },
-  ai:         { label:"AI",         iconSrc:"assets/nodes/node_ai.png",         cost:100, grow:60, harvests:3 },
-  quantum:    { label:"Quantum",    iconSrc:"assets/nodes/node_quantum.png",    cost:140, grow:90, harvests:3 },
+  electron:   { label:"Electron",   iconSrc:"assets/nodes/node_electron.png",   cost:1,   grow:3,  harvests:3 },
+  transistor: { label:"Transistor", iconSrc:"assets/nodes/node_transistor.png", cost:3,   grow:6,  harvests:3 },
+  microchip:  { label:"Microchip",  iconSrc:"assets/nodes/node_microchip.png",  cost:7,   grow:10, harvests:3 },
+  ram:        { label:"RAM",        iconSrc:"assets/nodes/node_ram.png",        cost:15,  grow:16, harvests:3 },
+  cpu:        { label:"CPU",        iconSrc:"assets/nodes/node_cpu.png",        cost:25,  grow:22, harvests:3 },
+  gpu:        { label:"GPU",        iconSrc:"assets/nodes/node_gpu.png",        cost:60,  grow:35, harvests:3 },
+  ai:         { label:"AI",         iconSrc:"assets/nodes/node_ai.png",         cost:100, grow:50, harvests:3 },
+  quantum:    { label:"Quantum",    iconSrc:"assets/nodes/node_quantum.png",    cost:140, grow:70, harvests:3 },
 };
 
 const SEED_ORDER = ["electron","transistor","microchip","ram","cpu","gpu","ai","quantum"];
@@ -4337,12 +4331,11 @@ function overclockSpeedMult(){
 }
 
 function updateLuckyUI(){
-  if (!el.luckyChanceValue) return;
-
   const p = luckyChance(); // 0..1
-  el.luckyChanceValue.textContent = Math.round(p * 100) + "%";
-
-  // keep diagnostics in sync (Skills + Dev)
+  if (el.luckyChanceValue){
+    el.luckyChanceValue.textContent = Math.round(p * 100) + "%";
+  }
+  // keep diagnostics in sync (Skills)
   if (typeof renderSkillsUI === "function") renderSkillsUI();
 }
 
@@ -5232,6 +5225,7 @@ if (!state.inventory) {
   startRAF();
   updateNFTsUI();
   updateLuckyUI();
+  renderSkillsUI();
   setInterval(nodeTick, 100);
   setInterval(updateBuildProgressUI, 120);
   setInterval(updateNFTsCooldownUI, 250);
