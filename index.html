@@ -2113,7 +2113,7 @@ try{
         // ✅ inventory restore + migration hardening
     if (saved.inventory && typeof saved.inventory === "object") {
       if (!state.inventory || typeof state.inventory !== "object") {
-        state.inventory = { crates: 0, nftCommons: {}, nftUniques: {} };
+        state.inventory = { crates: { basic:0, advanced:0, legendary:0 }, nftCommons: {}, nftUniques: {} };
       }
 
       if (typeof saved.inventory.crates === "number") {
@@ -3915,7 +3915,7 @@ const CRATES = {
     commonQty: [3, 5],
     uniqueBaseChance: 0.25,
     bonusRankChance: 0.33,
-    bonusRank: [20, 50],
+    bonusRank: [12, 30],
     pityByUniquesOwned: [1, 2, 4]
   }
 };
