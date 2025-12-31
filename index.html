@@ -6,7 +6,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <title>SOLTAN — mock v0.29</title>
+  <title>SOLTAN — mock v0.30</title>
   <style>
 html, body { height: 100%; }
 html { -webkit-text-size-adjust: 100%; }
@@ -501,6 +501,20 @@ h1,h2,h3,h4 {
   user-select:none;
 }
 
+.node-cell.locked{
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+.node-cell.locked::after{
+  content: "🔒";
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 14px;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
 .node-bar{
   height: 8px;          
   width: 100%;
@@ -952,6 +966,20 @@ html, body {
 .seedbar.cols-3{ grid-template-columns: repeat(3, 1fr); }
 .seedbar.cols-2{ grid-template-columns: repeat(3, 1fr); }
 
+.seed-card.locked{
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+.seed-lock{
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  font-size: 14px;
+  opacity: 0.9;
+  pointer-events: none;
+}
+.seed-card.locked{ cursor: not-allowed; }
+
 .seed-card.placeholder{
   visibility: hidden;
   pointer-events: none;
@@ -1269,6 +1297,48 @@ html, body {
   0%   { filter: brightness(1); }
   50%  { filter: brightness(1.3); }
   100% { filter: brightness(1); }
+}
+
+/* ===== TOAST ===== */
+#toastHost{
+  position: fixed;
+  left: 50%;
+  top: 14px;
+  transform: translateX(-50%);
+  z-index: 9999;
+  width: min(520px, calc(100vw - 24px));
+  pointer-events: none;
+}
+.toast{
+  background: rgba(7,11,18,0.92);
+  border: 1px solid rgba(22,32,51,0.95);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: toastIn 240ms ease-out forwards, toastOut 260ms ease-in forwards;
+  animation-delay: 0ms, 2600ms;
+}
+.toast .tTitle{ font-weight: 700; font-size: 14px; }
+.toast .tBody{ opacity: 0.92; font-size: 13px; margin-top: 2px; }
+.toast .tIcon{
+  width: 28px; height: 28px;
+  border-radius: 10px;
+  display:flex; align-items:center; justify-content:center;
+  background: rgba(74,222,128,0.12);
+  border: 1px solid rgba(74,222,128,0.25);
+  flex: 0 0 auto;
+}
+@keyframes toastIn{
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes toastOut{
+  to { opacity: 0; transform: translateY(-8px); }
 }
 
 .node-popup{
@@ -1905,9 +1975,11 @@ function defaultSave(){
   streak: { current: 0, lastClaimDate: null },
 
   upgrades: {
-  profitLvl: 0, // harvest gain multiplier
-  luckyLvl: 0,  // lucky chance bonus
-  speedLvl: 0,  // grow time reduction
+  profitLvl: 0,
+  luckyLvl:  0,
+  speedLvl:  0,
+  unlockComponentLvl: 0,
+  unlockCellLvl: 0,
 },
 
   progression: {
@@ -2060,12 +2132,14 @@ function cleanupLegacyKeysOnce(){
 
 const PASSIVE_TICK_SECONDS = 5;
 // =======================
-// STATE BOOTSTRAP (FIX v0.29)
+// STATE BOOTSTRAP (FIX v0.30)
 // =======================
 
 function createDefaultState(){
   return {
     resources: { power: 0, sol: 0.0, rank: 0 },
+    meta: { welcomeClaimed: false },
+
 
     buildings: { powerPlant: 0, dappStore: 0, furnace: 0 },
 
@@ -3251,7 +3325,9 @@ const UPGRADE_GROWTH = 1.30;
 const UPGRADE_CAPS = {
   profitLvl: 40,
   luckyLvl:  30,
-  speedLvl:  10
+  speedLvl:  10,
+  unlockComponentLvl: 30,
+  unlockCellLvl: 30
 };
 
 function renderUpgradesUI(){
@@ -3259,15 +3335,18 @@ function renderUpgradesUI(){
   if (!el) return;
 
   if (!state.upgrades){
-  state.upgrades = { profitLvl:0, luckyLvl:0, speedLvl:0 };
+  state.upgrades = { profitLvl:0, luckyLvl:0, speedLvl:0, unlockComponentLvl:0, unlockCellLvl:0 };
 }
 const u = state.upgrades;
 
   const rows = [
-    { key:"profitLvl", name:"Profit Boost", desc:"+5% per level", base: 25 },
-    { key:"luckyLvl",  name:"Lucky Boost",  desc:"+0.3% per level", base: 40 },
-    { key:"speedLvl",  name:"Speed Boost",  desc:"-4% grow time per level", base: 35 },
-  ];
+  { key:"profitLvl", name:"Profit Boost", desc:"+5% per level", base: 25 },
+  { key:"luckyLvl",  name:"Lucky Boost",  desc:"+0.3% per level", base: 40 },
+  { key:"speedLvl",  name:"Speed Boost",  desc:"-4% grow time per level", base: 35 },
+
+  { key:"unlockComponentLvl", name:"Unlock New Component", desc:"Unlocks higher-tier components at set levels", base: 60 },
+  { key:"unlockCellLvl", name:"Unlock New Cell", desc:"Unlocks more grid cells at set levels", base: 55 },
+];
 
   el.innerHTML = rows.map(r=>{
     const lvl = u[r.key] || 0;
@@ -3357,8 +3436,8 @@ function renderTelemetryUI(){
 function buyUpgrade(key, cost){
   // ✅ upgrades yoksa yarat
   if (!state.upgrades){
-    state.upgrades = { profitLvl:0, luckyLvl:0, speedLvl:0 };
-  }
+  state.upgrades = { profitLvl:0, luckyLvl:0, speedLvl:0, unlockComponentLvl:0, unlockCellLvl:0 };
+}
 
   const cap = UPGRADE_CAPS[key] ?? 999;
   if ((state.upgrades[key] || 0) >= cap) return;
@@ -4304,6 +4383,47 @@ const NODE_SEEDS = {
   quantum:    { label:"Quantum",    iconSrc:"assets/nodes/node_quantum.png",    cost:140, grow:70, harvests:3 },
 };
 
+// ===== UNLOCK RULES =====
+const COMPONENT_UNLOCK_REQ = {
+  electron: 0,
+  transistor: 3,
+  microchip: 7,
+  ram: 9,
+  cpu: 12,
+  gpu: 15,
+  ai: 17,
+  quantum: 20
+};
+
+// cells 7..16 unlock thresholds
+const CELL_UNLOCK_REQ = [3, 7, 9, 12, 15, 17, 20, 23, 27, 30];
+
+function getUnlockComponentLvl(){
+  return (state.upgrades && Number.isFinite(state.upgrades.unlockComponentLvl)) ? state.upgrades.unlockComponentLvl : 0;
+}
+function getUnlockCellLvl(){
+  return (state.upgrades && Number.isFinite(state.upgrades.unlockCellLvl)) ? state.upgrades.unlockCellLvl : 0;
+}
+
+function isComponentUnlocked(seedKey){
+  const req = COMPONENT_UNLOCK_REQ[seedKey];
+  if (req == null) return true; // unknown seeds => don’t block
+  return getUnlockComponentLvl() >= req;
+}
+
+function unlockedCellCount(){
+  const lvl = getUnlockCellLvl();
+  let count = 6; // first 6 always open
+  for (let i = 0; i < CELL_UNLOCK_REQ.length; i++){
+    if (lvl >= CELL_UNLOCK_REQ[i]) count++;
+  }
+  return Math.min(16, count);
+}
+
+function isCellUnlocked(idx){
+  return idx < unlockedCellCount();
+}
+
 const SEED_ORDER = ["electron","transistor","microchip","ram","cpu","gpu","ai","quantum"];
 let seedPage = 0;
 
@@ -4454,6 +4574,8 @@ function renderSeedBar(){
     const s = NODE_SEEDS[seedKey];
     const card = document.createElement("div");
     card.className = "seed-card";
+    const locked = !isComponentUnlocked(seedKey);
+    if (locked) card.classList.add("locked");
     if (state.powerGrid.selectedSeed === seedKey) card.classList.add("active");
     card.dataset.seed = seedKey;
 
@@ -4473,8 +4595,20 @@ function renderSeedBar(){
     card.appendChild(name);
     card.appendChild(icon);
     card.appendChild(cost);
+        if (locked){
+      const lk = document.createElement("div");
+      lk.className = "seed-lock";
+      lk.textContent = "🔒";
+      card.appendChild(lk);
+    }
+
 
     card.addEventListener("click", (ev)=>{
+        if (!isComponentUnlocked(seedKey)){
+    showToast("Locked component", "Upgrade: Unlock New Component to use this.", "🔒");
+    return;
+  }
+
   const alreadySelected = (state.powerGrid.selectedSeed === seedKey);
 
   if (alreadySelected){
@@ -4543,6 +4677,30 @@ function spawnNodePopup(cellEl, text, kind){
   setTimeout(remove, ttl);
 }
 
+function ensureToastHost(){
+  let host = document.getElementById("toastHost");
+  if (host) return host;
+  host = document.createElement("div");
+  host.id = "toastHost";
+  document.body.appendChild(host);
+  return host;
+}
+
+function showToast(title, body, icon="⚡"){
+  const host = ensureToastHost();
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.innerHTML = `
+    <div class="tIcon">${icon}</div>
+    <div>
+      <div class="tTitle">${title}</div>
+      <div class="tBody">${body}</div>
+    </div>
+  `;
+  host.appendChild(t);
+  setTimeout(()=>{ try{ t.remove(); }catch(e){} }, 3200);
+}
+
 function getNodeCellEl(idx){
   const dom = nodeDom[idx];
   return dom ? dom.cell : null;
@@ -4560,6 +4718,7 @@ function renderPowerGrid(force = false){
     state.powerGrid.nodes.forEach((n, idx) => {
       const cell = document.createElement("div");
       cell.className = "node-cell";
+      if (!isCellUnlocked(idx)) cell.classList.add("locked");
       cell.dataset.idx = String(idx);
 
       const icon = document.createElement("img");
@@ -4591,6 +4750,9 @@ function renderPowerGrid(force = false){
   state.powerGrid.nodes.forEach((n, idx) => {
     const dom = nodeDom[idx];
     if (!dom) return;
+
+    const unlocked = isCellUnlocked(idx);
+    dom.cell.classList.toggle("locked", !unlocked);
 
     dom.cell.classList.remove("node-ready", "lucky", "luckyA", "luckyB", "luckyC");
 
@@ -4634,6 +4796,15 @@ function setSelectedSeed(seedKey){
 }
 
 function nodeTryDeploy(idx){
+  if (!isCellUnlocked(idx)){
+    showToast("Locked cell", "Upgrade: Unlock New Cell to expand your grid.", "🔒");
+    return;
+  }
+  if (!isComponentUnlocked(state.powerGrid.selectedSeed)){
+    showToast("Locked component", "Upgrade: Unlock New Component to use this.", "🔒");
+    return;
+  }
+  
   const n = state.powerGrid.nodes[idx];
   if (n.seed) return;
 
@@ -4980,6 +5151,10 @@ if (gridEl) {
     if (!cell) return;
     const idx = parseInt(cell.dataset.idx, 10);
     if (isNaN(idx)) return;
+    if (!isCellUnlocked(idx)){
+    showToast("Locked cell", "Upgrade: Unlock New Cell to expand your grid.", "🔒");
+    return;
+    }
     const n = state.powerGrid.nodes[idx];
     if (!n.seed) {
       nodeTryDeploy(idx);
@@ -5324,7 +5499,16 @@ setInterval(()=>{
   updateWalletUI();
   updateStreakUI();         // streak buton + label durumu
   setInterval(passiveTick, PASSIVE_TICK_SECONDS * 1000);
-  log("Game session started (v0.29).", { tag:"SYS" });
+    // ===== WELCOME REWARD (first run / after reset) =====
+  if (!state.meta) state.meta = { welcomeClaimed:false };
+  if (!state.meta.welcomeClaimed){
+    state.resources.power = (state.resources.power || 0) + 100;
+    state.meta.welcomeClaimed = true;
+    showToast("Welcome reward", "+100 Electricity", "⚡");
+    scheduleSaveV1();
+    updateTopHUD();
+  }
+  log("Game session started (v0.30).", { tag:"SYS" });
 
 }
 
