@@ -1556,7 +1556,7 @@ html, body {
           <div class="nft-lock-card">
             <div class="nft-lock-title">NFT Library Locked</div>
             <div class="nft-lock-sub">Build <strong>dApp Store</strong> to unlock Lucky Grids and NFTs.</div>
-            <button class="btn btn-primary btn-sm" id="nftGoBuildBtn">Go to Buildings</button>
+            <button class="btn btn-primary btn-sm" id="nftGoBuildBtn">Build dApp Store</button>
           </div>
         </div>
       </div>
@@ -1650,7 +1650,7 @@ html, body {
     <button class="btn btn-sm" onclick="resetGame()">RESET GAME</button>
   </div>
   <div class="card" style="margin-top:12px;">
-  <div class="mini">Economy telemetry (last 15 min → hourly).</div>
+  <div class="mini">Economy telemetry (<span id="devTelemetrySample">—</span> sample → /hr projection).</div>
 
   <div class="stack" style="margin-top:10px;">
     <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
@@ -2975,8 +2975,6 @@ let pendingNodeRender = false;
       rankValue: document.getElementById("rankValue"),
       powerRate: document.getElementById("powerRate"),
 
-      luckyChanceValue: document.getElementById("luckyChanceValue"),
-
       streakValue: document.getElementById("streakValue"),
       claimStreakButton: document.getElementById("claimStreakButton"),
       streakMiniText: document.getElementById("streakMiniText"),
@@ -3016,6 +3014,15 @@ function updateNFTsUI(){
   const tab = document.getElementById("tabNFTs");
   if (tab) tab.classList.toggle("tab-locked", !unlocked);
 
+  if (!unlocked){
+    const btn = document.getElementById("nftGoBuildBtn");
+    if (btn){
+      const nextTier = (state.buildings.dappStore || 0) + 1; // lock ekranında genelde 1
+      const cost = buildingCost("dappStore", nextTier).power;
+      btn.textContent = `Build dApp Store (⚡${cost})`;
+    }
+    return;
+  }
 
   // unlocked değilse aşağıyı çizme
   if (!unlocked) return;
@@ -3109,19 +3116,18 @@ function updateNFTsUI(){
   } catch(e) {}
 }
 
-function updateNFTsCooldownUI(){
+function isPageVisible(pageId){
   const pager = document.getElementById("pager");
-  if (!pager) return;
+  const page  = document.getElementById(pageId);
+  if (!pager || !page) return false;
 
-  const w = Math.max(1, pager.clientWidth);
-  const nftsPage = document.getElementById("pageNFTs");
-  if (!nftsPage) return;
-
-  // visible check: pager viewport içinde mi?
   const pr = pager.getBoundingClientRect();
-  const nr = nftsPage.getBoundingClientRect();
-  const visible = (nr.left < pr.right - 10) && (nr.right > pr.left + 10);
-  if (!visible) return;
+  const nr = page.getBoundingClientRect();
+  return (nr.left < pr.right - 10) && (nr.right > pr.left + 10);
+}
+
+function updateNFTsCooldownUI(){
+  if (!isPageVisible("pageNFTs")) return;
 
   const unlocked = (state.buildings.dappStore || 0) >= 1;
   if (!unlocked) return;
@@ -3320,14 +3326,22 @@ function renderSkillsUI(){
 }
 
 function renderTelemetryUI(){
+  if (!isPageVisible("pageDev")) return;
+
   const elNet = document.getElementById("devPowerPerHour");
   if (!elNet) return;
   if (!state.telemetry) return;
 
-  const windowMs = 15 * 60 * 1000;
-  const now = Date.now();
-  const ageMs = Math.max(1, now - (state.telemetry.startMs || now));
-  const scale = 3600000 / Math.min(windowMs, ageMs);
+    const windowMs = 15 * 60 * 1000;
+    const minSampleMs = 30 * 1000;
+
+    const now = Date.now();
+    const ageMs = Math.max(0, now - (state.telemetry.startMs || now));
+    const effectiveMs = Math.min(windowMs, Math.max(minSampleMs, ageMs));
+    const scale = 3600000 / effectiveMs;
+
+    const sEl = document.getElementById("devTelemetrySample");
+    if (sEl) sEl.textContent = `${Math.round(effectiveMs/1000)}s`;
 
   const nodes = (state.telemetry.powerFromNodes || 0) * scale;
   const passive = (state.telemetry.powerFromPassive || 0) * scale;
@@ -3648,14 +3662,19 @@ function updateBuildProgressUI(){
       updateBuildingIconsUI();
       updateHourlyRates();
       checkBuildingRequirements();
-      renderBuildBar(); // UI'yı güncelle
-      markMapDirty(); // ✅ map'i RAF tekrar çizecek
-      updateNFTsUI(); // ✅ dApp Store bitince lock kalksın
+
+      if (isPageVisible("pageBuildings")){
+        renderBuildBar();
+        markMapDirty();
+      }
+
+      updateNFTsUI();
       updateLuckyUI();
     }
   });
 // status yazısını canlı güncelle
-if (showStatusKey) {
+if (showStatusKey && isPageVisible("pageBuildings")) {
+
   const name = BUILDINGS[showStatusKey].name;
   const pending = state.buildPendingTier[showStatusKey] || ((state.buildings[showStatusKey] || 0) + 1);
   const isBuild = (state.buildings[showStatusKey] || 0) === 0;
@@ -4381,9 +4400,6 @@ function overclockSpeedMult(){
 
 function updateLuckyUI(){
   const p = luckyChance(); // 0..1
-  if (el.luckyChanceValue){
-    el.luckyChanceValue.textContent = Math.round(p * 100) + "%";
-  }
   // keep diagnostics in sync (Skills)
   if (typeof renderSkillsUI === "function") renderSkillsUI();
 }
@@ -4717,7 +4733,7 @@ function nodeTick(){
   if (pendingNodeRender && (now - lastRender) > 150) {
     lastRender = now;
     pendingNodeRender = false;
-    renderPowerGrid();
+    if (isPageVisible("pageNode")) renderPowerGrid();
   }
 }
 
@@ -4881,7 +4897,11 @@ if (nftGoBuildBtn){
   });
 }
 
-if (tabNode) tabNode.addEventListener("click", ()=> { setActiveTab("node"); goPage(0); });
+if (tabNode) tabNode.addEventListener("click", ()=> {
+  setActiveTab("node");
+  goPage(0);
+  requestAnimationFrame(()=> renderPowerGrid());
+});
 
 if (tabBuildings) tabBuildings.addEventListener("click", ()=> {
   setActiveTab("buildings");
