@@ -1469,6 +1469,7 @@ html, body {
 </head>
 
 <body>
+  <div id="toastHost"></div>
     <div class="shell">
       <div class="app">
         <div class="hud">
@@ -5614,20 +5615,16 @@ if (!state.meta.welcomeClaimed){
   state.resources.power = (state.resources.power || 0) + 100;
   state.meta.welcomeClaimed = true;
 
-  // ✅ Immediately persist (prevents repeat reward on refresh)
+  // ✅ queue toast for AFTER init finishes
+  state.meta.pendingWelcomeToast = true;
+
   saveNowV1(state);
 
-  // ✅ UI refresh (fixes “shows 0 until first action”)
   updateResourcesUI();
   updateHourlyRates();
   updateTopHUD();
-
-  // ✅ show toast slightly delayed (guarantees paint + avoids missing on reload)
-setTimeout(() => {
-  showToastSingle("Welcome reward", "+100 Electricity", "⚡");
-}, 80);
-
 }
+
 
   log("Game session started (v0.30).", { tag:"SYS" });
 
@@ -5640,7 +5637,19 @@ function checkBuildingRequirements(){
 document.addEventListener("DOMContentLoaded", () => {
   init();
   checkBuildingRequirements();
+
+  // ===== POST-INIT TOASTS =====
+  if (state?.meta?.pendingWelcomeToast){
+    state.meta.pendingWelcomeToast = false;
+    saveNowV1(state);
+
+    // slight delay to survive any immediate UI rebuild
+    setTimeout(() => {
+      showToastSingle("Welcome reward", "+100 Electricity", "⚡");
+    }, 120);
+  }
 });
+
 
 </script>
     <div class="device-frame"><div class="safe-guides"></div></div>
