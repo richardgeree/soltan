@@ -5638,6 +5638,20 @@ if (!state.telemetry){
   };
 }
 
+// === 0.3 BUILD TIMERS (init-time guarantee) ===
+if (!state.buildings) state.buildings = { powerPlant:0, dappStore:0, furnace:0 };
+
+if (!state.buildBusy || typeof state.buildBusy !== "object") {
+  state.buildBusy = { powerPlant:false, dappStore:false, furnace:false };
+}
+if (!state.buildBusyUntil || typeof state.buildBusyUntil !== "object") {
+  state.buildBusyUntil = { powerPlant:0, dappStore:0, furnace:0 };
+}
+if (!state.buildPendingTier || typeof state.buildPendingTier !== "object") {
+  state.buildPendingTier = { powerPlant:0, dappStore:0, furnace:0 };
+}
+if (!state.ui) state.ui = {};
+
   loadPlotSprites();
   loadStreakFromStorage();  // streak state'i geri yükle
   updateResourcesUI();
@@ -5687,7 +5701,6 @@ if (!state.meta.welcomeClaimed){
 
   updateResourcesUI();
   updateHourlyRates();
-  updateTopHUD();
 
   // ✅ ONLY THIS — no toast, no timeout
   showWelcomeBanner("+100 Electricity — Welcome reward", "⚡");
@@ -5704,14 +5717,6 @@ function checkBuildingRequirements(){
 document.addEventListener("DOMContentLoaded", () => {
   init();
   checkBuildingRequirements();
-
-  // ===== POST-INIT TOASTS (RAM-only, deterministic) =====
-  if (welcomeToastPending){
-    welcomeToastPending = false;
-    setTimeout(() => {
-      showToastSingle("Welcome reward", "+100 Electricity", "⚡");
-    }, 250);
-  }
 
 });
 
