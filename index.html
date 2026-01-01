@@ -1341,6 +1341,47 @@ html, body {
   to { opacity: 0; transform: translateY(-8px); }
 }
 
+/* ===== WELCOME BANNER ===== */
+#welcomeBanner{
+  position: fixed;
+  left: 50%;
+  top: 14px;
+  transform: translateX(-50%);
+  z-index: 10000;
+  width: min(520px, calc(100vw - 24px));
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+}
+#welcomeBanner.show{
+  visibility: visible;
+  animation: wbIn 220ms ease-out forwards, wbOut 260ms ease-in forwards;
+  animation-delay: 0ms, 2200ms;
+}
+.wbCard{
+  background: rgba(7,11,18,0.92);
+  border: 1px solid rgba(22,32,51,0.95);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.wbIcon{
+  width: 28px; height: 28px;
+  border-radius: 10px;
+  display:flex; align-items:center; justify-content:center;
+  background: rgba(74,222,128,0.12);
+  border: 1px solid rgba(74,222,128,0.25);
+  flex: 0 0 auto;
+}
+.wbTitle{ font-weight: 800; font-size: 14px; }
+.wbBody{ opacity: 0.92; font-size: 13px; margin-top: 2px; }
+
+@keyframes wbIn{ to { opacity: 1; } }
+@keyframes wbOut{ to { opacity: 0; } }
+
 .node-popup{
   position: absolute;
   font-weight: 800;
@@ -1469,7 +1510,7 @@ html, body {
 </head>
 
 <body>
-  <div id="toastHost"></div>
+  <div id="welcomeBanner"></div>
     <div class="shell">
       <div class="app">
         <div class="hud">
@@ -4802,6 +4843,31 @@ function showToastSingle(title, body, icon="🔒"){
   showToast(title, body, icon);
 }
 
+function showWelcomeBanner(text, icon="⚡"){
+  const el = document.getElementById("welcomeBanner");
+  if (!el) return;
+
+  el.innerHTML = `
+    <div class="wbCard">
+      <div class="wbIcon">${icon}</div>
+      <div>
+        <div class="wbTitle">Welcome</div>
+        <div class="wbBody">${text}</div>
+      </div>
+    </div>
+  `;
+
+  // reset animation reliably
+  el.classList.remove("show");
+  void el.offsetWidth; // force reflow
+  el.classList.add("show");
+
+  // cleanup after animation window
+  setTimeout(()=> {
+    el.classList.remove("show");
+  }, 2600);
+}
+
 function runAfterDOMReady(fn){
   if (document.body) {
     requestAnimationFrame(fn);
@@ -5609,20 +5675,21 @@ setInterval(()=>{
   updateStreakUI();         // streak buton + label durumu
   setInterval(passiveTick, PASSIVE_TICK_SECONDS * 1000);
 
-  // ===== WELCOME REWARD (first run / after reset) =====
+// ===== WELCOME REWARD (first run / after reset) =====
 if (!state.meta) state.meta = { welcomeClaimed:false };
 
 if (!state.meta.welcomeClaimed){
   state.resources.power = (state.resources.power || 0) + 100;
   state.meta.welcomeClaimed = true;
 
-  welcomeToastPending = true;
-
   saveNowV1(state);
 
   updateResourcesUI();
   updateHourlyRates();
   updateTopHUD();
+
+  // ✅ ONLY THIS — no toast, no timeout
+  showWelcomeBanner("+100 Electricity — Welcome reward", "⚡");
 }
 
   log("Game session started (v0.30).", { tag:"SYS" });
