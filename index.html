@@ -2199,6 +2199,7 @@ function createDefaultState(){
 
 // 1) önce default state
 let state = loadSaveV1();
+let welcomeToastPending = false; // session-only (RAM), never saved
 
 // 2) sonra save’den yükle (SAVE v1 modülün bunu sağlamalı)
 try{
@@ -5615,8 +5616,7 @@ if (!state.meta.welcomeClaimed){
   state.resources.power = (state.resources.power || 0) + 100;
   state.meta.welcomeClaimed = true;
 
-  // ✅ queue toast for this page load only (NOT saved)
-  try{ sessionStorage.setItem("soltan_welcome_toast", "1"); }catch(e){}
+  welcomeToastPending = true;
 
   saveNowV1(state);
 
@@ -5637,18 +5637,14 @@ document.addEventListener("DOMContentLoaded", () => {
   init();
   checkBuildingRequirements();
 
-  // ===== POST-INIT TOASTS (session-only) =====
-  let shouldShowWelcome = false;
-  try{
-    shouldShowWelcome = (sessionStorage.getItem("soltan_welcome_toast") === "1");
-    if (shouldShowWelcome) sessionStorage.removeItem("soltan_welcome_toast");
-  }catch(e){}
-
-  if (shouldShowWelcome){
+  // ===== POST-INIT TOASTS (RAM-only, deterministic) =====
+  if (welcomeToastPending){
+    welcomeToastPending = false;
     setTimeout(() => {
       showToastSingle("Welcome reward", "+100 Electricity", "⚡");
-    }, 180);
+    }, 250);
   }
+
 });
 
 
