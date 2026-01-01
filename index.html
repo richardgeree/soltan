@@ -38,7 +38,7 @@ body {
   height: min(var(--frame-h), 100dvh);
   transform: translate(-50%, -50%) translateY(var(--frame-y));
   pointer-events: none;
-  z-index: 9999;
+  z-index: 9000;
   border-radius: 34px;
   box-shadow:
     0 0 0 2px rgba(255,255,255,0.10),
@@ -1305,7 +1305,7 @@ html, body {
   left: 50%;
   top: 14px;
   transform: translateX(-50%);
-  z-index: 9999;
+  z-index: 100000;
   width: min(520px, calc(100vw - 24px));
   pointer-events: none;
 }
@@ -1510,6 +1510,7 @@ html, body {
 </head>
 
 <body>
+  <div id="toastHost"></div>
   <div id="welcomeBanner"></div>
     <div class="shell">
       <div class="app">
