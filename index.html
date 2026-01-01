@@ -4770,11 +4770,14 @@ function spawnNodePopup(cellEl, text, kind){
 function ensureToastHost(){
   let host = document.getElementById("toastHost");
   if (host) return host;
+
+  // fallback (shouldn't happen anymore)
   host = document.createElement("div");
   host.id = "toastHost";
-  document.body.appendChild(host);
+  (document.body || document.documentElement).appendChild(host);
   return host;
 }
+
 
 function showToast(title, body, icon="⚡"){
   const host = ensureToastHost();
@@ -4795,6 +4798,14 @@ function showToastSingle(title, body, icon="🔒"){
   const host = ensureToastHost();
   host.innerHTML = "";     // ✅ clear previous toasts
   showToast(title, body, icon);
+}
+
+function runAfterDOMReady(fn){
+  if (document.body) {
+    requestAnimationFrame(fn);
+    return;
+  }
+  window.addEventListener("DOMContentLoaded", () => requestAnimationFrame(fn), { once:true });
 }
 
 function getNodeCellEl(idx){
@@ -5611,10 +5622,11 @@ if (!state.meta.welcomeClaimed){
   updateHourlyRates();
   updateTopHUD();
 
-  // ✅ show a single toast after first paint (more reliable on load)
-  requestAnimationFrame(() => {
-    showToastSingle("Welcome reward", "+100 Electricity", "⚡");
-  });
+  // ✅ show toast slightly delayed (guarantees paint + avoids missing on reload)
+setTimeout(() => {
+  showToastSingle("Welcome reward", "+100 Electricity", "⚡");
+}, 80);
+
 }
 
   log("Game session started (v0.30).", { tag:"SYS" });
