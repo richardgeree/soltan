@@ -5615,8 +5615,8 @@ if (!state.meta.welcomeClaimed){
   state.resources.power = (state.resources.power || 0) + 100;
   state.meta.welcomeClaimed = true;
 
-  // ✅ queue toast for AFTER init finishes
-  state.meta.pendingWelcomeToast = true;
+  // ✅ queue toast for this page load only (NOT saved)
+  try{ sessionStorage.setItem("soltan_welcome_toast", "1"); }catch(e){}
 
   saveNowV1(state);
 
@@ -5624,7 +5624,6 @@ if (!state.meta.welcomeClaimed){
   updateHourlyRates();
   updateTopHUD();
 }
-
 
   log("Game session started (v0.30).", { tag:"SYS" });
 
@@ -5638,15 +5637,17 @@ document.addEventListener("DOMContentLoaded", () => {
   init();
   checkBuildingRequirements();
 
-  // ===== POST-INIT TOASTS =====
-  if (state?.meta?.pendingWelcomeToast){
-    state.meta.pendingWelcomeToast = false;
-    saveNowV1(state);
+  // ===== POST-INIT TOASTS (session-only) =====
+  let shouldShowWelcome = false;
+  try{
+    shouldShowWelcome = (sessionStorage.getItem("soltan_welcome_toast") === "1");
+    if (shouldShowWelcome) sessionStorage.removeItem("soltan_welcome_toast");
+  }catch(e){}
 
-    // slight delay to survive any immediate UI rebuild
+  if (shouldShowWelcome){
     setTimeout(() => {
       showToastSingle("Welcome reward", "+100 Electricity", "⚡");
-    }, 120);
+    }, 180);
   }
 });
 
