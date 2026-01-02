@@ -162,18 +162,6 @@ body {
     0 8px 24px rgba(0,0,0,.45);
 }
 
-/* Skills pity ratio: keep it on one line */
-.pityValue{
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  white-space: nowrap;
-}
-.pityValue .mini{
-  display: inline !important;
-  white-space: nowrap;
-}
-
 
 .shell::-webkit-scrollbar {
   width: 0;
@@ -564,15 +552,6 @@ h1,h2,h3,h4 {
   box-shadow: 0 0 0 2px rgba(74,222,128,.15) inset;
 }
 
-.nft-wrap{
-  position: relative;
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
-  padding: 12px;
-  background: rgba(2,6,18,0.35);
-  overflow: hidden;
-}
-
 .nft-library{
   transition: filter 0.25s ease, opacity 0.25s ease;
 }
@@ -581,6 +560,10 @@ h1,h2,h3,h4 {
   filter: blur(10px) saturate(0.8);
   opacity: 0.9;
   pointer-events: none;
+}
+
+#nftWrap{
+  position: relative;
 }
 
 .nft-shelf-title{
@@ -593,50 +576,85 @@ h1,h2,h3,h4 {
 
 .nft-grid{
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
 }
 
-.nft-card{
+.nft-section{
+  margin-top: 12px;
+}
+
+.nft-h{
+  font-size: 12px;
+  color: var(--text-soft);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.nft-slot{
   position: relative;
-  border-radius: 12px;
-  border: 1px solid rgba(74,222,128,0.18);
-  background: #020612;
-  padding: 10px;
-  min-height: 120px;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
-}
-
-.nft-thumb{
-  height: 68px;
+  aspect-ratio: 1 / 1;
   border-radius: 10px;
-  background:
-    radial-gradient(circle at 30% 30%, rgba(74,222,128,0.18), transparent 55%),
-    radial-gradient(circle at 70% 60%, rgba(80,160,255,0.12), transparent 55%),
-    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0));
-  border: 1px dashed rgba(255,255,255,0.10);
-}
-
-.nft-name{
-  margin-top: 8px;
-  font-size: 13px;
+  border: 1px solid rgba(74,222,128,0.22);
+  background: #0b1020;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--text-main);
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
 }
 
-.nft-badge{
+.nft-slot.empty{
+  background: #0a0f18;
+  border-color: rgba(74,222,128,0.16);
+  color: rgba(255,255,255,0.28);
+}
+
+.nft-slot::before{
+  content: "";
+  width: 88%;
+  height: 88%;
+  background-image: url("assets/nfts/nft_frame.png");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.9;
+}
+
+.nft-slot.empty::before{
+  background-image: url("assets/nfts/nft_empty.png");
+  opacity: 0.9;
+}
+
+.nft-code{
   position: absolute;
-  top: 10px;
-  right: 10px;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.nft-count{
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 6px;
+  background: #e2e8f0;
+  color: #0b1020;
   font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.12);
-  color: var(--text-muted);
-  background: rgba(5,9,21,0.7);
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #0b1020;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.45);
 }
 
 .nft-lock{
@@ -1506,10 +1524,124 @@ html, body {
   z-index: 20;
 }
 
+.top-actions-left{
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 2px);
+  left: 10px;
+  display: flex;
+  gap: 4px;
+  z-index: 20;
+}
+
+.info-badge{
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.25);
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.info-pop{
+  position: fixed;
+  z-index: 99999;
+  min-width: 220px;
+  max-width: 260px;
+  background: rgba(5,9,21,0.96);
+  border: 1px solid rgba(74,222,128,0.35);
+  border-radius: 12px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.75);
+  padding: 10px 10px;
+  backdrop-filter: blur(6px);
+  color: var(--text-main);
+  font-size: 12px;
+}
+
+.luck-inline{
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+.splash-active .shell{
+  opacity: 0;
+  visibility: hidden;
+}
+
+.splash-screen{
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  z-index: 200000;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.shell{
+  transition: opacity 300ms ease;
+}
+
+.splash-active .shell{
+  transition: none;
+}
+
+.splash-screen.show{
+  visibility: visible;
+  animation: splashFade 3.2s ease forwards;
+}
+
+.splash-screen img{
+  width: min(72vw, 576px);
+  max-height: 70vh;
+  object-fit: contain;
+  transform: scale(0.3);
+  animation: splashZoom 3.2s ease forwards;
+}
+
+@keyframes splashFade{
+  0%{ opacity: 0; }
+  10%{ opacity: 1; }
+  70%{ opacity: 1; }
+  100%{ opacity: 0; }
+}
+
+@keyframes splashZoom{
+  0%{ transform: scale(0.3); }
+  34%{ transform: scale(1); }
+  70%{ transform: scale(1); }
+  100%{ transform: scale(1); }
+}
+
+.upgrade-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(2,6,18,0.35);
+}
+
+.upgrade-row + .upgrade-row{
+  margin-top: 8px;
+}
+
 </style>
 </head>
 
-<body>
+<body class="splash-active">
+  <div id="splashScreen" class="splash-screen show" aria-hidden="true">
+    <img src="assets/others/splash_soltan.png" alt="">
+  </div>
   <div id="toastHost"></div>
   <div id="welcomeBanner"></div>
     <div class="shell">
@@ -1517,6 +1649,10 @@ html, body {
         <div class="hud">
           <div class="hud-top">
   
+            <div class="top-actions-left">
+              <button class="btn btn-sm" id="devButton">Dev</button>
+            </div>
+
             <div class="top-actions">
               <button class="btn btn-sm" id="walletButton">Wallet</button>
               <button class="btn btn-sm" id="howtoButton">How-to</button>
@@ -1567,14 +1703,18 @@ html, body {
   <button class="tab-btn" id="tabBuildings">Buildings</button>
   <button class="tab-btn" id="tabNFTs">NFTs</button>
   <button class="tab-btn" id="tabUpgrade">Upgrade</button>
-  <button class="tab-btn" id="tabSkills">Skills</button>
-  <button class="tab-btn" id="tabDev">Dev</button>
 </div>
 
 <div class="panel-body">
   <div class="pager" id="pager">
 
     <section class="page" id="pageNode">
+      <div class="map-header" style="margin-bottom:6px;">
+        <div class="map-hint map-status" style="margin:0;">
+          Luck (Power Grid): <strong id="powerLuckText">+0.0%</strong>
+        </div>
+        <span class="info-badge" id="powerLuckInfo" aria-label="Luck info">i</span>
+      </div>
       <div class="seedbar-wrap">
         <button class="seed-arrow" id="seedPrev" aria-label="Previous">◀</button>
         <div class="seedbar" id="nodeSeedBar"></div>
@@ -1602,17 +1742,18 @@ html, body {
     </section>
 
     <section class="page" id="pageNFTs">
-      <div class="nft-wrap" id="nftWrap">
+      <div id="nftWrap">
         <div id="nftLibrary" class="nft-lib locked">
           <!-- SHOP / OPEN -->
           <div class="nft-actions" style="gap:10px; flex-direction:column; align-items:stretch;">
-            <div class="mini" style="opacity:.9;">SHOP — buy crates with Rank (daily limits + cooldown)</div>
-
             <div class="nft-shop" style="display:grid; grid-template-columns:1fr; gap:10px;">
               <div class="card" style="padding:12px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <div><strong>Basic Crate</strong></div>
-                  <div class="mini" id="basicMeta">—</div>
+                  <div><strong>Basic Crate (<span id="basicCount">0</span>)</strong></div>
+                  <div class="mini" style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
+                    <div id="basicPrice">—</div>
+                    <div id="basicLeft">—</div>
+                  </div>
                 </div>
                 <div class="mini" id="basicRules">—</div>
                 <button id="buyCrateBasicBtn" class="btn btn-primary btn-sm">Buy Basic</button>
@@ -1620,42 +1761,27 @@ html, body {
 
               <div class="card" style="padding:12px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <div><strong>Advanced Crate</strong></div>
-                  <div class="mini" id="advMeta">—</div>
+                  <div><strong>Advanced Crate (<span id="advCount">0</span>)</strong></div>
+                  <div class="mini" style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
+                    <div id="advPrice">—</div>
+                    <div id="advLeft">—</div>
+                  </div>
                 </div>
                 <div class="mini" id="advRules">—</div>
                 <button id="buyCrateAdvancedBtn" class="btn btn-primary btn-sm">Buy Advanced</button>
               </div>
-
-              <div class="card" style="padding:12px;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <div><strong>Legendary Crate</strong></div>
-                  <div class="mini" id="legMeta">—</div>
-                </div>
-                <div class="mini" id="legRules">—</div>
-                <button id="buyCrateLegendaryBtn" class="btn btn-primary btn-sm">Buy Legendary</button>
-              </div>
             </div>
 
             <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-              <div class="mini" id="crateCount">Crates: 0</div>
-
+              <button id="openCrateBtn" class="btn">Open Crate</button>
               <select id="crateTypeSelect" class="select" style="min-width:170px;">
                 <option value="basic">Open: Basic</option>
                 <option value="advanced">Open: Advanced</option>
-                <option value="legendary">Open: Legendary</option>
               </select>
-
-              <button id="openCrateBtn" class="btn">Open Selected</button>
             </div>
           </div>
 
           <!-- COLLECTIONS -->
-          <div class="nft-section">
-            <div class="nft-h">Uniques</div>
-            <div id="nftUniquesGrid" class="nft-grid"></div>
-          </div>
-
           <div class="nft-section">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
               <div class="nft-h">Commons</div>
@@ -1663,12 +1789,23 @@ html, body {
             </div>
             <div id="nftCommonsGrid" class="nft-grid"></div>
           </div>
+
+          <div class="nft-section">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+              <div class="nft-h">Uniques</div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <div class="luck-inline">Luck (NFTs): <strong id="nftLuckText">+0.0%</strong></div>
+                <span class="info-badge" id="nftLuckInfo" aria-label="Luck info">i</span>
+              </div>
+            </div>
+            <div id="nftUniquesGrid" class="nft-grid"></div>
+          </div>
         </div>
 
         <div class="nft-lock" id="nftLock">
           <div class="nft-lock-card">
             <div class="nft-lock-title">NFT Library Locked</div>
-            <div class="nft-lock-sub">Build <strong>dApp Store</strong> to unlock Lucky Grids and NFTs.</div>
+            <div class="nft-lock-sub">Build <strong>dApp Store</strong> to unlock NFTs.</div>
             <button class="btn btn-primary btn-sm" id="nftGoBuildBtn">Build dApp Store</button>
           </div>
         </div>
@@ -1676,116 +1813,9 @@ html, body {
     </section>
 
     <section class="page" id="pageUpgrade">
-      <div class="card-header">
-        <div class="card-title">Upgrade</div>
-      </div>
-
-      <div class="card">
-        <div class="mini">Spend ⚡ to boost profit, lucky chance, or speed.</div>
-        <div id="upgradeList" class="stack" style="margin-top:10px;"></div>
-      </div>
+      <div id="upgradeList" class="stack"></div>
     </section>
 
-<section class="page" id="pageSkills">
-  <div class="card-header">
-    <div class="card-title">Skills</div>
-  </div>
-
-  <div class="card">
-
-    <div class="stack" style="margin-top:10px;">
-      <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
-        <div class="mini">Profit</div>
-        <div><strong id="skillsProfitText">x1.00</strong></div>
-      </div>
-
-      <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
-        <div class="mini">Grow time</div>
-        <div><strong id="skillsSpeedText">-0%</strong></div>
-      </div>
-
-      <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
-        <div class="mini">Lucky bonus</div>
-        <div><strong id="skillsLuckyBonusText">+0.0%</strong></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card" style="margin-top:10px;">
-    <div class="mini">Hidden RNG</div>
-
-    <div class="stack" style="margin-top:10px;">
-      <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
-        <div class="mini">Lucky chance (total)</div>
-        <div><strong id="skillsLuckyChanceText">0%</strong></div>
-      </div>
-
-      <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
-        <div class="mini">Pity (Basic)</div>
-        <div class="pityValue">
-          <strong id="skillsPityBasic">0</strong>
-          <span class="mini">/ <span id="skillsPityBasicTh">0</span></span>
-        </div>
-      </div>
-
-            <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
-        <div class="mini">Pity (Advanced)</div>
-        <div class="pityValue">
-          <strong id="skillsPityAdvanced">0</strong>
-          <span class="mini">/ <span id="skillsPityAdvancedTh">0</span></span>
-        </div>
-      </div>
-
-
-            <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
-        <div class="mini">Pity (Legendary)</div>
-        <div class="pityValue">
-          <strong id="skillsPityLegendary">0</strong>
-          <span class="mini">/ <span id="skillsPityLegendaryTh">0</span></span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<section class="page" id="pageDev">
-  <div class="btn-group">
-    <button class="btn btn-sm" id="pass5sButton">+5s Tick</button>
-    <button class="btn btn-sm" id="addSolButton">+1 SOL</button>
-    <button class="btn btn-sm" id="buyPackButton">Buy Pack (0.5 SOL)</button>
-    <button class="btn btn-sm" id="devStreakButton">Streak +1</button>
-    <button class="btn btn-sm" id="maxAllButton">Max All</button>
-    <button class="btn btn-sm" id="devRank1000Btn">+1000 Rank</button>
-    <button class="btn btn-sm" id="devGiveCratesBtn">Give Crates (B/A/L)</button>
-    <button class="btn btn-sm" id="devResetPityBtn">Reset Pity</button>
-    <button class="btn btn-sm" id="devPrintShopBtn">Print Shop</button>
-    <button class="btn btn-sm" onclick="resetGame()">RESET GAME</button>
-  </div>
-  <div class="card" style="margin-top:12px;">
-  <div class="mini">Economy telemetry (<span id="devTelemetrySample">—</span> sample → /hr projection).</div>
-
-  <div class="stack" style="margin-top:10px;">
-    <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
-      <div class="mini">Power/hr (net)</div>
-      <div><strong id="devPowerPerHour">—</strong></div>
-    </div>
-    <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
-      <div class="mini">Nodes/hr</div>
-      <div><strong id="devNodesPerHour">—</strong></div>
-    </div>
-    <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
-      <div class="mini">Passive/hr</div>
-      <div><strong id="devPassivePerHour">—</strong></div>
-    </div>
-    <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
-      <div class="mini">Upgrade spend/hr</div>
-      <div><strong id="devSpendPerHour">—</strong></div>
-    </div>
-  </div>
-</div>
-
-</section>
 
   </div>
 </div>
@@ -1907,11 +1937,53 @@ html, body {
           <li><strong>Resources:</strong> ⚡ Power powers everything. Ⓢ SOL is premium currency for packs & future on-chain actions. 🔥 Rank is your long-term multiplier.</li>
           <li><strong>Power Grid:</strong> Deploy components onto empty nodes (costs ⚡). Each node “cooks” over time—harvest when ready for ⚡ rewards. Higher-tier components cost more but scale better.</li>
           <li><strong>Power Plant:</strong> Generates passive ⚡ over time. Upgrading it increases your baseline income.</li>
-          <li><strong>dApp Store:</strong> Unlocks Lucky Grids and the NFTs library. Higher tiers slightly increase Lucky odds.</li>
+          <li><strong>dApp Store:</strong> Unlocks the NFTs library.</li>
           <li><strong>Furnace:</strong> Unlocks <em>Burn Tokens</em>. Spend SOL (mock) to simulate buying & burning tokens to earn 🔥 Rank.</li>
           <li><strong>Streak:</strong> Claim once per day. Small daily ⚡ boosts that compound and keep momentum.</li>
           <li><strong>Rank:</strong> Earned only via Burn Tokens. Used as a multiplier for end-of-day/community reward logic (later: real distribution rules).</li>
             </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-backdrop" id="devModal">
+        <div class="modal">
+          <div class="modal-header">
+            <div class="modal-title">Dev</div>
+            <div class="modal-close" data-close="devModal">✕</div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-sm" id="pass5sButton">+5s Tick</button>
+            <button class="btn btn-sm" id="addSolButton">+1 SOL</button>
+            <button class="btn btn-sm" id="buyPackButton">Buy Pack (0.5 SOL)</button>
+            <button class="btn btn-sm" id="devStreakButton">Streak +1</button>
+            <button class="btn btn-sm" id="maxAllButton">Max All</button>
+            <button class="btn btn-sm" id="devRank1000Btn">+1000 Rank</button>
+            <button class="btn btn-sm" id="devGiveCratesBtn">Give Crates</button>
+            <button class="btn btn-sm" onclick="resetGame()">RESET GAME</button>
+          </div>
+
+          <div class="card" style="margin-top:12px;">
+            <div class="mini">Economy telemetry (<span id="devTelemetrySample">—</span> sample → /hr projection).</div>
+            <div class="stack" style="margin-top:10px;">
+              <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+                <div class="mini">Power/hr (net)</div>
+                <div><strong id="devPowerPerHour">—</strong></div>
+              </div>
+              <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+                <div class="mini">Nodes/hr</div>
+                <div><strong id="devNodesPerHour">—</strong></div>
+              </div>
+              <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+                <div class="mini">Passive/hr</div>
+                <div><strong id="devPassivePerHour">—</strong></div>
+              </div>
+              <div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+                <div class="mini">Upgrade spend/hr</div>
+                <div><strong id="devSpendPerHour">—</strong></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1963,11 +2035,8 @@ html, body {
 </div>
 
 <script>
-    function log(){ /* no-op */ }
-
 /* =========================================================
    SAVE v1 — single localStorage key + legacy migration
-   Drop-in module. Put this under `function log(){}`.
    ========================================================= */
 
 const SAVE_KEY = "soltan_save_v1";
@@ -2001,17 +2070,14 @@ function defaultSave(){
   },
   crates: {
     basic: 0,
-    advanced: 0,
-    legendary: 0
+    advanced: 0
   },
   nftCommons: {},
   nftUniques: {}
 },
 
   shop: {
-    daily: { dateKey: null, buys: { basic: 0, advanced: 0, legendary: 0 } },
-    cooldowns: { basic: 0, advanced: 0, legendary: 0 }, // next allowed purchase timestamp (ms)
-    pity: { basic: 0, advanced: 0, legendary: 0 },      // opens since last unique (per crate type)
+    daily: { dateKey: null, buys: { basic: 0, advanced: 0 } },
     lastOpenedType: "basic"
   },
 
@@ -2019,11 +2085,10 @@ function defaultSave(){
   streak: { current: 0, lastClaimDate: null },
 
   upgrades: {
-  profitLvl: 1,
-  luckyLvl:  1,
-  speedLvl:  1,
-  unlockComponentLvl: 1,
-  unlockCellLvl: 1,
+  profitLvl: 0,
+  luckyLvl:  0,
+  unlockComponentLvl: 0,
+  unlockCellLvl: 0,
 },
 
   progression: {
@@ -2257,11 +2322,11 @@ try{
         // ✅ inventory restore + migration hardening
     if (saved.inventory && typeof saved.inventory === "object") {
       if (!state.inventory || typeof state.inventory !== "object") {
-        state.inventory = { crates: { basic:0, advanced:0, legendary:0 }, nftCommons: {}, nftUniques: {} };
+        state.inventory = { crates: { basic:0, advanced:0 }, nftCommons: {}, nftUniques: {} };
       }
 
       if (typeof saved.inventory.crates === "number") {
-        state.inventory.crates = saved.inventory.crates;
+        state.inventory.crates = { basic: saved.inventory.crates, advanced: 0 };
       }
 
       if (saved.inventory.nftCommons && typeof saved.inventory.nftCommons === "object") {
@@ -2321,10 +2386,10 @@ function markMapDirty(full = false){
 
 // ✅ Plot/building sprite atlas (tek yerde)
 const PLOT_SPRITES = {
-  empty:      { src: "assets/buildings/bul_empty.png" },
+  empty:      { src: "assets/buildings/bul_empty.png", scale: 0.93, yOffset: -0.2 },
   powerPlant: { src: "assets/buildings/bul_powerplant.png" },
-  dappStore:  { src: "assets/buildings/bul_dappstore.png" },
-  furnace:    { src: "assets/buildings/bul_furnace.png" },
+  dappStore:  { src: "assets/buildings/bul_dappstore.png", scale: 0.95 },
+  furnace:    { src: "assets/buildings/bul_furnace.png", scale: 0.95 },
 };
 
 const plotImgs = {}; // { key: HTMLImageElement }
@@ -2339,9 +2404,13 @@ function loadPlotSprites(){
   });
 }
 
-function getPlotImg(key){
+function getPlotSprite(key){
   const img = plotImgs[key];
-  return (img && img.complete && img.naturalWidth > 0) ? img : null;
+  const meta = PLOT_SPRITES[key] || {};
+  if (img && img.complete && img.naturalWidth > 0) {
+    return { img, scale: meta.scale || 1, yOffset: meta.yOffset || 0 };
+  }
+  return null;
 }
 
 // ===== BUILDINGS MAP STATE =====
@@ -2953,11 +3022,45 @@ function drawMapOverlay(ctx){
     const ph = p.h * tileSize;
 
     const key = p.builtKey ? p.builtKey : "empty";
-    const img = getPlotImg(key);
-    if (img){
+    const sprite = getPlotSprite(key);
+    if (sprite){
       const pad = Math.max(2, Math.floor(tileSize * 1.1));
-      if (key === "empty") ctx.drawImage(img, ox, oy, pw, ph);
-      else ctx.drawImage(img, ox+pad, oy+pad, pw-pad*2, ph-pad*2);
+      const scale = sprite.scale || 1;
+      const targetX = key === "empty" ? ox : ox + pad;
+      const targetY = key === "empty" ? oy : oy + pad;
+      const targetW = key === "empty" ? pw : pw - pad * 2;
+      const targetH = key === "empty" ? ph : ph - pad * 2;
+
+      const scaledW = targetW * scale;
+      const scaledH = targetH * scale;
+      const dx = targetX + (targetW - scaledW) / 2;
+      const dy = targetY + (targetH - scaledH) / 2;
+      const yOffsetPx = sprite.yOffset ? Math.floor(tileSize * sprite.yOffset) : 0;
+      ctx.drawImage(sprite.img, dx, dy + yOffsetPx, scaledW, scaledH);
+    }
+
+    // labels
+    const labelH = Math.max(12, Math.floor(tileSize * 2.6));
+    const labelY = oy + ph - labelH;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#0f172a";
+    ctx.fillRect(ox, labelY, pw, labelH);
+    ctx.strokeStyle = "rgba(74,222,128,0.30)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(ox, labelY + 0.5);
+    ctx.lineTo(ox + pw, labelY + 0.5);
+    ctx.stroke();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `${Math.max(8, Math.floor(tileSize * 2.0))}px ${getComputedStyle(document.body).fontFamily}`;
+    if (p.builtKey) {
+      const bKey = p.builtKey;
+      const name = BUILDINGS[bKey]?.name || bKey;
+      const tier = (state.buildPendingTier?.[bKey] || state.buildings?.[bKey] || 1);
+      ctx.fillText(`${name} T${tier}`, ox + pw / 2, labelY + labelH / 2);
+    } else {
+      ctx.fillText("Empty plot", ox + pw / 2, labelY + labelH / 2);
     }
   }
 
@@ -2985,7 +3088,7 @@ function drawMapOverlay(ctx){
     const barH = Math.max(6, Math.floor(tileSize * 1.15));
     const barX = ox + pad;
     const barW = pw - pad * 2;
-    const barY = oy + ph - barH - pad;
+    const barY = oy + pad;
 
     ctx.fillStyle = "rgba(11,16,32,0.95)";
     ctx.fillRect(barX, barY, barW, barH);
@@ -3091,7 +3194,7 @@ let pendingNodeRender = false;
     const MOCK_WALLET_ADDRESS = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM";
     let walletConnected = true;
 
-    const el = {
+const el = {
       powerValue: document.getElementById("powerValue"),
       solValue: document.getElementById("solValue"),
       rankValue: document.getElementById("rankValue"),
@@ -3107,12 +3210,15 @@ let pendingNodeRender = false;
       devStreakButton: document.getElementById("devStreakButton"),
       maxAllButton: document.getElementById("maxAllButton"),
 
+      devButton: document.getElementById("devButton"),
       walletButton: document.getElementById("walletButton"),
       howtoButton: document.getElementById("howtoButton"),
       openSolscanBtn: document.getElementById("openSolscanBtn"),
       disconnectWalletBtn: document.getElementById("disconnectWalletBtn"),
       walletStatusNote: document.getElementById("walletStatusNote"),
-      walletAddress: document.getElementById("walletAddress")
+      walletAddress: document.getElementById("walletAddress"),
+      powerLuckInfo: document.getElementById("powerLuckInfo"),
+      nftLuckInfo: document.getElementById("nftLuckInfo")
     };
 
 function setPlaceStatus(msg){
@@ -3149,46 +3255,49 @@ function updateNFTsUI(){
   // unlocked değilse aşağıyı çizme
   if (!unlocked) return;
 
-  // crates count
-  const crateCount = document.getElementById("crateCount");
-  if (crateCount) crateCount.textContent = crateCountText();
-
-  // uniques
-  const uGrid = document.getElementById("nftUniquesGrid");
-  if (uGrid){
-    uGrid.innerHTML = "";
-    const owned = state.inventory?.nftUniques || {};
-    const ids = Object.keys(owned).filter(k => owned[k]);
-
-    if (ids.length === 0) {
-      uGrid.innerHTML = `<div class="mini">No uniques yet.</div>`;
-    } else {
-      ids.sort().forEach(id=>{
-        const pill = document.createElement("div");
-        pill.className = "nft-pill unique";
-        pill.textContent = id;
-        uGrid.appendChild(pill);
-      });
-    }
-  }
+  const displayNftId = (id)=> id.replace(/^([CU])0/, "$1");
 
   // commons
   const cGrid = document.getElementById("nftCommonsGrid");
   if (cGrid){
     cGrid.innerHTML = "";
     const commons = state.inventory?.nftCommons || {};
-    const ids = Object.keys(commons).filter(k => (commons[k]||0) > 0);
+    (NFT_POOLS.commonPool || []).forEach(id=>{
+      const count = commons[id] || 0;
+      const slot = document.createElement("div");
+      slot.className = "nft-slot" + (count ? "" : " empty");
+      if (count){
+        const code = document.createElement("div");
+        code.className = "nft-code";
+        code.textContent = displayNftId(id);
+        slot.appendChild(code);
 
-    if (ids.length === 0) {
-      cGrid.innerHTML = `<div class="mini">No commons yet.</div>`;
-    } else {
-      ids.sort().forEach(id=>{
-        const pill = document.createElement("div");
-        pill.className = "nft-pill common";
-        pill.textContent = `${id} ×${commons[id]}`;
-        cGrid.appendChild(pill);
-      });
-    }
+        const badge = document.createElement("div");
+        badge.className = "nft-count";
+        badge.textContent = String(count);
+        slot.appendChild(badge);
+      }
+      cGrid.appendChild(slot);
+    });
+  }
+
+  // uniques
+  const uGrid = document.getElementById("nftUniquesGrid");
+  if (uGrid){
+    uGrid.innerHTML = "";
+    const owned = state.inventory?.nftUniques || {};
+    (NFT_POOLS.uniquePool || []).forEach(id=>{
+      const has = !!owned[id];
+      const slot = document.createElement("div");
+      slot.className = "nft-slot" + (has ? "" : " empty");
+      if (has){
+        const code = document.createElement("div");
+        code.className = "nft-code";
+        code.textContent = displayNftId(id);
+        slot.appendChild(code);
+      }
+      uGrid.appendChild(slot);
+    });
   }
 
   // shop meta UI
@@ -3196,44 +3305,45 @@ function updateNFTsUI(){
     ensureShopState();
     resetDailyIfNeeded();
 
-    const now = Date.now();
-    const c = state.inventory.crates || { basic:0, advanced:0, legendary:0 };
+    const c = state.inventory.crates || { basic:0, advanced:0 };
 
-    const basicMeta = document.getElementById("basicMeta");
-    const advMeta = document.getElementById("advMeta");
-    const legMeta = document.getElementById("legMeta");
+    const basicPrice = document.getElementById("basicPrice");
+    const advPrice = document.getElementById("advPrice");
+    const basicLeft = document.getElementById("basicLeft");
+    const advLeft = document.getElementById("advLeft");
+    const basicCount = document.getElementById("basicCount");
+    const advCount = document.getElementById("advCount");
 
     const basicRules = document.getElementById("basicRules");
     const advRules = document.getElementById("advRules");
-    const legRules = document.getElementById("legRules");
 
-    const setMeta = (key, metaEl, rulesEl)=>{
+    const setMeta = (key, priceEl, leftEl, rulesEl)=>{
     const cfg = CRATES[key];
-    const cd = Math.max(0, (state.shop.cooldowns[key] || 0) - now);
-    const cdS = Math.ceil(cd/1000);
     const bought = state.shop.daily.buys[key] || 0;
     const left = Math.max(0, cfg.limitPerDay - bought);
 
-    if (metaEl) metaEl.textContent = `Have: ${c[key]||0} | Price: ${cfg.priceRank} | Left today: ${left}`;
-    if (rulesEl) rulesEl.textContent = `Cooldown: ${cdS}s`;
+    if (priceEl) priceEl.textContent = `${cfg.priceRank} 🔥`;
+    if (leftEl) leftEl.textContent = `Left today: ${left}`;
+    if (rulesEl) rulesEl.textContent = "";
   };
 
-    setMeta("basic", basicMeta, basicRules);
-    setMeta("advanced", advMeta, advRules);
-    setMeta("legendary", legMeta, legRules);
+    if (basicCount) basicCount.textContent = String(c.basic || 0);
+    if (advCount) advCount.textContent = String(c.advanced || 0);
+
+    setMeta("basic", basicPrice, basicLeft, basicRules);
+    setMeta("advanced", advPrice, advLeft, advRules);
 
     // disable buy buttons if locked by rules
     const disableBuy = (btnId, key)=>{
       const btn = document.getElementById(btnId);
       if (!btn) return;
-      const check = canBuyCrate(key, now);
+      const check = canBuyCrate(key);
       btn.disabled = !check.ok;
       btn.title = check.ok ? "" : check.reason;
     };
 
     disableBuy("buyCrateBasicBtn","basic");
     disableBuy("buyCrateAdvancedBtn","advanced");
-    disableBuy("buyCrateLegendaryBtn","legendary");
 
   } catch(e) {}
 }
@@ -3246,52 +3356,6 @@ function isPageVisible(pageId){
   const pr = pager.getBoundingClientRect();
   const nr = page.getBoundingClientRect();
   return (nr.left < pr.right - 10) && (nr.right > pr.left + 10);
-}
-
-function updateNFTsCooldownUI(){
-  if (!isPageVisible("pageNFTs")) return;
-
-  const unlocked = (state.buildings.dappStore || 0) >= 1;
-  if (!unlocked) return;
-
-  const now = Date.now();
-  const c = state.inventory.crates || { basic:0, advanced:0, legendary:0 };
-
-  const basicMeta = document.getElementById("basicMeta");
-  const advMeta = document.getElementById("advMeta");
-  const legMeta = document.getElementById("legMeta");
-
-  const basicRules = document.getElementById("basicRules");
-  const advRules = document.getElementById("advRules");
-  const legRules = document.getElementById("legRules");
-
-  const setMeta = (key, metaEl, rulesEl)=>{
-    const cfg = CRATES[key];
-    const cd = Math.max(0, (state.shop.cooldowns[key] || 0) - now);
-    const cdS = Math.ceil(cd/1000);
-    const bought = state.shop.daily.buys[key] || 0;
-    const left = Math.max(0, cfg.limitPerDay - bought);
-
-    if (metaEl) metaEl.textContent = `Have: ${c[key]||0} | Price: ${cfg.priceRank} | Left today: ${left}`;
-    if (rulesEl) rulesEl.textContent = `Cooldown: ${cdS}s`;
-  };
-
-  setMeta("basic", basicMeta, basicRules);
-  setMeta("advanced", advMeta, advRules);
-  setMeta("legendary", legMeta, legRules);
-
-  // buy butonları cooldown/limit'e göre live disable olsun
-  const disableBuy = (btnId, key)=>{
-    const btn = document.getElementById(btnId);
-    if (!btn) return;
-    const check = canBuyCrate(key, now);
-    btn.disabled = !check.ok;
-    btn.title = check.ok ? "" : check.reason;
-  };
-
-  disableBuy("buyCrateBasicBtn", "basic");
-  disableBuy("buyCrateAdvancedBtn", "advanced");
-  disableBuy("buyCrateLegendaryBtn", "legendary");
 }
 
 function openBurnCommons(){
@@ -3366,14 +3430,11 @@ function confirmBurnCommons(){
   scheduleSaveV1();
 
   closeModal("burnCommonsModal");
-  log(`Burned ${amt} commons → +${gainRank} Rank.`, { positive:true, tag:"BURN" });
 }
 
 const UPGRADE_GROWTH = 1.30;
 const UPGRADE_CAPS = {
-  profitLvl: 41,           // old max bonus = 40 steps
   luckyLvl:  31,           // old = 30 steps
-  speedLvl:  11,           // old = 10 steps
   unlockComponentLvl: 31,
   unlockCellLvl: 31
 };
@@ -3382,8 +3443,8 @@ function renderUpgradesUI(){
   const el = document.getElementById("upgradeList");
   if (!el) return;
 
-  if (!state.upgrades){
-  state.upgrades = { profitLvl:1, luckyLvl:1, speedLvl:1, unlockComponentLvl:1, unlockCellLvl:1 };
+if (!state.upgrades){
+  state.upgrades = { profitLvl:0, luckyLvl:0, unlockComponentLvl:0, unlockCellLvl:0 };
 }
 
 const u = state.upgrades;
@@ -3391,7 +3452,7 @@ const u = state.upgrades;
 const fmtPct = (x)=> (Math.round(x * 10) / 10).toFixed(1);
 
 const upgradeEffectLine = (key, lvl, atCap)=>{
-  const eff = Math.max(0, lvl - 1);
+  const eff = Math.max(0, lvl);
   const nextEff = eff + 1;
 
   // profit
@@ -3408,17 +3469,8 @@ const upgradeEffectLine = (key, lvl, atCap)=>{
     const now = fmtPct(eff * 0.3);
     const next = fmtPct(nextEff * 0.3);
     return atCap
-      ? `Now: +${now}% lucky bonus (MAX)`
-      : `Now: +${now}% lucky bonus • Next: +${next}%`;
-  }
-
-  // speed
-  if (key === "speedLvl"){
-    const now = Math.min(40, eff * 4);
-    const next = Math.min(40, nextEff * 4);
-    return atCap
-      ? `Now: -${now}% grow time (MAX)`
-      : `Now: -${now}% grow time • Next: -${next}%`;
+      ? `+${now}% (MAX)`
+      : `+${now}% --> +${next}%`;
   }
 
   // unlock component
@@ -3432,9 +3484,9 @@ const upgradeEffectLine = (key, lvl, atCap)=>{
         nextReq = req; nextName = k;
       }
     }
-    if (atCap) return `Now: Component unlock level ${nowLvl} (MAX)`;
-    if (nextReq == null) return `Now: Component unlock level ${nowLvl} • Next: —`;
-    return `Now: Unlock level ${nowLvl} • Next unlock: ${nextName.toUpperCase()} @ Lv ${nextReq}`;
+    if (atCap) return `Component unlock level ${nowLvl} (MAX)`;
+    if (nextReq == null) return `Next component @ Lvl —`;
+    return `Next component @ Lvl ${nextReq}`;
   }
 
   // unlock cell
@@ -3445,89 +3497,66 @@ const upgradeEffectLine = (key, lvl, atCap)=>{
     for (const req of CELL_UNLOCK_REQ){
       if (req > nowLvl && (nextReq == null || req < nextReq)) nextReq = req;
     }
-    if (atCap) return `Now: ${nowCells}/16 cells unlocked (MAX)`;
-    if (nextReq == null) return `Now: ${nowCells}/16 cells unlocked • Next: —`;
-    return `Now: ${nowCells}/16 cells unlocked • Next cell @ Lv ${nextReq}`;
+    if (atCap) return `Cells unlocked (MAX)`;
+    if (nextReq == null) return `Next cell @ Lvl —`;
+    return `Next cell @ Lvl ${nextReq}`;
   }
 
   return "";
 };
 
   const rows = [
-  { key:"profitLvl", name:"Profit Boost", desc:"+5% per level", base: 25 },
-  { key:"luckyLvl",  name:"Lucky Boost",  desc:"+0.3% per level", base: 40 },
-  { key:"speedLvl",  name:"Speed Boost",  desc:"-4% grow time per level", base: 35 },
+  { key:"luckyLvl",  name:"Luck Boost",  desc:"", base: 40 },
 
-  { key:"unlockComponentLvl", name:"Unlock New Component", desc:"Unlocks higher-tier components at set levels", base: 60 },
-  { key:"unlockCellLvl", name:"Unlock New Cell", desc:"Unlocks more grid cells at set levels", base: 55 },
+  { key:"unlockComponentLvl", name:"Unlock Component", desc:"", base: 60 },
+  { key:"unlockCellLvl", name:"Unlock Cell", desc:"", base: 55 },
 ];
 
   el.innerHTML = rows.map(r=>{
-    const lvl = (Number.isFinite(u[r.key]) && u[r.key] >= 1) ? u[r.key] : 1;
-    const eff = Math.max(0, lvl - 1);
+    const lvl = (Number.isFinite(u[r.key]) && u[r.key] >= 0) ? u[r.key] : 0;
+    const eff = Math.max(0, lvl);
 
     const cap = UPGRADE_CAPS[r.key] ?? 999;
     const atCap = lvl >= cap;
 
-    // cost: first upgrade (Lv1→Lv2) uses eff=0 (same as old Lv0→Lv1)
+    // cost: first upgrade (Lvl0→Lvl1) uses eff=0
     const cost = Math.round(r.base * Math.pow(UPGRADE_GROWTH, eff));
 
     const can = (!atCap) && (state.resources.power >= cost);
 
     return `
-      <div class="line" style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+      <div class="line upgrade-row">
         <div>
-          <div><strong>${r.name}</strong> <span class="mini">Lv ${lvl}</span></div>
+          <div><strong>${r.name}</strong> <span class="mini">Lvl ${lvl}</span></div>
           <div class="mini">${r.desc}</div>
           <div class="mini" style="opacity:.92;margin-top:4px;">
             ${upgradeEffectLine(r.key, lvl, atCap)}
           </div>
         </div>
         <button class="btn btn-sm" ${can ? "" : "disabled"} onclick="buyUpgrade('${r.key}', ${cost})" title="${atCap ? "MAX level" : ""}">
-          Buy (${cost}⚡)
+          Upgrade to Lvl ${lvl + 1} - ${cost}⚡
         </button>
       </div>
     `;
   }).join("");
 }
 
-function renderSkillsUI(){
-  // Upgrade effect readouts (single-line)
-  const profitMult = overclockProfitMult(); // x1.xx
-  const speedMult = overclockSpeedMult();   // 0..1 (time multiplier)
-  const speedReductionPct = Math.round((1 - speedMult) * 100);
-
-  const luckyLvl = (state.upgrades?.luckyLvl) || 1;
-  const luckyEff = Math.max(0, luckyLvl - 1);
-  const luckyBonusPct = (luckyEff * 0.3).toFixed(1); // eff lvl başı +0.3%
-
-  const luckyTotalPct = Math.round(luckyChance() * 100);
-
-  const pity = state.shop?.pity || { basic:0, advanced:0, legendary:0 };
+function renderLuckUI(){
+  const luckyTotalPct = luckyChance() * 100;
+  const nftLuckPct = nftLuckCombined() * 100;
 
   const setText = (id, val)=>{
     const elx = document.getElementById(id);
     if (elx) elx.textContent = val;
   };
 
-  setText("skillsProfitText", "x" + profitMult.toFixed(2));
-  setText("skillsSpeedText", "-" + speedReductionPct + "%");
-  setText("skillsLuckyBonusText", "+" + luckyBonusPct + "%");
-
-  setText("skillsLuckyChanceText", luckyTotalPct + "%");
-
-  setText("skillsPityBasic", String((pity.basic || 0) + 1));
-  setText("skillsPityAdvanced", String((pity.advanced || 0) + 1));
-  setText("skillsPityLegendary", String((pity.legendary || 0) + 1));
-
-  setText("skillsPityBasicTh", String(pityThreshold("basic")));
-  setText("skillsPityAdvancedTh", String(pityThreshold("advanced")));
-  setText("skillsPityLegendaryTh", String(pityThreshold("legendary")));
-
+  setText("powerLuckText", "+" + luckyTotalPct.toFixed(1) + "%");
+  setText("nftLuckText", "+" + nftLuckPct.toFixed(1) + "%");
 }
 
 function renderTelemetryUI(){
-  if (!isPageVisible("pageDev")) return;
+  const devModal = document.getElementById("devModal");
+  if (!devModal || !devModal.classList.contains("open")) return;
 
   const elNet = document.getElementById("devPowerPerHour");
   if (!elNet) return;
@@ -3558,11 +3587,11 @@ function renderTelemetryUI(){
 function buyUpgrade(key, cost){
   // ✅ upgrades yoksa yarat
   if (!state.upgrades){
-  state.upgrades = { profitLvl:1, luckyLvl:1, speedLvl:1, unlockComponentLvl:1, unlockCellLvl:1 };
+  state.upgrades = { profitLvl:0, luckyLvl:0, unlockComponentLvl:0, unlockCellLvl:0 };
 }
 
   const cap = UPGRADE_CAPS[key] ?? 999;
-  const lvl = (Number.isFinite(state.upgrades[key]) && state.upgrades[key] >= 1) ? state.upgrades[key] : 1;
+  const lvl = (Number.isFinite(state.upgrades[key]) && state.upgrades[key] >= 0) ? state.upgrades[key] : 0;
   if (lvl >= cap) return;
 
   if (state.resources.power < cost) return;
@@ -3571,15 +3600,16 @@ function buyUpgrade(key, cost){
   if (state.telemetry) state.telemetry.powerSpentOnUpgrades += cost;
   state.upgrades[key] = lvl + 1;
 
-    updateResourcesUI();
+  updateResourcesUI();
+  updateHourlyRates();
   renderUpgradesUI();
+  updateLuckyUI();
 
   // ✅ Refresh unlock-driven visuals (safe no-op if elements not on screen)
   renderSeedBar();
   renderPowerGrid();
 
   scheduleSaveV1();
-  log(`Overclock: ${key} upgraded.`, { positive:true, tag:"UPGRADE" });
 }
 
 function anyBuildBusy(){
@@ -3726,18 +3756,22 @@ function updateBuildingLevelsUI(){
       updateResourcesUI();
     }
 
-    function computePassiveGains(){
-      const pp = state.buildings.powerPlant || 0;
-      // dApp Store artık sadece Lucky + NFTs unlock
-      const eGain = (pp * 2);
-      return { eGain };
-    }
+function computePassiveGains(){
+  const pp = state.buildings.powerPlant || 0;
+  // dApp Store artık sadece Lucky + NFTs unlock
+  const eGain = (pp * 2) * overclockProfitMult();
+  return { eGain };
+}
+
+function passivePerHour(){
+  const gains = computePassiveGains();
+  const factor = 3600 / PASSIVE_TICK_SECONDS;
+  return gains.eGain * factor;
+}
 
     function updateHourlyRates(){
-    const gains = computePassiveGains();
-    const factor = 3600 / PASSIVE_TICK_SECONDS;
     el.powerRate.textContent =
-  "(" + (gains.eGain * factor).toFixed(1) + "/hr)";
+  "(" + passivePerHour().toFixed(1) + "/hr)";
 
   }
 
@@ -3823,7 +3857,6 @@ function applyStreakClaim(fromDev = false) {
 // Oyuncunun gördüğü buton
 function claimStreak() {
   if (hasClaimedToday()) {
-    log("Daily bonus already claimed today.", { negative: true, tag: "STREAK" });
     updateStreakUI();
     return;
   }
@@ -3964,7 +3997,6 @@ function resolveBurnTokenFromStep1() {
     const val = select.value;
     const meta = BURN_KNOWN_TOKENS[val];
     if (!meta) {
-      log("Please select a token to burn.", { negative: true, tag: "BURN" });
       return null;
     }
     return meta;
@@ -3973,7 +4005,6 @@ function resolveBurnTokenFromStep1() {
   if (modeContract && modeContract.checked) {
     const addr = (input.value || "").trim();
     if (!addr) {
-      log("Please paste a contract (mint) address.", { negative: true, tag: "BURN" });
       return null;
     }
     const known = BURN_KNOWN_MINTS[addr];
@@ -4032,21 +4063,18 @@ function executeBurn() {
   const result = document.getElementById("burnResultInline");
 
   if (!currentBurnToken) {
-    log("No token selected for burn.", { negative: true, tag: "BURN" });
     return;
   }
 
   const solInput = document.getElementById("burnSolAmountInline");
   const val = parseFloat(solInput.value);
   if (isNaN(val) || val <= 0) {
-    log("Enter a positive SOL amount.", { negative: true, tag: "BURN" });
     return;
   }
 
   const solAmount = val;
 
   if (state.resources.sol < solAmount) {
-    log("Not enough SOL (mock) to perform burn.", { negative: true, tag: "BURN" });
     return;
   }
 
@@ -4087,10 +4115,6 @@ function executeBurn() {
       `${tx.slice(0, 8)}…</a> (Solscan preview)`;
   }
 
-  log(
-    `Burned ${solAmount.toFixed(4)} SOL to buy & burn ${currentBurnToken.symbol}. +${rankGain} Rank.`,
-    { positive: true, tag: "BURN" }
-  );
 
   scheduleSaveV1();
 
@@ -4140,7 +4164,7 @@ const BUILDINGS = {
   },
   dappStore: {
     name:"dApp Store",
-    desc:"Unlocks Lucky Grids and NFTs",
+    desc:"Unlocks NFTs",
     req: () => state.buildings.powerPlant >= 1,
     reqText: () => "Requires: Power Plant Tier 1",
   },
@@ -4160,48 +4184,37 @@ const CRATES = {
     key: "basic",
     name: "Basic",
     priceRank: 30,
-    cooldownMs: 45 * 1000,     
     limitPerDay: 12,
     commonQty: [1, 2],         // her açılışta en az 1 common
     uniqueBaseChance: 0.10,    // %10
-    bonusRankChance: 0.18,     
-    bonusRank: [3, 8],
-    // pity eşikleri: ilk unique hızlı, ikinci de kısa süre sonra, sonra normale döner
-    pityByUniquesOwned: [3, 5, 9] // 0 unique → 3; 1 unique → 5; 2+ → 9
+    bonusRankChance: 0.0
   },
   advanced: {
     key: "advanced",
     name: "Advanced",
     priceRank: 90,
-    cooldownMs: 90 * 1000, 
     limitPerDay: 7,
     commonQty: [2, 3],
     uniqueBaseChance: 0.16,
-    bonusRankChance: 0.25,
-    bonusRank: [6, 16],
-    pityByUniquesOwned: [2, 4, 7]
-  },
-  legendary: {
-    key: "legendary",
-    name: "Legendary",
-    priceRank: 200,
-    cooldownMs: 240 * 1000, 
-    limitPerDay: 4,
-    commonQty: [3, 5],
-    uniqueBaseChance: 0.25,
-    bonusRankChance: 0.33,
-    bonusRank: [12, 30],
-    pityByUniquesOwned: [1, 2, 4]
+    bonusRankChance: 0.0
   }
 };
+
+function crateUniqueChance(crateKey){
+  const base = CRATES[crateKey]?.uniqueBaseChance || 0;
+  const lvl = state.buildings.dappStore || 0;
+  if (lvl < 1) return base;
+  const bonus = (lvl - 1) * 0.005; // +0.5% absolute per tier after T1
+  return Math.min(0.6, base + bonus);
+}
 
 // pools (senin mevcut setine uyumlu)
 const NFT_POOLS = {
   commonPool: [
     "C01","C02","C03","C04","C05","C06","C07","C08",
-    "C09","C10","C11","C12","C13","C14","C15","C16"
+    "C09","C10","C11","C12","C13","C14","C15"
   ],
-  uniquePool: ["U01","U02","U03","U04"]
+  uniquePool: ["U01","U02","U03","U04","U05"]
 };
 
 const CRATE_TABLES = {
@@ -4211,10 +4224,10 @@ const CRATE_TABLES = {
       ["C01",3],["C02",3],["C03",3],["C04",3],
       ["C05",2],["C06",2],["C07",2],["C08",2],
       ["C09",1],["C10",1],["C11",1],["C12",1],
-      ["C13",1],["C14",1],["C15",1],["C16",1]
+      ["C13",1],["C14",1],["C15",1]
     ],
     unique: [
-      ["U01",4],["U02",3],["U03",2],["U04",1]
+      ["U01",4],["U02",3],["U03",2],["U04",1],["U05",1]
     ]
   },
   advanced: {
@@ -4223,22 +4236,10 @@ const CRATE_TABLES = {
       ["C01",1],["C02",1],["C03",1],["C04",1],
       ["C05",2],["C06",2],["C07",2],["C08",2],
       ["C09",3],["C10",3],["C11",3],["C12",3],
-      ["C13",2],["C14",2],["C15",2],["C16",2]
+      ["C13",2],["C14",2],["C15",2]
     ],
     unique: [
-      ["U01",1],["U02",2],["U03",3],["U04",4]
-    ]
-  },
-  legendary: {
-    // legendary: geç oyun commons ağır (C09-C16)
-    common: [
-      ["C01",0.5],["C02",0.5],["C03",0.5],["C04",0.5],
-      ["C05",1],["C06",1],["C07",1],["C08",1],
-      ["C09",3],["C10",3],["C11",3],["C12",3],
-      ["C13",4],["C14",4],["C15",4],["C16",4]
-    ],
-    unique: [
-      ["U01",1],["U02",1],["U03",2],["U04",6]
+      ["U01",1],["U02",2],["U03",3],["U04",4],["U05",2]
     ]
   }
 };
@@ -4246,31 +4247,23 @@ const CRATE_TABLES = {
 function ensureShopState(){
   if (!state.shop || typeof state.shop !== "object") {
     state.shop = {
-      daily: { dateKey: null, buys: { basic: 0, advanced: 0, legendary: 0 } },
-      cooldowns: { basic: 0, advanced: 0, legendary: 0 },
-      pity: { basic: 0, advanced: 0, legendary: 0 },
+      daily: { dateKey: null, buys: { basic: 0, advanced: 0 } },
       lastOpenedType: "basic"
     };
   }
   // inventory crates migration: number → object
   if (state.inventory && typeof state.inventory.crates === "number") {
     const n = state.inventory.crates || 0;
-    state.inventory.crates = { basic: n, advanced: 0, legendary: 0 };
+    state.inventory.crates = { basic: n, advanced: 0 };
   }
   if (!state.inventory.crates || typeof state.inventory.crates !== "object") {
-    state.inventory.crates = { basic: 0, advanced: 0, legendary: 0 };
-  }
-  if (!state.shop.pity || typeof state.shop.pity !== "object") {
-    state.shop.pity = { basic: 0, advanced: 0, legendary: 0 };
-  }
-  if (!state.shop.cooldowns || typeof state.shop.cooldowns !== "object") {
-    state.shop.cooldowns = { basic: 0, advanced: 0, legendary: 0 };
+    state.inventory.crates = { basic: 0, advanced: 0 };
   }
   if (!state.shop.daily || typeof state.shop.daily !== "object") {
-    state.shop.daily = { dateKey: null, buys: { basic: 0, advanced: 0, legendary: 0 } };
+    state.shop.daily = { dateKey: null, buys: { basic: 0, advanced: 0 } };
   }
   if (!state.shop.daily.buys || typeof state.shop.daily.buys !== "object") {
-    state.shop.daily.buys = { basic: 0, advanced: 0, legendary: 0 };
+    state.shop.daily.buys = { basic: 0, advanced: 0 };
   }
 }
 
@@ -4287,7 +4280,7 @@ function resetDailyIfNeeded(){
   const k = dateKeyLocal();
   if (state.shop.daily.dateKey !== k) {
     state.shop.daily.dateKey = k;
-    state.shop.daily.buys = { basic: 0, advanced: 0, legendary: 0 };
+    state.shop.daily.buys = { basic: 0, advanced: 0 };
   }
 }
 
@@ -4319,32 +4312,11 @@ function randPickWeighted(entries){
   return entries[entries.length - 1][0];
 }
 
-function uniquesOwnedCount(){
-  const owned = state.inventory?.nftUniques || {};
-  return Object.keys(owned).filter(k => owned[k]).length;
-}
-
-function pityThreshold(crateKey){
-  const cfg = CRATES[crateKey];
-  const u = uniquesOwnedCount();
-  const arr = cfg.pityByUniquesOwned;
-  if (u <= 0) return arr[0];
-  if (u === 1) return arr[1];
-  return arr[2];
-}
-
-function canBuyCrate(crateKey, nowOverride){
+function canBuyCrate(crateKey){
   ensureShopState();
   resetDailyIfNeeded();
 
   const cfg = CRATES[crateKey];
-  const now = (nowOverride ?? Date.now());
-
-  // cooldown
-  const next = state.shop.cooldowns[crateKey] || 0;
-  if (now < next) {
-    return { ok:false, reason:`Cooldown: ${Math.ceil((next-now)/1000)}s` };
-  }
 
   // daily limit
   const bought = state.shop.daily.buys[crateKey] || 0;
@@ -4365,7 +4337,6 @@ function buyCrateType(crateKey){
   const cfg = CRATES[crateKey];
   const check = canBuyCrate(crateKey);
   if (!check.ok){
-    log(check.reason, { negative:true, tag:"SHOP" });
     return false;
   }
 
@@ -4376,30 +4347,19 @@ function buyCrateType(crateKey){
   resetDailyIfNeeded();
   state.shop.daily.buys[crateKey] = (state.shop.daily.buys[crateKey] || 0) + 1;
 
-  state.shop.cooldowns[crateKey] = Date.now() + cfg.cooldownMs;
-
   updateResourcesUI();
   updateNFTsUI();
   scheduleSaveV1();
 
-  log(`Bought 1 ${cfg.name} Crate → -${cfg.priceRank} Rank.`, { positive:true, tag:"SHOP" });
   return true;
 }
 
 function rollOpenOutcome(crateKey){
-  // nothing yok: her zaman common var. Unique (pity + chance) + bonus rank opsiyonel.
+  // nothing yok: her zaman common var. Unique + bonus rank opsiyonel.
   ensureShopState();
   const cfg = CRATES[crateKey];
 
-  const pity = state.shop.pity[crateKey] || 0;
-  const th = pityThreshold(crateKey);
-
-  let gotUnique = false;
-  if (pity + 1 >= th) {
-    gotUnique = true; // pity guarantee
-  } else {
-    gotUnique = Math.random() < cfg.uniqueBaseChance;
-  }
+  const gotUnique = Math.random() < crateUniqueChance(crateKey);
 
   // COMMON guaranteed
   const commonCount = randInt(cfg.commonQty[0], cfg.commonQty[1]);
@@ -4417,20 +4377,10 @@ function rollOpenOutcome(crateKey){
     uniqueId = table?.unique ? randPickWeighted(table.unique) : randPick(NFT_POOLS.uniquePool);
   }
 
-  // BONUS rank
-  let bonusRank = 0;
-  if (Math.random() < cfg.bonusRankChance){
-    bonusRank = randInt(cfg.bonusRank[0], cfg.bonusRank[1]);
-  }
-
-  return { commons, uniqueId, bonusRank, gotUnique, pityUsed: gotUnique && (pity + 1 >= th) };
+  return { commons, uniqueId, gotUnique };
 }
 
 function applyOpenOutcome(crateKey, out){
-  // consume pity
-  if (out.gotUnique) state.shop.pity[crateKey] = 0;
-  else state.shop.pity[crateKey] = (state.shop.pity[crateKey] || 0) + 1;
-
   // apply commons (stack)
   out.commons.forEach(id=>{
     state.inventory.nftCommons[id] = (state.inventory.nftCommons[id] || 0) + 1;
@@ -4451,16 +4401,6 @@ function applyOpenOutcome(crateKey, out){
     }
   }
 
-  // apply bonus rank
-  if (out.bonusRank > 0){
-    state.resources.rank = (state.resources.rank || 0) + out.bonusRank;
-  }
-}
-
-function crateCountText(){
-  ensureShopState();
-  const c = state.inventory?.crates || {};
-  return `Crates: B ${c.basic||0} / A ${c.advanced||0} / L ${c.legendary||0}`;
 }
 
 function openCrateSelected(crateKey){
@@ -4468,7 +4408,6 @@ function openCrateSelected(crateKey){
 
   const have = state.inventory.crates[crateKey] || 0;
   if (have <= 0){
-    log(`No ${CRATES[crateKey].name} crates to open.`, { negative:true, tag:"CRATE" });
     return null;
   }
 
@@ -4489,50 +4428,49 @@ function openCrateSelected(crateKey){
   if (out.uniqueId) lines.push(`<div>🌟 Unique: <strong>${out.uniqueId}</strong></div>`);
   if (out.duplicateUnique) lines.push(`<div class="mini">Unique duplicate (${out.duplicateUnique}) → fallback common: ${out.fallbackCommon}</div>`);
   if (!out.uniqueId && !out.duplicateUnique) lines.push(`<div class="mini">No unique this time.</div>`);
-  if (out.bonusRank > 0) lines.push(`<div>➕ Bonus Rank: <strong>${out.bonusRank}</strong></div>`);
+  
 
   const body = document.getElementById("crateModalBody");
   if (body) body.innerHTML = lines.join("");
 
   openModal("crateModal");
 
-  log(`Opened ${CRATES[crateKey].name} Crate.`, { positive:true, tag:"CRATE" });
   return out;
 }
 
 const NODE_SEEDS = {
-  electron:   { label:"Electron",   iconSrc:"assets/nodes/node_electron.png",   cost:1,   grow:3,  harvests:3 },
-  transistor: { label:"Transistor", iconSrc:"assets/nodes/node_transistor.png", cost:3,   grow:6,  harvests:3 },
-  microchip:  { label:"Microchip",  iconSrc:"assets/nodes/node_microchip.png",  cost:7,   grow:10, harvests:3 },
-  ram:        { label:"RAM",        iconSrc:"assets/nodes/node_ram.png",        cost:15,  grow:16, harvests:3 },
-  cpu:        { label:"CPU",        iconSrc:"assets/nodes/node_cpu.png",        cost:25,  grow:22, harvests:3 },
-  gpu:        { label:"GPU",        iconSrc:"assets/nodes/node_gpu.png",        cost:60,  grow:35, harvests:3 },
-  ai:         { label:"AI",         iconSrc:"assets/nodes/node_ai.png",         cost:100, grow:50, harvests:3 },
-  quantum:    { label:"Quantum",    iconSrc:"assets/nodes/node_quantum.png",    cost:140, grow:70, harvests:3 },
+  electron:   { label:"Electron",   iconSrc:"assets/nodes/node_electron.png",   cost:2,  grow:2,  harvests:3 },
+  transistor: { label:"Transistor", iconSrc:"assets/nodes/node_transistor.png", cost:4,  grow:4,  harvests:3 },
+  microchip:  { label:"Microchip",  iconSrc:"assets/nodes/node_microchip.png",  cost:6,  grow:5,  harvests:3 },
+  ram:        { label:"RAM",        iconSrc:"assets/nodes/node_ram.png",        cost:8,  grow:6,  harvests:3 },
+  cpu:        { label:"CPU",        iconSrc:"assets/nodes/node_cpu.png",        cost:10, grow:7,  harvests:3 },
+  gpu:        { label:"GPU",        iconSrc:"assets/nodes/node_gpu.png",        cost:12, grow:8,  harvests:3 },
+  ai:         { label:"AI",         iconSrc:"assets/nodes/node_ai.png",         cost:14, grow:9,  harvests:3 },
+  quantum:    { label:"Quantum",    iconSrc:"assets/nodes/node_quantum.png",    cost:16, grow:10, harvests:3 },
 };
 
 // ===== UNLOCK RULES =====
 const COMPONENT_UNLOCK_REQ = {
-  electron: 1,
-  transistor: 4,
-  microchip: 8,
-  ram: 10,
-  cpu: 13,
-  gpu: 16,
-  ai: 18,
-  quantum: 21
+  electron: 0,
+  transistor: 3,
+  microchip: 7,
+  ram: 9,
+  cpu: 12,
+  gpu: 15,
+  ai: 17,
+  quantum: 20
 };
 
 // cells 7..16 unlock thresholds
-const CELL_UNLOCK_REQ = [4, 8, 10, 13, 16, 18, 21, 24, 28, 31];
+const CELL_UNLOCK_REQ = [3, 7, 9, 12, 15, 17, 20, 23, 27, 30];
 
 function getUnlockComponentLvl(){
   const v = state.upgrades?.unlockComponentLvl;
-  return (Number.isFinite(v) && v >= 1) ? v : 1;
+  return (Number.isFinite(v) && v >= 0) ? v : 0;
 }
 function getUnlockCellLvl(){
   const v = state.upgrades?.unlockCellLvl;
-  return (Number.isFinite(v) && v >= 1) ? v : 1;
+  return (Number.isFinite(v) && v >= 0) ? v : 0;
 }
 
 function isComponentUnlocked(seedKey){
@@ -4566,6 +4504,43 @@ function closeSeedPop(){
     seedPopEl = null;
   }
   seedPopOpenFor = null;
+}
+
+let infoPopEl = null;
+
+function closeInfoPop(){
+  if (infoPopEl){
+    infoPopEl.remove();
+    infoPopEl = null;
+  }
+}
+
+function openInfoPop(anchorEl, text){
+  closeInfoPop();
+  if (!anchorEl) return;
+
+  const pop = document.createElement("div");
+  pop.className = "info-pop";
+  pop.textContent = text;
+  document.body.appendChild(pop);
+
+  const r = anchorEl.getBoundingClientRect();
+  const pad = 10;
+  let x = Math.round(r.left);
+  let y = Math.round(r.bottom + 6);
+
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const pr = pop.getBoundingClientRect();
+
+  if (x + pr.width + pad > vw) x = vw - pr.width - pad;
+  if (x < pad) x = pad;
+  if (y + pr.height + pad > vh) y = Math.max(pad, r.top - pr.height - 6);
+
+  pop.style.left = x + "px";
+  pop.style.top  = y + "px";
+
+  infoPopEl = pop;
 }
 
 function openSeedPop(seedKey, anchorEl){
@@ -4616,46 +4591,45 @@ function openSeedPop(seedKey, anchorEl){
 // Electron: 3 / 8 / 20 (senin verdiğin)
 // Sonraki seed’ler kademeli artar (24 değer = 8 seed x 3 tier)
 function seedRankRewards(seedKey){
-  const idx = Math.max(0, SEED_ORDER.indexOf(seedKey));
-  // basit ölçek: Electron->Quantum artar
-  const core = 3 + idx * 2;
-  const ent  = 8 + idx * 4;
-  const fus  = 20 + idx * 10;
-  return { core, entangled: ent, fusion: fus };
+  const table = {
+    electron:   { core: 4,  entangled: 12,  fusion: 35 },
+    transistor: { core: 6,  entangled: 18,  fusion: 50 },
+    microchip:  { core: 10, entangled: 30,  fusion: 90 },
+    ram:        { core: 14, entangled: 42,  fusion: 110 },
+    cpu:        { core: 22, entangled: 66,  fusion: 150 },
+    gpu:        { core: 30, entangled: 90,  fusion: 190 },
+    ai:         { core: 40, entangled: 120, fusion: 220 },
+    quantum:    { core: 52, entangled: 156, fusion: 260 }
+  };
+  return table[seedKey] || { core: 0, entangled: 0, fusion: 0 };
 }
 
 function luckyChance(){
-  const lvl = state.buildings.dappStore || 0;
-  if (lvl < 1) return 0;
-
-  // “yavaşça artan” curve:
-  // Tier1: 4%, Tier2: 5%, Tier3: 6% ... Tier11: 14% (cap)
-  const base = 0.04;
-  const perTier = 0.01;
-  const cap = 0.14;
-  const lvlU = (state.upgrades?.luckyLvl) || 1;
-  const effU = Math.max(0, lvlU - 1);
+  const lvlU = (state.upgrades?.luckyLvl) || 0;
+  const effU = Math.max(0, lvlU);
   const upgradeBonus = effU * 0.003; // eff lvl başı +0.3%
-return Math.min(cap, base + (lvl - 1) * perTier + upgradeBonus);
+  const cap = 0.14;
+  return Math.min(cap, upgradeBonus);
+}
+
+function nftLuckCombined(){
+  if ((state.buildings.dappStore || 0) < 1) return 0;
+  const pBasic = crateUniqueChance("basic");
+  const pAdv = crateUniqueChance("advanced");
+  return (pBasic + pAdv) / 2;
 }
 
 function overclockProfitMult(){
-  const lvl = (state.upgrades?.profitLvl) || 1;
-  const eff = Math.max(0, lvl - 1);
-  return 1 + (eff * 0.05); // eff lvl başı +5%
+  return 1;
 }
 
 function overclockSpeedMult(){
-  const lvl = (state.upgrades?.speedLvl) || 1;
-  const eff = Math.max(0, lvl - 1);
-  const mult = 1 - Math.min(0.40, eff * 0.04); // cap: %40 hızlanma
-  return mult;
+  return 1;
 }
 
 function updateLuckyUI(){
   const p = luckyChance(); // 0..1
-  // keep diagnostics in sync (Skills)
-  if (typeof renderSkillsUI === "function") renderSkillsUI();
+  if (typeof renderLuckUI === "function") renderLuckUI();
 }
 
 // Lucky roll:
@@ -4739,7 +4713,7 @@ function renderSeedBar(){
 
     card.addEventListener("click", (ev)=>{
         if (!isComponentUnlocked(seedKey)){
-    showToastSingle("Locked component", "Upgrade: Unlock New Component to use this.", "🔒");
+    showToastSingle("Locked component", "Upgrade: Unlock Component to use this.", "🔒");
     return;
   }
 
@@ -4783,9 +4757,17 @@ function prevSeedPage(){
 }
 
 function nodeSeedProfit(seedKey){
-  // senin tarifin: her harvest = cost/2 (3 harvest => toplam 1.5x cost)
-  const s = NODE_SEEDS[seedKey];
-  return Math.max(1, Math.round(s.cost / 2));
+  const table = {
+    electron: 1.5,
+    transistor: 3,
+    microchip: 5,
+    ram: 6.5,
+    cpu: 8.5,
+    gpu: 10,
+    ai: 12,
+    quantum: 14
+  };
+  return table[seedKey] || 0;
 }
 
 function spawnNodePopup(cellEl, text, kind){
@@ -4867,6 +4849,27 @@ function showWelcomeBanner(text, icon="⚡"){
   setTimeout(()=> {
     el.classList.remove("show");
   }, 2600);
+}
+
+function scheduleWelcomeReward(){
+  if (!state.meta) state.meta = { welcomeClaimed:false };
+  if (!state.meta.welcomePending) return;
+
+  setTimeout(() => {
+    if (!state.meta || !state.meta.welcomePending) return;
+
+    showWelcomeBanner("+100 Power — Welcome reward", "⚡");
+
+    setTimeout(() => {
+      if (!state.meta || !state.meta.welcomePending) return;
+      state.meta.welcomePending = false;
+      state.meta.welcomeClaimed = true;
+      state.resources.power = (state.resources.power || 0) + 100;
+      saveNowV1(state);
+      updateResourcesUI();
+      updateHourlyRates();
+    }, 400);
+  }, SPLASH_MS + 50);
 }
 
 function runAfterDOMReady(fn){
@@ -4973,11 +4976,11 @@ function setSelectedSeed(seedKey){
 
 function nodeTryDeploy(idx){
   if (!isCellUnlocked(idx)){
-    showToastSingle("Locked cell", "Upgrade: Unlock New Cell to expand your grid.", "🔒");
+    showToastSingle("Locked cell", "Upgrade: Unlock Cell to expand grid.", "🔒");
     return;
   }
   if (!isComponentUnlocked(state.powerGrid.selectedSeed)){
-    showToastSingle("Locked component", "Upgrade: Unlock New Component to use this.", "🔒");
+    showToastSingle("Locked component", "Upgrade: Unlock Component to use this.", "🔒");
     return;
   }
   
@@ -4986,7 +4989,6 @@ function nodeTryDeploy(idx){
 
   const s = NODE_SEEDS[state.powerGrid.selectedSeed];
   if (!canAfford(s.cost)){
-    log(`Not enough ⚡ to deploy ${s.label}.`, { negative:true, tag:"NODE" });
     return;
   }
 
@@ -5002,7 +5004,6 @@ n.total = t;
 // ✅ lucky roll only once, on FIRST deploy
 n.luckyTier = rollLuckyTier();
 
-log(`Deployed ${s.label} → -${s.cost}⚡`, { negative:false, tag:"NODE" });
 renderPowerGrid();
 scheduleSaveV1();
 
@@ -5015,16 +5016,15 @@ function nodeTryHarvest(idx){
 
   const s = NODE_SEEDS[n.seed];
   let gain = nodeSeedProfit(n.seed);
-  gain = Math.max(1, Math.round(gain * overclockProfitMult()));
+  gain = Math.max(0.1, Math.round(gain * overclockProfitMult() * 10) / 10);
 
   state.resources.power += gain;
   if (state.telemetry) state.telemetry.powerFromNodes += gain;
-  spawnNodePopup(getNodeCellEl(idx), `+${gain}⚡`, "power pos");
+  spawnNodePopup(getNodeCellEl(idx), `+${formatRes(gain)}⚡`, "power pos");
 
   updateResourcesUI();
   updateHourlyRates();
 
-  log(`Harvested ${s.label} → +${gain}⚡`, { positive:true, tag:"NODE" });
 
   if (n.stage >= s.harvests){
   // ✅ cycle complete: apply lucky rank bonus (if any)
@@ -5036,10 +5036,6 @@ function nodeTryHarvest(idx){
 
       spawnNodePopup(getNodeCellEl(idx), `+${bonus}🔥`, "rank");
 
-      log(
-        `Lucky ${s.label} (${luckyTierToLabel(n.luckyTier)}) → +${bonus} Rank`,
-        { positive:true, tag:"LUCKY" }
-      );
     }
   }
 
@@ -5205,17 +5201,14 @@ const tabNode = document.getElementById("tabNode");
 const tabBuildings = document.getElementById("tabBuildings");
 const tabNFTs = document.getElementById("tabNFTs");
 const tabUpgrade = document.getElementById("tabUpgrade");
-const tabSkills = document.getElementById("tabSkills");
-const tabDev = document.getElementById("tabDev");
+const tabDev = null;
 
 function setActiveTab(which){
-  [tabNode, tabBuildings, tabNFTs, tabUpgrade, tabSkills, tabDev].forEach(b=> b && b.classList.remove("active"));
+  [tabNode, tabBuildings, tabNFTs, tabUpgrade].forEach(b=> b && b.classList.remove("active"));
   if (which === "node" && tabNode) tabNode.classList.add("active");
   if (which === "buildings" && tabBuildings) tabBuildings.classList.add("active");
   if (which === "nfts" && tabNFTs) tabNFTs.classList.add("active");
   if (which === "upgrade" && tabUpgrade) tabUpgrade.classList.add("active");
-  if (which === "skills" && tabSkills) tabSkills.classList.add("active");
-  if (which === "dev" && tabDev) tabDev.classList.add("active");
 }
 
 let isProgrammaticScroll = false;
@@ -5268,20 +5261,11 @@ if (tabUpgrade) tabUpgrade.addEventListener("click", ()=> {
   requestAnimationFrame(()=> renderUpgradesUI());
 });
 
-if (tabSkills) tabSkills.addEventListener("click", ()=> {
-  setActiveTab("skills");
-  goPage(4);
-  requestAnimationFrame(()=> renderSkillsUI());
-});
-
-if (tabDev) tabDev.addEventListener("click", ()=> { setActiveTab("dev"); goPage(5); });
-
 const openCrateBtn = document.getElementById("openCrateBtn");
 const crateTypeSelect = document.getElementById("crateTypeSelect");
 
 const buyBasicBtn = document.getElementById("buyCrateBasicBtn");
 const buyAdvBtn = document.getElementById("buyCrateAdvancedBtn");
-const buyLegBtn = document.getElementById("buyCrateLegendaryBtn");
 
 if (buyBasicBtn) buyBasicBtn.addEventListener("click", ()=>{
   if ((state.buildings.dappStore || 0) < 1) { setPlaceStatus("dApp Store required."); return; }
@@ -5291,11 +5275,6 @@ if (buyBasicBtn) buyBasicBtn.addEventListener("click", ()=>{
 if (buyAdvBtn) buyAdvBtn.addEventListener("click", ()=>{
   if ((state.buildings.dappStore || 0) < 1) { setPlaceStatus("dApp Store required."); return; }
   buyCrateType("advanced");
-});
-
-if (buyLegBtn) buyLegBtn.addEventListener("click", ()=>{
-  if ((state.buildings.dappStore || 0) < 1) { setPlaceStatus("dApp Store required."); return; }
-  buyCrateType("legendary");
 });
 
 if (openCrateBtn) openCrateBtn.addEventListener("click", ()=>{
@@ -5328,7 +5307,7 @@ if (gridEl) {
     const idx = parseInt(cell.dataset.idx, 10);
     if (isNaN(idx)) return;
     if (!isCellUnlocked(idx)){
-    showToastSingle("Locked cell", "Upgrade: Unlock New Cell to expand your grid.", "🔒");
+    showToastSingle("Locked cell", "Upgrade: Unlock Cell to expand grid.", "🔒");
     return;
     }
     const n = state.powerGrid.nodes[idx];
@@ -5351,39 +5330,19 @@ if (devRank1000Btn) devRank1000Btn.addEventListener("click", ()=>{
   state.resources.rank = (state.resources.rank || 0) + 1000;
   updateResourcesUI();
   scheduleSaveV1();
-  log("+1000 Rank (DEV).", { positive:true, tag:"DEV" });
 });
 
 const devGiveCratesBtn = document.getElementById("devGiveCratesBtn");
 if (devGiveCratesBtn) devGiveCratesBtn.addEventListener("click", ()=>{
   ensureShopState();
-  state.inventory.crates.basic += 3;
-  state.inventory.crates.advanced += 2;
-  state.inventory.crates.legendary += 1;
+  state.inventory.crates.basic += 5;
+  state.inventory.crates.advanced += 3;
   updateNFTsUI();
   scheduleSaveV1();
-  log("Gave crates: +3 basic, +2 advanced, +1 legendary (DEV).", { positive:true, tag:"DEV" });
-});
-
-const devResetPityBtn = document.getElementById("devResetPityBtn");
-if (devResetPityBtn) devResetPityBtn.addEventListener("click", ()=>{
-  ensureShopState();
-  state.shop.pity = { basic:0, advanced:0, legendary:0 };
-  updateNFTsUI();
-  scheduleSaveV1();
-  log("Pity reset (DEV).", { positive:true, tag:"DEV" });
-});
-
-const devPrintShopBtn = document.getElementById("devPrintShopBtn");
-if (devPrintShopBtn) devPrintShopBtn.addEventListener("click", ()=>{
-  ensureShopState();
-  console.log("SHOP_STATE", JSON.parse(JSON.stringify(state.shop)));
-  console.log("CRATES", CRATES);
-  log("Printed shop state to console.", { tag:"DEV" });
 });
 
 
-// Swipe/scroll ile geçince active tab güncelle (5 sayfa)
+  // Swipe/scroll ile geçince active tab güncelle (4 sayfa)
 if (pager){
   let lastIdx = -1;
 
@@ -5400,8 +5359,6 @@ if (pager){
     else if (idx === 1) setActiveTab("buildings");
     else if (idx === 2) setActiveTab("nfts");
     else if (idx === 3) setActiveTab("upgrade");
-    else if (idx === 4) setActiveTab("skills");
-    else if (idx === 5) setActiveTab("dev");
   }, { passive:true });
 }
 
@@ -5411,8 +5368,22 @@ if (pager){
             if (el.devStreakButton) el.devStreakButton.addEventListener("click", () => applyStreakClaim(true));
 
         // 🔽 TOP BAR BUTONLARI
+      if (el.devButton) el.devButton.addEventListener("click", () => openModal("devModal"));
       el.walletButton.addEventListener("click", () => openModal("walletModal"));
       el.howtoButton.addEventListener("click", () => openModal("howtoModal"));
+
+      if (el.powerLuckInfo) {
+        el.powerLuckInfo.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openInfoPop(el.powerLuckInfo, "Upgrade Luck Boost inside Upgrades to increase Luck");
+        });
+      }
+      if (el.nftLuckInfo) {
+        el.nftLuckInfo.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openInfoPop(el.nftLuckInfo, "Upgrade dApp Store inside Buildings to increase Luck");
+        });
+      }
 
            // 🔽 WALLET MODAL BUTTONS
       el.openSolscanBtn.addEventListener("click", () => {
@@ -5427,11 +5398,9 @@ if (pager){
         if (walletConnected) {
           // Going from connected → disconnected
           walletConnected = false;
-          log("Wallet disconnected (mock).", { tag:"WALLET" });
         } else {
           // Going from disconnected → connected
           walletConnected = true;
-          log("Wallet connected (mock).", { tag:"WALLET" });
         }
         updateWalletUI();
       });
@@ -5448,13 +5417,9 @@ if (pager){
 
   state.resources.sol -= costSol;
 
-  const pp = state.buildings.powerPlant || 0;
-  const da = state.buildings.dappStore || 0;
-  const scale = 1 + (pp * 0.25) + (da * 0.35);
-
   const baseE_min = 160, baseE_max = 240;
   const PACK_MULT = 20;
-  const e = Math.round((baseE_min + Math.random() * (baseE_max - baseE_min)) * scale * PACK_MULT);
+  const e = Math.round((baseE_min + Math.random() * (baseE_max - baseE_min)) * PACK_MULT);
 
   state.resources.power += e;
   updateResourcesUI();
@@ -5487,18 +5452,24 @@ document.querySelectorAll(".modal-backdrop").forEach(backdrop => {
   });
 });
 
-// ✅ close seed pop on outside click
+// ✅ close seed/info pop on outside click
 document.addEventListener("pointerdown", (e) => {
-  if (!seedPopEl) return;
-
   const t = e.target;
-  const clickedInsidePop = seedPopEl.contains(t);
 
-  // seed-card üstüne tıkladıysa kapatma kararını seed-card click handler verecek
-  const clickedSeedCard = t && t.closest && t.closest(".seed-card");
+  if (seedPopEl){
+    const clickedInsidePop = seedPopEl.contains(t);
+    const clickedSeedCard = t && t.closest && t.closest(".seed-card");
+    if (!clickedInsidePop && !clickedSeedCard){
+      closeSeedPop();
+    }
+  }
 
-  if (!clickedInsidePop && !clickedSeedCard){
-    closeSeedPop();
+  if (infoPopEl){
+    const clickedInsideInfo = infoPopEl.contains(t);
+    const clickedInfoBadge = t && t.closest && t.closest(".info-badge");
+    if (!clickedInsideInfo && !clickedInfoBadge){
+      closeInfoPop();
+    }
   }
 }, { passive:true });
 
@@ -5608,7 +5579,22 @@ function stopRAF(){
   state.render.rafOn = false;
 }
 
+const SPLASH_MS = 3200;
+
+function showSplash(){
+  const el = document.getElementById("splashScreen");
+  if (!el) return;
+  el.style.display = "flex";
+  requestAnimationFrame(() => el.classList.add("show"));
+  setTimeout(() => {
+    el.classList.remove("show");
+    el.style.display = "none";
+    document.body.classList.remove("splash-active");
+  }, SPLASH_MS);
+}
+
    function init(){
+    showSplash();
     // === 0.1 USER / IDENTITY (init-time guarantee) ===
 if (!state.user) {
   state.user = {
@@ -5622,7 +5608,7 @@ if (!state.user) {
 // === 0.2 INVENTORY (init-time guarantee) ===
 if (!state.inventory) {
   state.inventory = {
-    crates: { basic:0, advanced:0, legendary:0 }, // unopened crates
+    crates: { basic:0, advanced:0 }, // unopened crates
     nftCommons: {},       // { "nft_id": count }
     nftUniques: {},       // { "nft_id": true }
   };
@@ -5672,10 +5658,9 @@ if (!state.ui) state.ui = {};
   startRAF();
   updateNFTsUI();
   updateLuckyUI();
-  renderSkillsUI();
+  renderLuckUI();
   setInterval(nodeTick, 100);
   setInterval(updateBuildProgressUI, 120);
-  setInterval(updateNFTsCooldownUI, 250);
   setInterval(renderTelemetryUI, 500);
 
 setInterval(()=>{
@@ -5692,21 +5677,12 @@ setInterval(()=>{
 
 // ===== WELCOME REWARD (first run / after reset) =====
 if (!state.meta) state.meta = { welcomeClaimed:false };
-
-if (!state.meta.welcomeClaimed){
-  state.resources.power = (state.resources.power || 0) + 100;
-  state.meta.welcomeClaimed = true;
-
+if (!state.meta.welcomeClaimed) {
+  state.meta.welcomePending = true;
   saveNowV1(state);
-
-  updateResourcesUI();
-  updateHourlyRates();
-
-  // ✅ ONLY THIS — no toast, no timeout
-  showWelcomeBanner("+100 Electricity — Welcome reward", "⚡");
 }
+scheduleWelcomeReward();
 
-  log("Game session started (v0.30).", { tag:"SYS" });
 
 }
 
@@ -5725,3 +5701,4 @@ document.addEventListener("DOMContentLoaded", () => {
     <div class="device-frame"><div class="safe-guides"></div></div>
   </body>
 </html>
+  
