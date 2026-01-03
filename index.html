@@ -6,7 +6,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <title>SOLTAN — mock v0.30</title>
+  <title>SOLTAN — mock v0.31</title>
   <style>
 html, body { height: 100%; }
 html { -webkit-text-size-adjust: 100%; }
@@ -1327,6 +1327,21 @@ html, body {
   width: min(520px, calc(100vw - 24px));
   pointer-events: none;
 }
+#crashBanner{
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 100000;
+  background: rgba(220, 38, 38, 0.92);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.4;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
 .toast{
   background: rgba(7,11,18,0.92);
   border: 1px solid rgba(22,32,51,0.95);
@@ -1606,6 +1621,48 @@ html, body {
   animation: splashZoom 3.2s ease forwards;
 }
 
+.loading-overlay{
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(5, 7, 13, 0.55);
+  z-index: 190000;
+  pointer-events: none;
+}
+.loading-card{
+  width: min(520px, calc(100vw - 24px));
+  margin: 0 12px 20px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(7,11,18,0.92);
+  border: 1px solid rgba(22,32,51,0.95);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+}
+.loading-title{
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.loading-bar{
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+.loading-bar-fill{
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  transition: width 120ms linear;
+}
+.loading-text{
+  font-size: 11px;
+  color: var(--text-soft);
+  margin-top: 6px;
+}
+
 @keyframes splashFade{
   0%{ opacity: 0; }
   10%{ opacity: 1; }
@@ -1642,7 +1699,15 @@ html, body {
   <div id="splashScreen" class="splash-screen show" aria-hidden="true">
     <img src="assets/others/splash_soltan.png" alt="">
   </div>
-  <div id="toastHost"></div>
+  <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
+    <div class="loading-card">
+      <div class="loading-title">Loading assets...</div>
+      <div class="loading-bar"><div id="loadingBarFill" class="loading-bar-fill"></div></div>
+      <div id="loadingText" class="loading-text">0%</div>
+    </div>
+  </div>
+      <div id="toastHost"></div>
+      <div id="crashBanner" style="display:none;"></div>
   <div id="welcomeBanner"></div>
     <div class="shell">
       <div class="app">
@@ -1878,7 +1943,7 @@ html, body {
             <div style="font-size:12px; color:var(--text-soft); margin-bottom:6px;">
         SOL to burn (mock)
             </div>
-            <input id="burnSolAmountInline" class="btn btn-sm" style="width:100%;" placeholder="e.g. 0.25" inputmode="decimal">
+            <input id="burnSolAmountInline" class="btn btn-sm" style="width:100%;" placeholder="e.g. 0.25" inputmode="decimal" type="number" min="0" step="0.0001">
 
             <div class="btn-group" style="margin-top:12px;">
         <button class="btn btn-primary" id="burnExecuteBtnInline">Burn</button>
@@ -1984,6 +2049,36 @@ html, body {
                 <div><strong id="devSpendPerHour">—</strong></div>
               </div>
             </div>
+            <div class="line" style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+              <div class="mini">Resource clamp logs</div>
+              <label class="mini" style="display:flex;align-items:center;gap:6px;">
+                <input type="checkbox" id="devLogClampToggle">
+                enabled
+              </label>
+            </div>
+            <div class="line" style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+              <div class="mini">Resource change logs</div>
+              <label class="mini" style="display:flex;align-items:center;gap:6px;">
+                <input type="checkbox" id="devLogResourcesToggle">
+                enabled
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-backdrop" id="recoveryModal">
+        <div class="modal">
+          <div class="modal-header">
+            <div class="modal-title">Recovery</div>
+            <div class="modal-close" data-close="recoveryModal">✕</div>
+          </div>
+          <div class="mini" id="recoveryMessage">
+            Your data could not be loaded. Would you like to reset and start fresh?
+          </div>
+          <div class="btn-group" style="margin-top:12px;">
+            <button class="btn btn-sm btn-danger" id="recoveryResetBtn">Reset Game</button>
+            <button class="btn btn-sm" id="recoveryCloseBtn">Close</button>
           </div>
         </div>
       </div>
@@ -2040,7 +2135,41 @@ html, body {
    ========================================================= */
 
 const SAVE_KEY = "soltan_save_v1";
-const SAVE_VERSION = 1;
+const SAVE_VERSION = 2;
+
+const GAME_CONFIG = {
+  TIMERS: {
+    SAVE_DEBOUNCE_MS: 250,
+    PASSIVE_TICK_SECONDS: 5,
+    BUILD_BASE_MS: 5000,
+    NODE_TICK_MS: 100,
+    TELEMETRY_MS: 500,
+    TELEMETRY_RESET_MS: 15 * 60 * 1000,
+    OFFLINE_MAX_MS: 12 * 60 * 60 * 1000
+  },
+  BUILDINGS: {
+    powerPlant: { baseCost: 120, growth: 1.6, passivePerTick: 2 },
+    dappStore: { baseCost: 350, growth: 1.5 },
+    furnace: { baseCost: 1800, growth: 1.45 }
+  },
+  STREAK: {
+    basePower: 2,
+    weekMultipliers: [1.0, 1.5, 2.0, 3.0]
+  },
+  BURN: {
+    rankPerSol: 100,
+    furnaceTierMultiplier: 0.25
+  },
+  SHOP: {
+    packSolCost: 0.5,
+    packPowerMin: 160,
+    packPowerMax: 240,
+    packPowerMult: 20
+  },
+  LIMITS: {
+    upgradeCapFallback: 999
+  }
+};
 
 // ---- helpers
 function safeParse(json){
@@ -2173,32 +2302,43 @@ function migrateLegacyToV1(){
 }
 
 // ---- load/save
+function normalizeSave(parsed){
+  const base = defaultSave();
+  return {
+    ...base,
+    ...parsed,
+    resources: { ...base.resources, ...(parsed.resources||{}) },
+    buildings: { ...base.buildings, ...(parsed.buildings||{}) },
+    streak: { ...base.streak, ...(parsed.streak||{}) },
+    powerGrid: {
+      ...base.powerGrid,
+      ...(parsed.powerGrid||{}),
+      nodes: Array.isArray(parsed.powerGrid?.nodes) ? parsed.powerGrid.nodes : base.powerGrid.nodes
+    },
+    buildMap: {
+      ...base.buildMap,
+      ...(parsed.buildMap||{}),
+      built: Array.isArray(parsed.buildMap?.built) ? parsed.buildMap.built.slice(0,3) : base.buildMap.built.slice()
+    }
+  };
+}
+
 function loadSaveV1(){
   const raw = localStorage.getItem(SAVE_KEY);
   const parsed = safeParse(raw);
 
   // If valid v1, return it
   if (parsed && parsed.version === SAVE_VERSION) {
-    // minimal shape hardening (in case of partial corruption)
-    const base = defaultSave();
-    // shallow merge
-    return {
-      ...base,
-      ...parsed,
-      resources: { ...base.resources, ...(parsed.resources||{}) },
-      buildings: { ...base.buildings, ...(parsed.buildings||{}) },
-      streak: { ...base.streak, ...(parsed.streak||{}) },
-      powerGrid: {
-        ...base.powerGrid,
-        ...(parsed.powerGrid||{}),
-        nodes: Array.isArray(parsed.powerGrid?.nodes) ? parsed.powerGrid.nodes : base.powerGrid.nodes
-      },
-      buildMap: {
-        ...base.buildMap,
-        ...(parsed.buildMap||{}),
-        built: Array.isArray(parsed.buildMap?.built) ? parsed.buildMap.built.slice(0,3) : base.buildMap.built.slice()
-      }
-    };
+    return normalizeSave(parsed);
+  }
+
+  // Migrate v1 -> v2
+  if (parsed && parsed.version === 1) {
+    const migrated = normalizeSave(parsed);
+    migrated.version = SAVE_VERSION;
+    migrated.ts = Date.now();
+    localStorage.setItem(SAVE_KEY, JSON.stringify(migrated));
+    return migrated;
   }
 
   // Otherwise migrate legacy -> v1
@@ -2207,10 +2347,119 @@ function loadSaveV1(){
   return migrated;
 }
 
-function saveNowV1(saveObj){
+function serializeStateForSave(src){
+  const base = defaultSave();
+  const safeNum = (v, fallback = 0) => (Number.isFinite(v) ? v : fallback);
+  const safeBool = (v, fallback = false) => (typeof v === "boolean" ? v : fallback);
+
+  const resources = src?.resources || {};
+  const buildings = src?.buildings || {};
+  const streak = src?.streak || {};
+  const meta = src?.meta || {};
+  const upgrades = src?.upgrades || {};
+  const shop = src?.shop || {};
+  const progression = src?.progression || {};
+  const rng = src?.rng || {};
+  const powerGrid = src?.powerGrid || {};
+  const buildBusy = src?.buildBusy || {};
+  const buildBusyUntil = src?.buildBusyUntil || {};
+  const buildPendingTier = src?.buildPendingTier || {};
+  const buildMap = src?.buildMap || {};
+  const inventory = src?.inventory || {};
+
+  const cratesObj = (inventory && typeof inventory.crates === "object") ? inventory.crates : null;
+  const cratesBasic = (typeof inventory?.crates === "number") ? inventory.crates : (cratesObj?.basic);
+  const cratesAdv = (typeof inventory?.crates === "number") ? 0 : (cratesObj?.advanced);
+
+  return {
+    version: SAVE_VERSION,
+    ts: Date.now(),
+    resources: {
+      power: safeNum(resources.power, base.resources.power),
+      sol: safeNum(resources.sol, base.resources.sol),
+      rank: safeNum(resources.rank, base.resources.rank)
+    },
+    meta: { ...base.meta, ...meta },
+    buildings: {
+      powerPlant: safeNum(buildings.powerPlant, base.buildings.powerPlant),
+      dappStore: safeNum(buildings.dappStore, base.buildings.dappStore),
+      furnace: safeNum(buildings.furnace, base.buildings.furnace)
+    },
+    inventory: {
+      crates: {
+        basic: safeNum(cratesBasic, 0),
+        advanced: safeNum(cratesAdv, 0)
+      },
+      nftCommons: (inventory.nftCommons && typeof inventory.nftCommons === "object") ? { ...inventory.nftCommons } : {},
+      nftUniques: (inventory.nftUniques && typeof inventory.nftUniques === "object") ? { ...inventory.nftUniques } : {}
+    },
+    shop: {
+      daily: {
+        dateKey: shop?.daily?.dateKey ?? base.shop.daily.dateKey,
+        buys: {
+          basic: safeNum(shop?.daily?.buys?.basic, 0),
+          advanced: safeNum(shop?.daily?.buys?.advanced, 0)
+        }
+      },
+      lastOpenedType: shop?.lastOpenedType || base.shop.lastOpenedType
+    },
+    streak: {
+      current: safeNum(streak.current, base.streak.current),
+      lastClaimDate: streak.lastClaimDate || base.streak.lastClaimDate
+    },
+    upgrades: {
+      profitLvl: safeNum(upgrades.profitLvl, base.upgrades.profitLvl),
+      luckyLvl: safeNum(upgrades.luckyLvl, base.upgrades.luckyLvl),
+      unlockComponentLvl: safeNum(upgrades.unlockComponentLvl, base.upgrades.unlockComponentLvl),
+      unlockCellLvl: safeNum(upgrades.unlockCellLvl, base.upgrades.unlockCellLvl)
+    },
+    progression: {
+      chapter: safeNum(progression.chapter, base.progression.chapter),
+      unlocks: {
+        shop: safeBool(progression?.unlocks?.shop, base.progression.unlocks.shop),
+        nftCollection: safeBool(progression?.unlocks?.nftCollection, base.progression.unlocks.nftCollection),
+        overclock: safeBool(progression?.unlocks?.overclock, base.progression.unlocks.overclock)
+      }
+    },
+    rng: {
+      seed: safeNum(rng.seed, base.rng.seed),
+      rolls: safeNum(rng.rolls, base.rng.rolls)
+    },
+    powerGrid: {
+      selectedSeed: powerGrid.selectedSeed || base.powerGrid.selectedSeed,
+      nodes: Array.isArray(powerGrid.nodes) ? powerGrid.nodes.map(n => ({
+        seed: n?.seed || null,
+        stage: safeNum(n?.stage, 0),
+        readyIn: safeNum(n?.readyIn, 0),
+        total: safeNum(n?.total, 0),
+        luckyTier: n?.luckyTier || null
+      })) : base.powerGrid.nodes
+    },
+    buildBusy: {
+      powerPlant: !!buildBusy.powerPlant,
+      dappStore: !!buildBusy.dappStore,
+      furnace: !!buildBusy.furnace
+    },
+    buildBusyUntil: {
+      powerPlant: safeNum(buildBusyUntil.powerPlant, 0),
+      dappStore: safeNum(buildBusyUntil.dappStore, 0),
+      furnace: safeNum(buildBusyUntil.furnace, 0)
+    },
+    buildPendingTier: {
+      powerPlant: safeNum(buildPendingTier.powerPlant, 0),
+      dappStore: safeNum(buildPendingTier.dappStore, 0),
+      furnace: safeNum(buildPendingTier.furnace, 0)
+    },
+    buildMap: {
+      seed: safeNum(buildMap.seed, base.buildMap.seed),
+      built: Array.isArray(buildMap.built) ? buildMap.built.slice(0, 3).map(v => v || null) : base.buildMap.built.slice()
+    }
+  };
+}
+
+function saveNowV1(srcState){
   try{
-    saveObj.version = SAVE_VERSION;
-    saveObj.ts = Date.now();
+    const saveObj = serializeStateForSave(srcState);
     localStorage.setItem(SAVE_KEY, JSON.stringify(saveObj));
   }catch(e){
     // storage can fail (private mode/quota). ignore.
@@ -2224,8 +2473,8 @@ function scheduleSaveV1(){
   __saveScheduled = true;
   setTimeout(() => {
     __saveScheduled = false;
-    saveNowV1(state); // IMPORTANT: in your current code `state` is the save object (we'll set it that way)
-  }, 250);
+    saveNowV1(state); // IMPORTANT: serializer strips runtime-only fields
+  }, GAME_CONFIG.TIMERS.SAVE_DEBOUNCE_MS);
 }
 
 // ---- optional: one-time cleanup of legacy keys (safe to keep; you decide)
@@ -2239,9 +2488,9 @@ function cleanupLegacyKeysOnce(){
   }catch(e){}
 }
 
-const PASSIVE_TICK_SECONDS = 5;
+const PASSIVE_TICK_SECONDS = GAME_CONFIG.TIMERS.PASSIVE_TICK_SECONDS;
 // =======================
-// STATE BOOTSTRAP (FIX v0.30)
+// STATE BOOTSTRAP (FIX v0.31)
 // =======================
 
 function createDefaultState(){
@@ -2258,6 +2507,33 @@ function createDefaultState(){
     buildPendingTier: { powerPlant: 0, dappStore: 0, furnace: 0 },
 
     streak: { current: 0, lastClaimDate: null },
+
+    upgrades: { profitLvl: 0, luckyLvl: 0, unlockComponentLvl: 0, unlockCellLvl: 0 },
+
+    inventory: {
+      crates: { basic: 0, advanced: 0 },
+      nftCommons: {},
+      nftUniques: {}
+    },
+
+    shop: {
+      daily: { dateKey: null, buys: { basic: 0, advanced: 0 } },
+      lastOpenedType: "basic"
+    },
+
+    progression: {
+      chapter: 1,
+      unlocks: { shop: true, nftCollection: false, overclock: false }
+    },
+
+    rng: {
+      seed: Math.floor(Math.random() * 1e9),
+      rolls: 0
+    },
+    dev: {
+      logClamp: false,
+      logResources: false
+    },
 
     powerGrid: {
       selectedSeed: "electron",
@@ -2298,67 +2574,248 @@ function createDefaultState(){
       selectedPlaceKey: null,
       tileSize: 4,
       seed: 0,
+      built: [null, null, null],
       view: { x:0, y:0, w:64, h:64 },
       viewRect: null
     }
   };
 }
 
-// 1) önce default state
-let state = loadSaveV1();
-let welcomeToastPending = false; // session-only (RAM), never saved
+function applySaveToState(target, saved){
+  if (!saved || typeof saved !== "object") return;
 
-// 2) sonra save’den yükle (SAVE v1 modülün bunu sağlamalı)
-try{
-  const saved = loadSaveV1(); // SAVE v1 module fonksiyonu
-  if (saved && typeof saved === "object") {
-    // sadece bilinen alanları merge et (render/ui gibi runtime şeyleri ezme)
-    if (saved.resources) Object.assign(state.resources, saved.resources);
-    if (saved.buildings) Object.assign(state.buildings, saved.buildings);
-    if (saved.streak) Object.assign(state.streak, saved.streak);
-    if (saved.meta) Object.assign(state.meta, saved.meta);
-    if (saved.upgrades) Object.assign(state.upgrades, saved.upgrades);
+  if (saved.resources) Object.assign(target.resources, saved.resources);
+  if (saved.buildings) Object.assign(target.buildings, saved.buildings);
+  if (saved.streak) Object.assign(target.streak, saved.streak);
+  if (saved.meta) Object.assign(target.meta, saved.meta);
 
-        // ✅ inventory restore + migration hardening
-    if (saved.inventory && typeof saved.inventory === "object") {
-      if (!state.inventory || typeof state.inventory !== "object") {
-        state.inventory = { crates: { basic:0, advanced:0 }, nftCommons: {}, nftUniques: {} };
-      }
-
-      if (typeof saved.inventory.crates === "number") {
-        state.inventory.crates = { basic: saved.inventory.crates, advanced: 0 };
-      }
-
-      if (saved.inventory.nftCommons && typeof saved.inventory.nftCommons === "object") {
-        state.inventory.nftCommons = { ...saved.inventory.nftCommons };
-      }
-
-      if (saved.inventory.nftUniques && typeof saved.inventory.nftUniques === "object") {
-        state.inventory.nftUniques = { ...saved.inventory.nftUniques };
-      }
+  if (saved.upgrades && typeof saved.upgrades === "object") {
+    if (!target.upgrades || typeof target.upgrades !== "object") {
+      target.upgrades = { profitLvl: 0, luckyLvl: 0, unlockComponentLvl: 0, unlockCellLvl: 0 };
     }
+    Object.assign(target.upgrades, saved.upgrades);
+  }
 
-
-    if (saved.powerGrid && Array.isArray(saved.powerGrid.nodes)) {
-      state.powerGrid.selectedSeed = saved.powerGrid.selectedSeed || state.powerGrid.selectedSeed;
-      // node sayısı uyuşmuyorsa default’a düş
-      if (saved.powerGrid.nodes.length === state.powerGrid.nodes.length) {
-        state.powerGrid.nodes = saved.powerGrid.nodes;
-      }
+  if (saved.inventory && typeof saved.inventory === "object") {
+    if (!target.inventory || typeof target.inventory !== "object") {
+      target.inventory = { crates: { basic:0, advanced:0 }, nftCommons: {}, nftUniques: {} };
     }
-
-    // buildMap: tiles/plots restore edilecekse burada kontrollü al
-    if (saved.buildMap) {
-      if (typeof saved.buildMap.seed === "number") state.buildMap.seed = saved.buildMap.seed;
-      if (Array.isArray(saved.buildMap.plots)) state.buildMap.plots = saved.buildMap.plots;
-      if (saved.buildMap.tiles && saved.buildMap.tiles.length) state.buildMap.tiles = saved.buildMap.tiles;
+    if (typeof saved.inventory.crates === "number") {
+      target.inventory.crates = { basic: saved.inventory.crates, advanced: 0 };
+    } else if (saved.inventory.crates && typeof saved.inventory.crates === "object") {
+      target.inventory.crates = { ...target.inventory.crates, ...saved.inventory.crates };
+    }
+    if (saved.inventory.nftCommons && typeof saved.inventory.nftCommons === "object") {
+      target.inventory.nftCommons = { ...saved.inventory.nftCommons };
+    }
+    if (saved.inventory.nftUniques && typeof saved.inventory.nftUniques === "object") {
+      target.inventory.nftUniques = { ...saved.inventory.nftUniques };
     }
   }
+
+  if (saved.shop && typeof saved.shop === "object") {
+    if (!target.shop || typeof target.shop !== "object") {
+      target.shop = { daily: { dateKey: null, buys: { basic: 0, advanced: 0 } }, lastOpenedType: "basic" };
+    }
+    target.shop.lastOpenedType = saved.shop.lastOpenedType || target.shop.lastOpenedType;
+    if (saved.shop.daily && typeof saved.shop.daily === "object") {
+      target.shop.daily = {
+        dateKey: saved.shop.daily.dateKey ?? target.shop.daily.dateKey,
+        buys: { ...target.shop.daily.buys, ...(saved.shop.daily.buys || {}) }
+      };
+    }
+  }
+
+  if (saved.progression && typeof saved.progression === "object") {
+    if (!target.progression || typeof target.progression !== "object") {
+      target.progression = { chapter: 1, unlocks: { shop: true, nftCollection: false, overclock: false } };
+    }
+    if (typeof saved.progression.chapter === "number") target.progression.chapter = saved.progression.chapter;
+    if (saved.progression.unlocks && typeof saved.progression.unlocks === "object") {
+      target.progression.unlocks = { ...target.progression.unlocks, ...saved.progression.unlocks };
+    }
+  }
+
+  if (saved.rng && typeof saved.rng === "object") {
+    if (!target.rng || typeof target.rng !== "object") {
+      target.rng = { seed: Math.floor(Math.random() * 1e9), rolls: 0 };
+    }
+    if (typeof saved.rng.seed === "number") target.rng.seed = saved.rng.seed;
+    if (typeof saved.rng.rolls === "number") target.rng.rolls = saved.rng.rolls;
+  }
+
+  if (saved.powerGrid && Array.isArray(saved.powerGrid.nodes)) {
+    target.powerGrid.selectedSeed = saved.powerGrid.selectedSeed || target.powerGrid.selectedSeed;
+    if (saved.powerGrid.nodes.length === target.powerGrid.nodes.length) {
+      target.powerGrid.nodes = saved.powerGrid.nodes;
+    }
+  }
+
+  if (saved.buildBusy && typeof saved.buildBusy === "object") {
+    target.buildBusy = { ...target.buildBusy, ...saved.buildBusy };
+  }
+  if (saved.buildBusyUntil && typeof saved.buildBusyUntil === "object") {
+    target.buildBusyUntil = { ...target.buildBusyUntil, ...saved.buildBusyUntil };
+  }
+  if (saved.buildPendingTier && typeof saved.buildPendingTier === "object") {
+    target.buildPendingTier = { ...target.buildPendingTier, ...saved.buildPendingTier };
+  }
+
+  if (saved.buildMap && typeof saved.buildMap === "object") {
+    if (typeof saved.buildMap.seed === "number") target.buildMap.seed = saved.buildMap.seed;
+    if (Array.isArray(saved.buildMap.built)) target.buildMap.built = saved.buildMap.built.slice(0, 3);
+  }
+}
+
+function validateStateInvariants(){
+  const n0 = (v)=> (Number.isFinite(v) ? v : 0);
+  const npos = (v)=> Math.max(0, n0(v));
+
+  if (!state.resources) state.resources = { power: 0, sol: 0, rank: 0 };
+  state.resources.power = npos(state.resources.power);
+  state.resources.sol = npos(state.resources.sol);
+  state.resources.rank = npos(state.resources.rank);
+
+  if (!state.buildings) state.buildings = { powerPlant: 0, dappStore: 0, furnace: 0 };
+  state.buildings.powerPlant = npos(state.buildings.powerPlant);
+  state.buildings.dappStore = npos(state.buildings.dappStore);
+  state.buildings.furnace = npos(state.buildings.furnace);
+
+  if (!state.streak) state.streak = { current: 0, lastClaimDate: null };
+  state.streak.current = npos(state.streak.current);
+  if (state.streak.lastClaimDate && typeof state.streak.lastClaimDate !== "string") {
+    state.streak.lastClaimDate = null;
+  }
+
+  if (!state.upgrades) state.upgrades = { profitLvl: 0, luckyLvl: 0, unlockComponentLvl: 0, unlockCellLvl: 0 };
+  state.upgrades.profitLvl = npos(state.upgrades.profitLvl);
+  state.upgrades.luckyLvl = npos(state.upgrades.luckyLvl);
+  state.upgrades.unlockComponentLvl = npos(state.upgrades.unlockComponentLvl);
+  state.upgrades.unlockCellLvl = npos(state.upgrades.unlockCellLvl);
+
+  if (!state.inventory) state.inventory = { crates: { basic: 0, advanced: 0 }, nftCommons: {}, nftUniques: {} };
+  if (!state.inventory.crates || typeof state.inventory.crates !== "object") {
+    state.inventory.crates = { basic: 0, advanced: 0 };
+  }
+  state.inventory.crates.basic = npos(state.inventory.crates.basic);
+  state.inventory.crates.advanced = npos(state.inventory.crates.advanced);
+  if (!state.inventory.nftCommons || typeof state.inventory.nftCommons !== "object") state.inventory.nftCommons = {};
+  if (!state.inventory.nftUniques || typeof state.inventory.nftUniques !== "object") state.inventory.nftUniques = {};
+
+  if (!state.powerGrid) state.powerGrid = { selectedSeed: "electron", nodes: [] };
+  if (!Array.isArray(state.powerGrid.nodes)) state.powerGrid.nodes = [];
+  state.powerGrid.nodes.forEach(n=>{
+    if (!n || typeof n !== "object") return;
+    n.stage = npos(n.stage);
+    n.readyIn = npos(n.readyIn);
+    n.total = npos(n.total);
+    if (n.seed && typeof n.seed !== "string") n.seed = null;
+    if (n.luckyTier && typeof n.luckyTier !== "string") n.luckyTier = null;
+  });
+
+  if (!state.buildBusy || typeof state.buildBusy !== "object") {
+    state.buildBusy = { powerPlant:false, dappStore:false, furnace:false };
+  }
+  if (!state.buildBusyUntil || typeof state.buildBusyUntil !== "object") {
+    state.buildBusyUntil = { powerPlant:0, dappStore:0, furnace:0 };
+  }
+  if (!state.buildPendingTier || typeof state.buildPendingTier !== "object") {
+    state.buildPendingTier = { powerPlant:0, dappStore:0, furnace:0 };
+  }
+  ["powerPlant","dappStore","furnace"].forEach(k=>{
+    state.buildBusy[k] = !!state.buildBusy[k];
+    state.buildBusyUntil[k] = npos(state.buildBusyUntil[k]);
+    state.buildPendingTier[k] = npos(state.buildPendingTier[k]);
+  });
+
+  if (!state.buildMap || typeof state.buildMap !== "object") state.buildMap = { seed: 0, built: [null, null, null] };
+  if (!Array.isArray(state.buildMap.built)) state.buildMap.built = [null, null, null];
+  state.buildMap.built = state.buildMap.built.slice(0,3).map(v => v || null);
+
+  if (!state.dev || typeof state.dev !== "object") state.dev = { logClamp: false };
+  state.dev.logClamp = !!state.dev.logClamp;
+  state.dev.logResources = !!state.dev.logResources;
+}
+
+function applyOfflineProgress(savedTs){
+  if (!Number.isFinite(savedTs)) return;
+  const now = Date.now();
+  let elapsedMs = now - savedTs;
+  if (!Number.isFinite(elapsedMs) || elapsedMs <= 0) return;
+
+  const MAX_OFFLINE_MS = GAME_CONFIG.TIMERS.OFFLINE_MAX_MS; // cap to avoid huge jumps
+  if (elapsedMs > MAX_OFFLINE_MS) elapsedMs = MAX_OFFLINE_MS;
+
+  const elapsedSec = elapsedMs / 1000;
+
+  // passive power gain
+  const gains = computePassiveGains();
+  const perSec = gains.eGain / PASSIVE_TICK_SECONDS;
+  const powerGain = perSec * elapsedSec;
+  if (powerGain > 0) {
+    applyTxn({ power: powerGain, reason: "offlinePassive" });
+  }
+
+  // node timers
+  state.powerGrid.nodes.forEach(n => {
+    if (n.seed && n.readyIn > 0){
+      n.readyIn = Math.max(0, n.readyIn - elapsedSec);
+    }
+  });
+
+  // build timers
+  ["powerPlant","dappStore","furnace"].forEach(key => {
+    if (!state.buildBusy[key]) return;
+    const left = Math.max(0, (state.buildBusyUntil[key] || 0) - elapsedMs);
+    state.buildBusyUntil[key] = left;
+      if (left <= 0){
+      state.buildBusy[key] = false;
+      state.buildBusyUntil[key] = 0;
+      finalizeBuildComplete(key);
+    }
+  });
+}
+
+// 1) önce default state
+let state = createDefaultState();
+let welcomeToastPending = false; // session-only (RAM), never saved
+
+// 2) sonra save’den yükle (tek bir hydrate yolu)
+try{
+  const saved = loadSaveV1();
+  applySaveToState(state, saved);
+  applyOfflineProgress(saved?.ts);
+  validateStateInvariants();
 }catch(e){
   console.warn("Save load failed, using defaults.", e);
 }
 
 let explorationBusy = false;
+let __initDone = false;
+let __eventsWired = false;
+const __intervals = {};
+let __intervalsPaused = false;
+
+function startIntervals(){
+  if (__intervals.nodeTick || __intervals.telemetry || __intervals.passive || __intervals.telemetryReset) return;
+  __intervals.nodeTick = setInterval(nodeTick, GAME_CONFIG.TIMERS.NODE_TICK_MS);
+  __intervals.telemetry = setInterval(renderTelemetryUI, GAME_CONFIG.TIMERS.TELEMETRY_MS);
+  __intervals.telemetryReset = setInterval(()=>{
+    if (!state.telemetry) return;
+    state.telemetry.startMs = Date.now();
+    state.telemetry.powerFromNodes = 0;
+    state.telemetry.powerFromPassive = 0;
+    state.telemetry.powerSpentOnUpgrades = 0;
+  }, GAME_CONFIG.TIMERS.TELEMETRY_RESET_MS);
+  __intervals.passive = setInterval(passiveTick, PASSIVE_TICK_SECONDS * 1000);
+}
+
+function stopIntervals(){
+  if (__intervals.nodeTick) { clearInterval(__intervals.nodeTick); __intervals.nodeTick = null; }
+  if (__intervals.telemetry) { clearInterval(__intervals.telemetry); __intervals.telemetry = null; }
+  if (__intervals.telemetryReset) { clearInterval(__intervals.telemetryReset); __intervals.telemetryReset = null; }
+  if (__intervals.passive) { clearInterval(__intervals.passive); __intervals.passive = null; }
+}
 
 state.render = {
   mapDirty: true,
@@ -2376,8 +2833,12 @@ state.ui = {
   confirmPlotIndex: null
 };
 
-// buildMap runtime fields (tiles/plots/view/tileSize) - keep your existing init
-state.buildMap = state.buildMap || { seed: 0, built: [null,null,null] };
+// buildMap runtime fields (tiles/plots/view/tileSize) - preserve persisted seed/built
+const persistedBuildMap = (state.buildMap && typeof state.buildMap === "object") ? state.buildMap : {};
+const persistedBuildMapSeed = (typeof persistedBuildMap.seed === "number") ? persistedBuildMap.seed : 0;
+const persistedBuildMapBuilt = Array.isArray(persistedBuildMap.built)
+  ? persistedBuildMap.built.slice(0,3)
+  : [null, null, null];
 
 function markMapDirty(full = false){
   state.render.mapDirty = true;
@@ -2420,7 +2881,9 @@ state.buildMap = {
   tiles: null,            // Uint8Array
   plots: [],              // {x,y, builtKey:null|key}
   selectedPlaceKey: null, // "powerPlant" | "dappStore" | "furnace"
-  tileSize: 4             // render scale (auto ayarlayacağız)
+  tileSize: 4,            // render scale (auto ayarlayacağız)
+  seed: persistedBuildMapSeed,
+  built: persistedBuildMapBuilt
 };
 
 state.buildMap.view = { x:0, y:0, w:64, h:64 };
@@ -3078,9 +3541,7 @@ function drawMapOverlay(ctx){
     const pw = p.w * tileSize;
     const ph = p.h * tileSize;
 
-    const until = state.buildBusyUntil[builtKey] || 0;
-    const now = Date.now();
-    const leftMs = Math.max(0, until - now);
+    const leftMs = Math.max(0, state.buildBusyUntil[builtKey] || 0);
     const totalMs = BUILD_DURATION_MS || 5000;
     const pct = Math.max(0, Math.min(1, 1 - (leftMs / totalMs)));
 
@@ -3190,6 +3651,8 @@ function recenterMapView(){
 const nodeDom = []; // her hücrenin DOM referansları
 let lastRender = 0;
 let pendingNodeRender = false;
+let lastNodeTickTs = performance.now();
+let lastBuildTickTs = performance.now();
 
     const MOCK_WALLET_ADDRESS = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM";
     let walletConnected = true;
@@ -3209,6 +3672,10 @@ const el = {
       buyPackButton: document.getElementById("buyPackButton"),
       devStreakButton: document.getElementById("devStreakButton"),
       maxAllButton: document.getElementById("maxAllButton"),
+      devLogClampToggle: document.getElementById("devLogClampToggle"),
+      devLogResourcesToggle: document.getElementById("devLogResourcesToggle"),
+      recoveryResetBtn: document.getElementById("recoveryResetBtn"),
+      recoveryCloseBtn: document.getElementById("recoveryCloseBtn"),
 
       devButton: document.getElementById("devButton"),
       walletButton: document.getElementById("walletButton"),
@@ -3229,7 +3696,7 @@ function setPlaceStatus(msg){
   ps.textContent = m ? ` ${m}` : "Idle";
 }
 
-function updateNFTsUI(){
+function updateNFTsUI(force = false){
   const lib = document.getElementById("nftLibrary");
   const lock = document.getElementById("nftLock");
   if (!lib || !lock) return;
@@ -3241,6 +3708,8 @@ function updateNFTsUI(){
   lock.style.display = unlocked ? "none" : "flex";
   const tab = document.getElementById("tabNFTs");
   if (tab) tab.classList.toggle("tab-locked", !unlocked);
+
+  if (!force && !isPageVisible("pageNFTs")) return;
 
   if (!unlocked){
     const btn = document.getElementById("nftGoBuildBtn");
@@ -3358,6 +3827,15 @@ function isPageVisible(pageId){
   return (nr.left < pr.right - 10) && (nr.right > pr.left + 10);
 }
 
+function sanitizeNumber(raw, opts = {}){
+  const val = (typeof raw === "string") ? raw.trim() : raw;
+  const num = opts.integer ? parseInt(val, 10) : parseFloat(val);
+  if (!Number.isFinite(num)) return null;
+  if (opts.min != null && num < opts.min) return null;
+  if (opts.max != null && num > opts.max) return null;
+  return opts.integer ? Math.floor(num) : num;
+}
+
 function openBurnCommons(){
   const inv = state.inventory || {};
   const total = Object.values(inv.nftCommons || {}).reduce((a,b)=>a+(b||0),0);
@@ -3381,8 +3859,8 @@ function confirmBurnCommons(){
   const total = Object.values(commons).reduce((a,b)=>a+(b||0),0);
 
   const amtEl = document.getElementById("burnCommonsAmount");
-  const raw = (amtEl ? amtEl.value : "").trim();
-  const amt = parseInt(raw, 10);
+  const raw = (amtEl ? amtEl.value : "");
+  const amt = sanitizeNumber(raw, { integer: true, min: 1, max: total });
 
   const hint = document.getElementById("burnCommonsHint");
   const setHint = (msg) => {
@@ -3392,18 +3870,17 @@ function confirmBurnCommons(){
     hint.style.opacity = "1";
   };
 
-  if (!Number.isFinite(amt) || raw === ""){
+  if (raw === ""){
     setHint("Enter a valid amount.");
     return;
   }
 
-  if (amt <= 0){
-    setHint("Amount must be at least 1.");
-    return;
-  }
-
-  if (amt > total){
-    setHint(`Not enough commons. You have ${total}, tried to burn ${amt}.`);
+  if (amt == null){
+    if (total > 0){
+      setHint(`Not enough commons. You have ${total}.`);
+    } else {
+      setHint("Amount must be at least 1.");
+    }
     return;
   }
 
@@ -3423,7 +3900,7 @@ function confirmBurnCommons(){
   inv.nftCommons = commons;
 
   const gainRank = amt * 100;
-  state.resources.rank += gainRank;
+  applyTxn({ rank: gainRank, reason: "burnCommons" });
 
   updateResourcesUI();
   updateNFTsUI();
@@ -3439,7 +3916,8 @@ const UPGRADE_CAPS = {
   unlockCellLvl: 31
 };
 
-function renderUpgradesUI(){
+function renderUpgradesUI(force = false){
+  if (!force && !isPageVisible("pageUpgrade")) return;
   const el = document.getElementById("upgradeList");
   if (!el) return;
 
@@ -3516,7 +3994,7 @@ const upgradeEffectLine = (key, lvl, atCap)=>{
     const lvl = (Number.isFinite(u[r.key]) && u[r.key] >= 0) ? u[r.key] : 0;
     const eff = Math.max(0, lvl);
 
-    const cap = UPGRADE_CAPS[r.key] ?? 999;
+    const cap = UPGRADE_CAPS[r.key] ?? GAME_CONFIG.LIMITS.upgradeCapFallback;
     const atCap = lvl >= cap;
 
     // cost: first upgrade (Lvl0→Lvl1) uses eff=0
@@ -3590,14 +4068,13 @@ function buyUpgrade(key, cost){
   state.upgrades = { profitLvl:0, luckyLvl:0, unlockComponentLvl:0, unlockCellLvl:0 };
 }
 
-  const cap = UPGRADE_CAPS[key] ?? 999;
+  const cap = UPGRADE_CAPS[key] ?? GAME_CONFIG.LIMITS.upgradeCapFallback;
   const lvl = (Number.isFinite(state.upgrades[key]) && state.upgrades[key] >= 0) ? state.upgrades[key] : 0;
   if (lvl >= cap) return;
 
   if (state.resources.power < cost) return;
 
-  state.resources.power -= cost;
-  if (state.telemetry) state.telemetry.powerSpentOnUpgrades += cost;
+  applyTxn({ power: -cost, reason: "upgrade", telemetry: { powerSpentOnUpgrades: cost } });
   state.upgrades[key] = lvl + 1;
 
   updateResourcesUI();
@@ -3682,10 +4159,7 @@ function cancelSelection(){
 }
 
 function getPowerPlantIconSrc(level){
-  if (level <= 0) return "assets/icons/powerplant_lv1.png"; // built değilken de lv1 göster
-  if (level === 1) return "assets/icons/powerplant_lv1.png";
-  if (level === 2) return "assets/icons/powerplant_lv2.png";
-  return "assets/icons/powerplant_lv3.png"; // level 3+ aynı görsel (yıldızları sonra overlay yapacağız)
+  return "assets/buildings/bul_powerplant.png";
 }
 
 function updateBuildingIconsUI(){
@@ -3709,26 +4183,26 @@ function updateBuildingIconsUI(){
       }
     }
 
-    function buildingCost(key, levelForCost){
+function buildingCost(key, levelForCost){
       const l = Math.max(levelForCost, 1);
 
       if (key === "powerPlant") {
-        const baseE = 120;
-        const growth = 1.6;
+        const baseE = GAME_CONFIG.BUILDINGS.powerPlant.baseCost;
+        const growth = GAME_CONFIG.BUILDINGS.powerPlant.growth;
         const power = Math.round(baseE * Math.pow(growth, l - 1));
         return { power };
       }
 
       if (key === "dappStore") {
-        const baseE = 350;
-        const growth = 1.5;
+        const baseE = GAME_CONFIG.BUILDINGS.dappStore.baseCost;
+        const growth = GAME_CONFIG.BUILDINGS.dappStore.growth;
         const power = Math.round(baseE * Math.pow(growth, l - 1));
         return { power };
       }
 
       if (key === "furnace") {
-        const baseE = 1800;
-        const growth = 1.45;
+        const baseE = GAME_CONFIG.BUILDINGS.furnace.baseCost;
+        const growth = GAME_CONFIG.BUILDINGS.furnace.growth;
         const power = Math.round(baseE * Math.pow(growth, l - 1));
         return { power };
       }
@@ -3746,20 +4220,89 @@ function updateBuildingLevelsUI(){
   renderBuildBar();
 }
 
+function applyTxn(txn = {}){
+  if (!state.resources) state.resources = { power: 0, sol: 0, rank: 0 };
+
+  const hasPower = Object.prototype.hasOwnProperty.call(txn, "power");
+  const hasSol = Object.prototype.hasOwnProperty.call(txn, "sol");
+  const hasRank = Object.prototype.hasOwnProperty.call(txn, "rank");
+
+  const dp = (hasPower && Number.isFinite(txn.power)) ? txn.power : 0;
+  const ds = (hasSol && Number.isFinite(txn.sol)) ? txn.sol : 0;
+  const dr = (hasRank && Number.isFinite(txn.rank)) ? txn.rank : 0;
+
+  const curP = Number.isFinite(state.resources.power) ? state.resources.power : 0;
+  const curS = Number.isFinite(state.resources.sol) ? state.resources.sol : 0;
+  const curR = Number.isFinite(state.resources.rank) ? state.resources.rank : 0;
+
+  if (state.dev?.logClamp) {
+    if ((hasPower && !Number.isFinite(txn.power)) ||
+        (hasSol && !Number.isFinite(txn.sol)) ||
+        (hasRank && !Number.isFinite(txn.rank))) {
+      console.warn("[resources] Non-finite delta ignored:", txn);
+    }
+  }
+
+  const nextP = curP + dp;
+  const nextS = curS + ds;
+  const nextR = curR + dr;
+
+  if (state.dev?.logResources && (hasPower || hasSol || hasRank)) {
+    console.log("[resources] txn:", {
+      reason: txn.reason || "unknown",
+      power: hasPower ? dp : undefined,
+      sol: hasSol ? ds : undefined,
+      rank: hasRank ? dr : undefined
+    });
+  }
+
+  if (state.dev?.logClamp) {
+    if ((hasPower && !Number.isFinite(nextP)) ||
+        (hasSol && !Number.isFinite(nextS)) ||
+        (hasRank && !Number.isFinite(nextR))) {
+      console.warn("[resources] Non-finite result clamped:", { nextP, nextS, nextR });
+    }
+    if ((hasPower && nextP < 0) ||
+        (hasSol && nextS < 0) ||
+        (hasRank && nextR < 0)) {
+      console.warn("[resources] Negative result clamped:", { nextP, nextS, nextR });
+    }
+  }
+
+  state.resources.power = Math.max(0, Number.isFinite(nextP) ? nextP : 0);
+  state.resources.sol = Math.max(0, Number.isFinite(nextS) ? nextS : 0);
+  state.resources.rank = Math.max(0, Number.isFinite(nextR) ? nextR : 0);
+
+  if (state.telemetry && txn.telemetry && typeof txn.telemetry === "object") {
+    if (Number.isFinite(txn.telemetry.powerFromNodes)) {
+      state.telemetry.powerFromNodes += txn.telemetry.powerFromNodes;
+    }
+    if (Number.isFinite(txn.telemetry.powerFromPassive)) {
+      state.telemetry.powerFromPassive += txn.telemetry.powerFromPassive;
+    }
+    if (Number.isFinite(txn.telemetry.powerSpentOnUpgrades)) {
+      state.telemetry.powerSpentOnUpgrades += txn.telemetry.powerSpentOnUpgrades;
+    }
+  }
+}
+
+function addResources(delta = {}){
+  applyTxn({ ...delta, reason: delta.reason || "addResources" });
+}
+
    function canAfford(e, sol=0){
       return state.resources.power >= e && state.resources.sol >= sol;
     }
 
     function spend(e, sol=0){
-      state.resources.power -= e;
-      state.resources.sol -= sol;
+      applyTxn({ power: -e, sol: -sol, reason: "spend" });
       updateResourcesUI();
     }
 
 function computePassiveGains(){
   const pp = state.buildings.powerPlant || 0;
   // dApp Store artık sadece Lucky + NFTs unlock
-  const eGain = (pp * 2) * overclockProfitMult();
+  const eGain = (pp * GAME_CONFIG.BUILDINGS.powerPlant.passivePerTick) * overclockProfitMult();
   return { eGain };
 }
 
@@ -3778,8 +4321,7 @@ function passivePerHour(){
     function passiveTick(){
       const gains = computePassiveGains();
       if(gains.eGain === 0) return;
-      state.resources.power += gains.eGain;
-      if (state.telemetry) state.telemetry.powerFromPassive += gains.eGain;
+      applyTxn({ power: gains.eGain, reason: "passive", telemetry: { powerFromPassive: gains.eGain } });
 
       updateResourcesUI();
       updateHourlyRates();
@@ -3834,14 +4376,14 @@ function applyStreakClaim(fromDev = false) {
 
   const weekIndex = Math.min(3, Math.floor((s - 1) / 7)); // 0..3
   const weekNum = weekIndex + 1;
-  const weekMultipliers = [1.0, 1.5, 2.0, 3.0];
+  const weekMultipliers = GAME_CONFIG.STREAK.weekMultipliers;
   const mult = weekMultipliers[weekIndex];
 
-  const baseE = 2;  // elektrik tabanı
+  const baseE = GAME_CONFIG.STREAK.basePower;  // elektrik tabanı
 
   const eGain = Math.round(baseE * mult);
 
-  state.resources.power += eGain;
+  applyTxn({ power: eGain, reason: "streak" });
   updateResourcesUI();
   updateHourlyRates();
 
@@ -3863,10 +4405,33 @@ function claimStreak() {
   applyStreakClaim(false);
 }
 
-const BUILD_DURATION_MS = 5000;
+const BUILD_DURATION_MS = GAME_CONFIG.TIMERS.BUILD_BASE_MS;
+
+function finalizeBuildComplete(key){
+  const nextTier = state.buildPendingTier[key] || (state.buildings[key] + 1);
+  state.buildPendingTier[key] = 0;
+  state.buildings[key] = nextTier;
+
+  if (nextTier === 1) setPlaceStatus(`${BUILDINGS[key].name} Tier ${nextTier} has been built.`);
+  else setPlaceStatus(`${BUILDINGS[key].name} upgraded → Tier ${nextTier} complete.`);
+
+  setTimeout(() => setPlaceStatus(""), 1000);
+
+  updateBuildingIconsUI();
+  updateHourlyRates();
+  checkBuildingRequirements();
+  renderBuildBar();
+  markMapDirty();
+  updateNFTsUI();
+  updateLuckyUI();
+  saveNowV1(state);
+}
 
 function updateBuildProgressUI(){
-  const now = Date.now();
+  const now = performance.now();
+  let dtMs = now - lastBuildTickTs;
+  lastBuildTickTs = now;
+  if (!Number.isFinite(dtMs) || dtMs < 0) dtMs = 0;
 
   // ✅ status için: en az bir build varsa buradan güncelleyeceğiz
   let showStatusKey = null;
@@ -3875,8 +4440,10 @@ function updateBuildProgressUI(){
   ["powerPlant","dappStore","furnace"].forEach(key=>{
     if (!state.buildBusy[key]) return;
 
-    const until = state.buildBusyUntil[key] || 0;
-    let leftMs = Math.max(0, until - now);
+    if (dtMs > 0 && state.buildBusyUntil[key] > 0){
+      state.buildBusyUntil[key] = Math.max(0, state.buildBusyUntil[key] - dtMs);
+    }
+    let leftMs = Math.max(0, state.buildBusyUntil[key] || 0);
 
         // ✅ status: ilk busy building'i seç (istersen öncelik sırası böyle kalsın)
     if (!showStatusKey) {
@@ -3888,28 +4455,7 @@ function updateBuildProgressUI(){
     if (leftMs <= 0){
       state.buildBusy[key] = false;
       state.buildBusyUntil[key] = 0;
-
-      const nextTier = state.buildPendingTier[key] || (state.buildings[key] + 1);
-      state.buildPendingTier[key] = 0;
-      state.buildings[key] = nextTier;
-
-      // status
-      if (nextTier === 1) setPlaceStatus(`${BUILDINGS[key].name} Tier ${nextTier} has been built.`);
-      else setPlaceStatus(`${BUILDINGS[key].name} upgraded → Tier ${nextTier} complete.`);
-
-      setTimeout(() => setPlaceStatus(""), 1000);
-
-      updateBuildingIconsUI();
-      updateHourlyRates();
-      checkBuildingRequirements();
-
-      if (isPageVisible("pageBuildings")){
-        renderBuildBar();
-        markMapDirty();
-      }
-
-      updateNFTsUI();
-      updateLuckyUI();
+      finalizeBuildComplete(key);
     }
   });
 // status yazısını canlı güncelle
@@ -3930,33 +4476,26 @@ if (showStatusKey && isPageVisible("pageBuildings")) {
 
 }
 
-function buildOrUpgrade(key, name){
-  const current = state.buildings[key] || 0;
-  const nextTier = current + 1;
-
-  // Busy kontrolü
-  if (state.buildBusy[key]) {
-    setPlaceStatus(`${name} is already in progress.`);
+function buildOrUpgrade(mode, key, name, plotIdx){
+  const check = (mode === "upgrade") ? canUpgrade(key, plotIdx) : canBuild(key, plotIdx);
+  if (!check.ok) {
+    if (check.reason) setPlaceStatus(check.reason);
     return false;
   }
 
-  // Requirements (senin mevcut kuralların)
-  if (key === "dappStore" && state.buildings.powerPlant < 1) return false;
-  if (key === "furnace" && (state.buildings.powerPlant < 1 || state.buildings.dappStore < 1)) return false;
-
-  // Cost
-  const cost = buildingCost(key, nextTier);
-  if (!canAfford(cost.power)) return false;
+  const current = state.buildings[key] || 0;
+  const nextTier = current + 1;
 
   // ✅ sadece 1 kere harca
+  const cost = buildingCost(key, nextTier);
   spend(cost.power);
   updateHourlyRates();
 
   // ✅ ASIL EKSİK OLAN: build timer'ı başlat
-  const now = Date.now();
   state.buildBusy[key] = true;
-  state.buildBusyUntil[key] = now + (BUILD_DURATION_MS || 5000);
+  state.buildBusyUntil[key] = (BUILD_DURATION_MS || 5000);
   state.buildPendingTier[key] = nextTier;
+  lastBuildTickTs = performance.now();
 
   // ✅ UI refresh
   renderBuildBar();
@@ -4055,7 +4594,7 @@ function burnerMultiplier(){
 
   // Tier 1 = x1.0
   // Her tier +%25 Rank
-  return 1 + (lvl - 1) * 0.25;
+  return 1 + (lvl - 1) * GAME_CONFIG.BURN.furnaceTierMultiplier;
 }
 
 function executeBurn() {
@@ -4067,26 +4606,20 @@ function executeBurn() {
   }
 
   const solInput = document.getElementById("burnSolAmountInline");
-  const val = parseFloat(solInput.value);
-  if (isNaN(val) || val <= 0) {
-    return;
-  }
+  const solAmount = sanitizeNumber(solInput ? solInput.value : "", { min: 0.000001 });
+  if (solAmount == null) return;
 
-  const solAmount = val;
-
-  if (state.resources.sol < solAmount) {
-    return;
-  }
+  if (state.resources.sol < solAmount) return;
 
   // SOL düş
-  state.resources.sol -= solAmount;
+  applyTxn({ sol: -solAmount, reason: "burn" });
 
   // Rank kazanımı (örnek: 1 SOL = 100 Rank)
-  const baseRank = solAmount * 100;
+  const baseRank = solAmount * GAME_CONFIG.BURN.rankPerSol;
   const burnerMult = burnerMultiplier();
   const rankGain = Math.max(1, Math.round(baseRank * burnerMult));
 
-  state.resources.rank += rankGain;
+  applyTxn({ rank: rankGain, reason: "burn" });
 
   updateResourcesUI();
 
@@ -4312,11 +4845,62 @@ function randPickWeighted(entries){
   return entries[entries.length - 1][0];
 }
 
+function canBuild(key, plotIdx){
+  if (anyBuildBusy()) return { ok:false, reason:"Building in progress… wait." };
+  if (state.buildBusy[key]) return { ok:false, reason:`${BUILDINGS[key]?.name || key} is already in progress.` };
+
+  // Requirements
+  if (key === "dappStore" && state.buildings.powerPlant < 1) return { ok:false, reason:"Power Plant required." };
+  if (key === "furnace" && (state.buildings.powerPlant < 1 || state.buildings.dappStore < 1)) {
+    return { ok:false, reason:"Power Plant + dApp Store required." };
+  }
+
+  if (state.buildings[key] > 0) return { ok:false, reason:"This building is already built elsewhere." };
+
+  if (plotIdx != null){
+    const plot = state.buildMap.plots[plotIdx];
+    if (!plot) return { ok:false, reason:"Invalid plot." };
+    if (plot.builtKey) return { ok:false, reason:"Plot already has a building." };
+  }
+
+  const nextTier = (state.buildings[key] || 0) + 1;
+  const cost = buildingCost(key, nextTier).power;
+  if (!canAfford(cost)) return { ok:false, reason:`Not enough Power. Need ${cost}.` };
+
+  return { ok:true };
+}
+
+function canUpgrade(key, plotIdx){
+  if (anyBuildBusy()) return { ok:false, reason:"Building in progress… wait." };
+  if (state.buildBusy[key]) return { ok:false, reason:`${BUILDINGS[key]?.name || key} is already in progress.` };
+
+  // Requirements (same as build, for safety)
+  if (key === "dappStore" && state.buildings.powerPlant < 1) return { ok:false, reason:"Power Plant required." };
+  if (key === "furnace" && (state.buildings.powerPlant < 1 || state.buildings.dappStore < 1)) {
+    return { ok:false, reason:"Power Plant + dApp Store required." };
+  }
+
+  if (plotIdx != null){
+    const plot = state.buildMap.plots[plotIdx];
+    if (!plot || !plot.builtKey) return { ok:false, reason:"Empty plot." };
+    if (plot.builtKey !== key) return { ok:false, reason:"Select the building that exists on this plot." };
+  }
+
+  const nextTier = (state.buildings[key] || 0) + 1;
+  const cost = buildingCost(key, nextTier).power;
+  if (!canAfford(cost)) return { ok:false, reason:`Not enough Power. Need ${cost}.` };
+
+  return { ok:true };
+}
+
 function canBuyCrate(crateKey){
   ensureShopState();
   resetDailyIfNeeded();
 
   const cfg = CRATES[crateKey];
+  if ((state.buildings.dappStore || 0) < 1) {
+    return { ok:false, reason:"dApp Store required." };
+  }
 
   // daily limit
   const bought = state.shop.daily.buys[crateKey] || 0;
@@ -4332,6 +4916,17 @@ function canBuyCrate(crateKey){
   return { ok:true };
 }
 
+function canOpenCrate(crateKey){
+  if ((state.buildings.dappStore || 0) < 1) {
+    return { ok:false, reason:"dApp Store required." };
+  }
+  const have = state.inventory.crates[crateKey] || 0;
+  if (have <= 0) {
+    return { ok:false, reason:"No crates available." };
+  }
+  return { ok:true };
+}
+
 function buyCrateType(crateKey){
   ensureShopState();
   const cfg = CRATES[crateKey];
@@ -4340,7 +4935,7 @@ function buyCrateType(crateKey){
     return false;
   }
 
-  state.resources.rank -= cfg.priceRank;
+  applyTxn({ rank: -cfg.priceRank, reason: "buyCrate" });
 
   state.inventory.crates[crateKey] = (state.inventory.crates[crateKey] || 0) + 1;
 
@@ -4406,11 +5001,10 @@ function applyOpenOutcome(crateKey, out){
 function openCrateSelected(crateKey){
   ensureShopState();
 
-  const have = state.inventory.crates[crateKey] || 0;
-  if (have <= 0){
-    return null;
-  }
+  const check = canOpenCrate(crateKey);
+  if (!check.ok) return null;
 
+  const have = state.inventory.crates[crateKey] || 0;
   state.inventory.crates[crateKey] = have - 1;
   state.shop.lastOpenedType = crateKey;
 
@@ -4448,6 +5042,56 @@ const NODE_SEEDS = {
   ai:         { label:"AI",         iconSrc:"assets/nodes/node_ai.png",         cost:14, grow:9,  harvests:3 },
   quantum:    { label:"Quantum",    iconSrc:"assets/nodes/node_quantum.png",    cost:16, grow:10, harvests:3 },
 };
+
+function getPreloadAssets(){
+  const list = [
+    "assets/others/splash_soltan.png",
+    "assets/nodes/node_empty.png",
+    "assets/nfts/nft_frame.png",
+    "assets/nfts/nft_empty.png"
+  ];
+  Object.values(PLOT_SPRITES).forEach(p => list.push(p.src));
+  Object.values(NODE_SEEDS).forEach(n => list.push(n.iconSrc));
+  return Array.from(new Set(list.filter(Boolean)));
+}
+
+function setLoadingProgress(pct){
+  const fill = document.getElementById("loadingBarFill");
+  const text = document.getElementById("loadingText");
+  const p = Math.max(0, Math.min(1, pct || 0));
+  if (fill) fill.style.width = Math.round(p * 100) + "%";
+  if (text) text.textContent = Math.round(p * 100) + "%";
+}
+
+function setLoadingOverlayVisible(show){
+  const el = document.getElementById("loadingOverlay");
+  if (!el) return;
+  el.style.display = show ? "flex" : "none";
+}
+
+function preloadAssets(){
+  const assets = getPreloadAssets();
+  if (!assets.length) return Promise.resolve();
+
+  let loaded = 0;
+  const total = assets.length;
+  setLoadingOverlayVisible(true);
+  setLoadingProgress(0);
+
+  const loaders = assets.map((src) => new Promise((resolve) => {
+    const img = new Image();
+    const done = () => {
+      loaded += 1;
+      setLoadingProgress(loaded / total);
+      resolve();
+    };
+    img.onload = done;
+    img.onerror = done;
+    img.src = src;
+  }));
+
+  return Promise.all(loaders).then(() => setLoadingOverlayVisible(false));
+}
 
 // ===== UNLOCK RULES =====
 const COMPONENT_UNLOCK_REQ = {
@@ -4826,6 +5470,19 @@ function showToastSingle(title, body, icon="🔒"){
   showToast(title, body, icon);
 }
 
+function showCrashBanner(msg){
+  const el = document.getElementById("crashBanner");
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = "block";
+}
+
+function showRecoveryModal(message){
+  const msgEl = document.getElementById("recoveryMessage");
+  if (msgEl) msgEl.textContent = message || "Your data could not be loaded. Would you like to reset and start fresh?";
+  openModal("recoveryModal");
+}
+
 function showWelcomeBanner(text, icon="⚡"){
   const el = document.getElementById("welcomeBanner");
   if (!el) return;
@@ -4864,7 +5521,7 @@ function scheduleWelcomeReward(){
       if (!state.meta || !state.meta.welcomePending) return;
       state.meta.welcomePending = false;
       state.meta.welcomeClaimed = true;
-      state.resources.power = (state.resources.power || 0) + 100;
+      applyTxn({ power: 100, reason: "welcome" });
       saveNowV1(state);
       updateResourcesUI();
       updateHourlyRates();
@@ -5018,8 +5675,7 @@ function nodeTryHarvest(idx){
   let gain = nodeSeedProfit(n.seed);
   gain = Math.max(0.1, Math.round(gain * overclockProfitMult() * 10) / 10);
 
-  state.resources.power += gain;
-  if (state.telemetry) state.telemetry.powerFromNodes += gain;
+  applyTxn({ power: gain, reason: "nodeHarvest", telemetry: { powerFromNodes: gain } });
   spawnNodePopup(getNodeCellEl(idx), `+${formatRes(gain)}⚡`, "power pos");
 
   updateResourcesUI();
@@ -5031,7 +5687,7 @@ function nodeTryHarvest(idx){
   if (n.luckyTier){
     const bonus = luckyTierToRank(n.seed, n.luckyTier);
     if (bonus > 0){
-      state.resources.rank += bonus;
+      applyTxn({ rank: bonus, reason: "nodeLuckyBonus" });
       updateResourcesUI();
 
       spawnNodePopup(getNodeCellEl(idx), `+${bonus}🔥`, "rank");
@@ -5057,11 +5713,18 @@ function nodeTryHarvest(idx){
 }
 
 function nodeTick(){
+  const now = performance.now();
+  let dt = (now - lastNodeTickTs) / 1000;
+  lastNodeTickTs = now;
+
+  if (!Number.isFinite(dt) || dt <= 0) return;
+  if (dt > 1) dt = 1; // clamp to avoid huge jumps when tab is throttled
+
   let changed = false;
 
   state.powerGrid.nodes.forEach(n=>{
     if (n.seed && n.readyIn > 0){
-      n.readyIn -= 0.1;
+      n.readyIn -= dt;
       if (n.readyIn < 0) n.readyIn = 0;
       changed = true;
     }
@@ -5070,17 +5733,19 @@ function nodeTick(){
   // değişiklik olduysa render'ı “beklemeye al”
   if (changed) pendingNodeRender = true;
 
-  const now = performance.now();
+  const renderNow = performance.now();
 
   // 150ms throttle, ama pending varsa mutlaka çiz
-  if (pendingNodeRender && (now - lastRender) > 150) {
-    lastRender = now;
+  if (pendingNodeRender && (renderNow - lastRender) > 150) {
+    lastRender = renderNow;
     pendingNodeRender = false;
     if (isPageVisible("pageNode")) renderPowerGrid();
   }
 }
 
     function wireEvents(){
+    if (__eventsWired) return;
+    __eventsWired = true;
 
 const yes = document.getElementById("confirmYesBtn");
 const no  = document.getElementById("confirmNoBtn");
@@ -5100,10 +5765,7 @@ if (yes) yes.addEventListener("click", () => {
 
   // ✅ BUILD
   if (mode === "build") {
-    if (plot.builtKey) { setPlaceStatus("Plot already has a building."); return; }
-    if (state.buildings[key] > 0) { setPlaceStatus("This building is already built elsewhere."); return; }
-
-    const ok = buildOrUpgrade(key, BUILDINGS[key].name);
+    const ok = buildOrUpgrade("build", key, BUILDINGS[key].name, idx);
     if (!ok) { setPlaceStatus("Can't build. Requirements or cost not met."); return; }
 
     plot.builtKey = key;
@@ -5119,10 +5781,7 @@ scheduleSaveV1();
 
   // ✅ UPGRADE
   if (mode === "upgrade") {
-    if (!plot.builtKey) { setPlaceStatus("Empty plot."); return; }
-    if (plot.builtKey !== key) { setPlaceStatus("Select the building that exists on this plot."); return; }
-
-    const ok = buildOrUpgrade(key, BUILDINGS[key].name);
+    const ok = buildOrUpgrade("upgrade", key, BUILDINGS[key].name, idx);
     if (!ok) { setPlaceStatus("Can't upgrade. Requirements or cost not met."); return; }
 
     setPlaceStatus(`${BUILDINGS[key].name} upgrade started.`);
@@ -5203,12 +5862,17 @@ const tabNFTs = document.getElementById("tabNFTs");
 const tabUpgrade = document.getElementById("tabUpgrade");
 const tabDev = null;
 
+const TAB_DEFS = [
+  { key: "node", btn: tabNode, onShow: () => renderPowerGrid() },
+  { key: "buildings", btn: tabBuildings, onShow: () => renderBuildMap() },
+  { key: "nfts", btn: tabNFTs, onShow: () => updateNFTsUI(true) },
+  { key: "upgrade", btn: tabUpgrade, onShow: () => renderUpgradesUI(true) }
+];
+
 function setActiveTab(which){
-  [tabNode, tabBuildings, tabNFTs, tabUpgrade].forEach(b=> b && b.classList.remove("active"));
-  if (which === "node" && tabNode) tabNode.classList.add("active");
-  if (which === "buildings" && tabBuildings) tabBuildings.classList.add("active");
-  if (which === "nfts" && tabNFTs) tabNFTs.classList.add("active");
-  if (which === "upgrade" && tabUpgrade) tabUpgrade.classList.add("active");
+  TAB_DEFS.forEach(t => t.btn && t.btn.classList.remove("active"));
+  const hit = TAB_DEFS.find(t => t.key === which);
+  if (hit && hit.btn) hit.btn.classList.add("active");
 }
 
 let isProgrammaticScroll = false;
@@ -5232,33 +5896,18 @@ const nftGoBuildBtn = document.getElementById("nftGoBuildBtn");
 if (nftGoBuildBtn){
   nftGoBuildBtn.addEventListener("click", ()=>{
     setActiveTab("buildings");
-    goPage(1);
+    goPage(TAB_DEFS.findIndex(t => t.key === "buildings"));
     requestAnimationFrame(()=> renderBuildMap());
   });
 }
 
-if (tabNode) tabNode.addEventListener("click", ()=> {
-  setActiveTab("node");
-  goPage(0);
-  requestAnimationFrame(()=> renderPowerGrid());
-});
-
-if (tabBuildings) tabBuildings.addEventListener("click", ()=> {
-  setActiveTab("buildings");
-  goPage(1);
-  requestAnimationFrame(()=> renderBuildMap());
-});
-
-if (tabNFTs) tabNFTs.addEventListener("click", ()=> {
-  setActiveTab("nfts");
-  goPage(2);
-  requestAnimationFrame(()=> updateNFTsUI());
-});
-
-if (tabUpgrade) tabUpgrade.addEventListener("click", ()=> {
-  setActiveTab("upgrade");
-  goPage(3);
-  requestAnimationFrame(()=> renderUpgradesUI());
+TAB_DEFS.forEach((t, idx) => {
+  if (!t.btn) return;
+  t.btn.addEventListener("click", ()=> {
+    setActiveTab(t.key);
+    goPage(idx);
+    requestAnimationFrame(()=> t.onShow && t.onShow());
+  });
 });
 
 const openCrateBtn = document.getElementById("openCrateBtn");
@@ -5268,18 +5917,21 @@ const buyBasicBtn = document.getElementById("buyCrateBasicBtn");
 const buyAdvBtn = document.getElementById("buyCrateAdvancedBtn");
 
 if (buyBasicBtn) buyBasicBtn.addEventListener("click", ()=>{
-  if ((state.buildings.dappStore || 0) < 1) { setPlaceStatus("dApp Store required."); return; }
+  const check = canBuyCrate("basic");
+  if (!check.ok) { setPlaceStatus(check.reason); return; }
   buyCrateType("basic");
 });
 
 if (buyAdvBtn) buyAdvBtn.addEventListener("click", ()=>{
-  if ((state.buildings.dappStore || 0) < 1) { setPlaceStatus("dApp Store required."); return; }
+  const check = canBuyCrate("advanced");
+  if (!check.ok) { setPlaceStatus(check.reason); return; }
   buyCrateType("advanced");
 });
 
 if (openCrateBtn) openCrateBtn.addEventListener("click", ()=>{
-  if ((state.buildings.dappStore || 0) < 1) { setPlaceStatus("dApp Store required."); return; }
   const k = (crateTypeSelect && crateTypeSelect.value) ? crateTypeSelect.value : (state.shop?.lastOpenedType || "basic");
+  const check = canOpenCrate(k);
+  if (!check.ok) { setPlaceStatus(check.reason); return; }
   openCrateSelected(k);
 });
 
@@ -5294,6 +5946,8 @@ if (burnCommonsConfirmBtn) burnCommonsConfirmBtn.addEventListener("click", confi
 const openAnotherBtn = document.getElementById("openAnotherBtn");
 if (openAnotherBtn) openAnotherBtn.addEventListener("click", ()=>{
   const k = state.shop?.lastOpenedType || (crateTypeSelect && crateTypeSelect.value) || "basic";
+  const check = canOpenCrate(k);
+  if (!check.ok) { setPlaceStatus(check.reason); return; }
   openCrateSelected(k);
 });
 
@@ -5327,8 +5981,9 @@ if (gridEl) {
 
 const devRank1000Btn = document.getElementById("devRank1000Btn");
 if (devRank1000Btn) devRank1000Btn.addEventListener("click", ()=>{
-  state.resources.rank = (state.resources.rank || 0) + 1000;
+  applyTxn({ rank: 1000, reason: "devRank" });
   updateResourcesUI();
+  updateNFTsUI();
   scheduleSaveV1();
 });
 
@@ -5355,10 +6010,8 @@ if (pager){
     if (idx === lastIdx) return;
     lastIdx = idx;
 
-    if (idx === 0) setActiveTab("node");
-    else if (idx === 1) setActiveTab("buildings");
-    else if (idx === 2) setActiveTab("nfts");
-    else if (idx === 3) setActiveTab("upgrade");
+    const hit = TAB_DEFS[idx];
+    if (hit) setActiveTab(hit.key);
   }, { passive:true });
 }
 
@@ -5407,21 +6060,38 @@ if (pager){
 
       el.pass5sButton.addEventListener("click", () => passiveTick());
       if (el.addSolButton) el.addSolButton.addEventListener("click", () => {
-  state.resources.sol += 1;
+  applyTxn({ sol: 1, reason: "devSol" });
   updateResourcesUI();
   scheduleSaveV1();
 });
+      if (el.devLogClampToggle){
+        el.devLogClampToggle.checked = !!state.dev?.logClamp;
+        el.devLogClampToggle.addEventListener("change", () => {
+          if (!state.dev) state.dev = {};
+          state.dev.logClamp = !!el.devLogClampToggle.checked;
+        });
+      }
+      if (el.devLogResourcesToggle){
+        el.devLogResourcesToggle.checked = !!state.dev?.logResources;
+        el.devLogResourcesToggle.addEventListener("change", () => {
+          if (!state.dev) state.dev = {};
+          state.dev.logResources = !!el.devLogResourcesToggle.checked;
+        });
+      }
+      if (el.recoveryResetBtn) el.recoveryResetBtn.addEventListener("click", () => resetGame());
+      if (el.recoveryCloseBtn) el.recoveryCloseBtn.addEventListener("click", () => closeModal("recoveryModal"));
       if (el.buyPackButton) el.buyPackButton.addEventListener("click", () => {
-  const costSol = 0.5;
+  const costSol = GAME_CONFIG.SHOP.packSolCost;
   if (state.resources.sol < costSol) return;
 
-  state.resources.sol -= costSol;
+  applyTxn({ sol: -costSol, reason: "buyPack" });
 
-  const baseE_min = 160, baseE_max = 240;
-  const PACK_MULT = 20;
+  const baseE_min = GAME_CONFIG.SHOP.packPowerMin;
+  const baseE_max = GAME_CONFIG.SHOP.packPowerMax;
+  const PACK_MULT = GAME_CONFIG.SHOP.packPowerMult;
   const e = Math.round((baseE_min + Math.random() * (baseE_max - baseE_min)) * PACK_MULT);
 
-  state.resources.power += e;
+  applyTxn({ power: e, reason: "buyPack" });
   updateResourcesUI();
   updateHourlyRates();
   scheduleSaveV1();
@@ -5555,6 +6225,9 @@ function isBuildingsPageActive(){
 
 function rafLoop(ts){
   if (state.render.rafOn) {
+    if (anyBuildBusy()) {
+      updateBuildProgressUI();
+    }
     if (isBuildingsPageActive() && anyBuildBusy()) {
       state.render.mapDirty = true;
     }
@@ -5593,8 +6266,12 @@ function showSplash(){
   }, SPLASH_MS);
 }
 
-   function init(){
+   async function init(){
+    if (__initDone) return;
+    __initDone = true;
     showSplash();
+    try {
+    await preloadAssets();
     // === 0.1 USER / IDENTITY (init-time guarantee) ===
 if (!state.user) {
   state.user = {
@@ -5612,6 +6289,11 @@ if (!state.inventory) {
     nftCommons: {},       // { "nft_id": count }
     nftUniques: {},       // { "nft_id": true }
   };
+}
+
+// === 0.2.5 DEV FLAGS (init-time guarantee) ===
+if (!state.dev) {
+  state.dev = { logClamp: false, logResources: false };
 }
 
 // === 0.25 TELEMETRY (init-time guarantee) ===
@@ -5659,21 +6341,10 @@ if (!state.ui) state.ui = {};
   updateNFTsUI();
   updateLuckyUI();
   renderLuckUI();
-  setInterval(nodeTick, 100);
-  setInterval(updateBuildProgressUI, 120);
-  setInterval(renderTelemetryUI, 500);
-
-setInterval(()=>{
-  if (!state.telemetry) return;
-  state.telemetry.startMs = Date.now();
-  state.telemetry.powerFromNodes = 0;
-  state.telemetry.powerFromPassive = 0;
-  state.telemetry.powerSpentOnUpgrades = 0;
-}, 15 * 60 * 1000);
+  startIntervals();
 
   updateWalletUI();
   updateStreakUI();         // streak buton + label durumu
-  setInterval(passiveTick, PASSIVE_TICK_SECONDS * 1000);
 
 // ===== WELCOME REWARD (first run / after reset) =====
 if (!state.meta) state.meta = { welcomeClaimed:false };
@@ -5683,7 +6354,11 @@ if (!state.meta.welcomeClaimed) {
 }
 scheduleWelcomeReward();
 
-
+    } catch (e) {
+      console.error("[init]", e);
+      showCrashBanner("Crash: Initialization failed");
+      showRecoveryModal("Your data could not be loaded. Would you like to reset and start fresh?");
+    }
 }
 
 function checkBuildingRequirements(){
@@ -5691,14 +6366,36 @@ function checkBuildingRequirements(){
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  init();
-  checkBuildingRequirements();
-
+  init().then(() => checkBuildingRequirements());
 });
 
+window.addEventListener("error", (e) => {
+  const msg = e?.message ? `Crash: ${e.message}` : "Crash: Unknown error";
+  showCrashBanner(msg);
+  console.error("[crash]", e?.error || e);
+});
+
+window.addEventListener("unhandledrejection", (e) => {
+  const msg = e?.reason ? `Crash: ${e.reason}` : "Crash: Unhandled rejection";
+  showCrashBanner(msg);
+  console.error("[crash]", e?.reason || e);
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") {
+    if (!__intervalsPaused) {
+      stopIntervals();
+      __intervalsPaused = true;
+    }
+  } else {
+    if (__intervalsPaused) {
+      startIntervals();
+      __intervalsPaused = false;
+    }
+  }
+});
 
 </script>
     <div class="device-frame"><div class="safe-guides"></div></div>
   </body>
 </html>
-  
